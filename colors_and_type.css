@@ -1,0 +1,296 @@
+/* ============================================================
+   Pickle Pixels — Colors + Type
+   CourtReserve's design system. Three-layer tokens:
+   primitive → alias → semantic.
+   ============================================================ */
+
+/* ---------- Fonts ---------- */
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-Light.ttf") format("truetype"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-Book.ttf") format("truetype"); font-weight: 350; font-style: normal; font-display: swap; }
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-Italic.ttf") format("truetype"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-Medium.ttf") format("truetype"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-SemiBold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-BoldItalic.ttf") format("truetype"); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-Black.ttf") format("truetype"); font-weight: 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Axiforma"; src: url("./fonts/Axiforma-Heavy.ttf") format("truetype"); font-weight: 950; font-style: normal; font-display: swap; }
+
+:root {
+  /* ============================================================
+     LAYER 1 — PRIMITIVES (raw values; never used directly in components)
+     ============================================================ */
+
+  /* Ink — the brand near-black. Top by usage (10,901× in Figma). */
+  --pp-ink-900: #0D1010;
+  --pp-ink-800: #0F1214;   /* canonical brand black */
+  --pp-ink-700: #212424;
+  --pp-ink-600: #222424;
+  --pp-ink-500: #2F3436;
+  --pp-ink-400: #373E4B;
+  --pp-ink-300: #4B5052;
+  --pp-ink-200: #858F8F;
+  --pp-ink-100: #BBBFC1;
+
+  /* Neutrals — light backgrounds, borders, surfaces */
+  --pp-neutral-0:    #FFFFFF;
+  --pp-neutral-50:   #F6F8FA;
+  --pp-neutral-100:  #F4F5F6;
+  --pp-neutral-150:  #F0F0F0;
+  --pp-neutral-200:  #EDF3F3;
+  --pp-neutral-250:  #E9EBEC;
+  --pp-neutral-300:  #DEE1E5;
+  --pp-neutral-400:  #D6D9DA;
+  --pp-neutral-500:  #BEC3CB;
+
+  /* Blue — primary action */
+  --pp-blue-700:  #0052B4;
+  --pp-blue-600:  #1F4ED8;   /* canonical brand blue */
+  --pp-blue-100:  #AEBBD6;   /* shadow tint */
+
+  /* Red — error / destructive */
+  --pp-red-700:  #D80027;
+  --pp-red-600:  #DA0B0B;    /* canonical brand red */
+  --pp-red-50:   #FEECEC;
+  --pp-red-100:  #F7ECEB;
+
+  /* Green — success / secondary action */
+  --pp-green-700:  #2E7D32;  /* canonical brand green (also from logo checkmark) */
+  --pp-green-50:   #F1F7F0;
+
+  /* Yellow — warning / accent */
+  --pp-yellow-400: #FFDA44;
+
+  /* Effects */
+  --pp-shadow-sm:    0 1px 2px rgba(15,18,20,0.06), 0 1px 1px rgba(15,18,20,0.04);
+  --pp-shadow-md:    0 2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
+  --pp-shadow-lg:    0 8px 24px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+  --pp-shadow-xl:    0 16px 48px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
+  --pp-shadow-inner-press: inset 0 4px 8px rgba(0,0,0,0.16);
+  --pp-shadow-pop:   0 2px 4px rgba(0,0,0,0.24), inset 0 4px 8px rgba(0,0,0,0.16);
+  --pp-focus-ring:   0 0 0 3px rgba(31,78,216,0.32);
+
+  /* Radii */
+  --pp-radius-2:  2px;
+  --pp-radius-4:  4px;
+  --pp-radius-6:  6px;
+  --pp-radius-8:  8px;
+  --pp-radius-12: 12px;
+  --pp-radius-16: 16px;
+  --pp-radius-pill: 999px;
+
+  /* Spacing scale (px) */
+  --pp-space-2: 2px;
+  --pp-space-4: 4px;
+  --pp-space-8: 8px;
+  --pp-space-12: 12px;
+  --pp-space-16: 16px;
+  --pp-space-24: 24px;
+  --pp-space-32: 32px;
+  --pp-space-48: 48px;
+  --pp-space-64: 64px;
+  --pp-space-128: 128px;
+
+  /* Page padding scale (responsive page gutters) */
+  --pp-page-200:  200px;
+  --pp-page-400:  400px;
+  --pp-page-600:  600px;
+  --pp-page-1000: 1000px;
+  --pp-page-1600: 1600px;
+
+  /* ============================================================
+     LAYER 2 — ALIAS (named roles that map primitives → system intent)
+     ============================================================ */
+
+  /* Foreground (text + icon) */
+  --pp-fg-default:    var(--pp-ink-800);   /* primary text */
+  --pp-fg-muted:      var(--pp-ink-300);   /* secondary text, captions */
+  --pp-fg-subtle:     var(--pp-ink-200);   /* placeholder, disabled */
+  --pp-fg-onVibrant:  var(--pp-neutral-0); /* text on filled buttons/badges */
+  --pp-fg-link:       var(--pp-blue-600);
+  --pp-fg-success:    var(--pp-green-700);
+  --pp-fg-warning:    var(--pp-ink-800);   /* yellow bgs use ink fg */
+  --pp-fg-error:      var(--pp-red-600);
+
+  /* Background */
+  --pp-bg-default:    var(--pp-neutral-0);
+  --pp-bg-subtle:     var(--pp-neutral-100);
+  --pp-bg-muted:      var(--pp-neutral-200);
+  --pp-bg-inverse:    var(--pp-ink-800);
+  --pp-bg-vibrant-primary:   var(--pp-blue-600);
+  --pp-bg-vibrant-secondary: var(--pp-green-700);
+  --pp-bg-vibrant-error:     var(--pp-red-600);
+  --pp-bg-vibrant-warning:   var(--pp-yellow-400);
+  --pp-bg-tint-primary:  #EDF1FB;
+  --pp-bg-tint-error:    var(--pp-red-50);
+  --pp-bg-tint-success:  var(--pp-green-50);
+  --pp-bg-tint-warning:  #FFF8E1;
+
+  /* Border */
+  --pp-border-default:  var(--pp-neutral-300);
+  --pp-border-subtle:   var(--pp-neutral-250);
+  --pp-border-strong:   var(--pp-ink-300);
+  --pp-border-primary:  var(--pp-blue-600);
+  --pp-border-error:    var(--pp-red-600);
+  --pp-border-focus:    var(--pp-blue-600);
+
+  /* ============================================================
+     LAYER 3 — SEMANTIC (component-bound; consume aliases)
+     These are illustrative; components below pick them up.
+     ============================================================ */
+  --pp-button-primary-bg:        var(--pp-bg-vibrant-primary);
+  --pp-button-primary-bg-hover:  var(--pp-blue-700);
+  --pp-button-primary-fg:        var(--pp-fg-onVibrant);
+  --pp-button-secondary-bg:      var(--pp-bg-vibrant-secondary);
+  --pp-button-secondary-fg:      var(--pp-fg-onVibrant);
+  --pp-button-danger-bg:         var(--pp-bg-vibrant-error);
+  --pp-button-danger-fg:         var(--pp-fg-onVibrant);
+  --pp-button-outline-fg:        var(--pp-fg-default);
+  --pp-button-outline-border:    var(--pp-border-default);
+
+  --pp-input-bg:        var(--pp-bg-default);
+  --pp-input-border:    var(--pp-border-default);
+  --pp-input-fg:        var(--pp-fg-default);
+  --pp-input-placeholder: var(--pp-fg-subtle);
+  --pp-input-radius:    var(--pp-radius-6);
+
+  --pp-card-bg:       var(--pp-bg-default);
+  --pp-card-border:   var(--pp-border-subtle);
+  --pp-card-radius:   var(--pp-radius-8);
+  --pp-card-shadow:   var(--pp-shadow-sm);
+
+  --pp-alert-success-bg: var(--pp-bg-tint-success);
+  --pp-alert-success-fg: var(--pp-fg-success);
+  --pp-alert-error-bg:   var(--pp-bg-tint-error);
+  --pp-alert-error-fg:   var(--pp-fg-error);
+
+  /* ---------- Type primitives ---------- */
+  --pp-font-display: "Axiforma", "Axiforma-ExtraBold", system-ui, sans-serif;
+  --pp-font-body:    "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --pp-font-mono:    ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* Sizes (px) */
+  --pp-fs-11: 11px;
+  --pp-fs-12: 12px;
+  --pp-fs-13: 13px;
+  --pp-fs-14: 14px;
+  --pp-fs-16: 16px;
+  --pp-fs-20: 20px;
+  --pp-fs-24: 24px;
+  --pp-fs-32: 32px;
+  --pp-fs-40: 40px;
+  --pp-fs-48: 48px;
+  --pp-fs-60: 60px;
+  --pp-fs-64: 64px;
+
+  /* Weights */
+  --pp-fw-regular:  400;
+  --pp-fw-medium:   500;
+  --pp-fw-semibold: 600;
+  --pp-fw-bold:     700;
+  --pp-fw-extrabold:800;
+  --pp-fw-black:    900;
+}
+
+/* ============================================================
+   Semantic CSS (use directly in HTML).
+   ============================================================ */
+
+html, body { color: var(--pp-fg-default); background: var(--pp-bg-default); font-family: var(--pp-font-body); }
+
+h1, .pp-h1 {
+  font-family: var(--pp-font-display);
+  font-weight: var(--pp-fw-extrabold);
+  font-size: var(--pp-fs-64);
+  line-height: 88px;
+  letter-spacing: -1.5px;
+  color: var(--pp-fg-default);
+  margin: 0;
+}
+h2, .pp-h2 {
+  font-family: var(--pp-font-display);
+  font-weight: var(--pp-fw-extrabold);
+  font-size: var(--pp-fs-40);
+  line-height: 56px;
+  letter-spacing: -1px;
+  color: var(--pp-fg-default);
+  margin: 0;
+}
+h3, .pp-h3 {
+  font-family: var(--pp-font-display);
+  font-weight: var(--pp-fw-extrabold);
+  font-size: var(--pp-fs-32);
+  line-height: 40px;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+h4, .pp-h4 {
+  font-family: var(--pp-font-body);
+  font-weight: var(--pp-fw-semibold);
+  font-size: var(--pp-fs-24);
+  line-height: 32px;
+  margin: 0;
+}
+h5, .pp-h5 {
+  font-family: var(--pp-font-body);
+  font-weight: var(--pp-fw-semibold);
+  font-size: var(--pp-fs-20);
+  line-height: 28px;
+  margin: 0;
+}
+
+p, .pp-body {
+  font-family: var(--pp-font-body);
+  font-weight: var(--pp-fw-regular);
+  font-size: var(--pp-fs-14);
+  line-height: 20px;
+  letter-spacing: 0.1px;
+  color: var(--pp-fg-default);
+  margin: 0;
+}
+
+.pp-body-lg {
+  font-family: var(--pp-font-body);
+  font-weight: var(--pp-fw-regular);
+  font-size: var(--pp-fs-16);
+  line-height: 24px;
+}
+
+.pp-label, label, .pp-label-md {
+  font-family: var(--pp-font-body);
+  font-weight: var(--pp-fw-medium);
+  font-size: var(--pp-fs-14);
+  line-height: 20px;
+  letter-spacing: 0.1px;
+}
+
+.pp-label-sm {
+  font-family: var(--pp-font-body);
+  font-weight: var(--pp-fw-medium);
+  font-size: var(--pp-fs-13);
+  line-height: 16px;
+  letter-spacing: 0.2px;
+}
+
+.pp-caption {
+  font-family: var(--pp-font-body);
+  font-weight: var(--pp-fw-regular);
+  font-size: var(--pp-fs-12);
+  line-height: 16px;
+  color: var(--pp-fg-muted);
+}
+
+.pp-mono, code {
+  font-family: var(--pp-font-mono);
+  font-size: var(--pp-fs-13);
+  background: var(--pp-bg-subtle);
+  padding: 1px 6px;
+  border-radius: var(--pp-radius-4);
+}
+
+a, .pp-link {
+  color: var(--pp-fg-link);
+  text-decoration: none;
+}
+a:hover, .pp-link:hover { text-decoration: underline; }
