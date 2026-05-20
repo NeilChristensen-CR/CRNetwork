@@ -2017,7 +2017,7 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
                 zIndex: 1,
                 flex: isMobile ? 1 : "0 0 auto",
                 minWidth: 0,
-                height: isMobile ? 36 : 44,
+                height: 44,
                 padding: isMobile ? "0 8px" : "0 18px",
                 borderRadius: 999, border: 0,
                 background: "transparent",
