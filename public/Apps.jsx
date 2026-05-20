@@ -2047,6 +2047,22 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
 
 }
 
+// ---- supplyState ---------------------------------------------------------
+// Decides how to render an event's "spots remaining" tag. When the supply
+// is healthy (>30% of seats still open) the tag drops the urgent red and
+// just shows a neutral count — "4 of 16 open spots". When supply tightens
+// it flips back to the loud red "X Spots Left" pill so the urgency reads.
+// Falls back to urgent when totalSpots is missing.
+function supplyState({ spotsLeft, totalSpots }) {
+  if (typeof totalSpots !== "number" || totalSpots <= 0) {
+    return { urgent: true, text: `${spotsLeft} Spots Left` };
+  }
+  const urgent = spotsLeft / totalSpots <= 0.3;
+  return urgent
+    ? { urgent: true, text: `${spotsLeft} Spots Left` }
+    : { urgent: false, text: `${spotsLeft} of ${totalSpots} open spots` };
+}
+
 // ---- Verified popular clubs near you — horizontal carousel of map-image
 // venue cards. Each card: map preview with distance badge, club name,
 // rating + price, sport tag, and a See Events & Info link.
@@ -2236,12 +2252,19 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                   <span style={{ fontFamily: theme.display, fontSize: 9, fontWeight: 700, color: ev.logoBg, letterSpacing: 1.4, marginTop: 2 }}>{ev.logoLine2}</span>
                 </div>
               </div>
-              <span style={{
-                height: 22, padding: "0 10px", borderRadius: 999,
-                background: "#DC2626", color: "#fff",
-                fontSize: 11, fontWeight: 700,
-                display: "inline-flex", alignItems: "center",
-              }}>{ev.spotsLeft} Spots Left</span>
+              {(() => {
+                const s = supplyState(ev);
+                return (
+                  <span style={{
+                    height: 22, padding: "0 10px", borderRadius: 999,
+                    background: s.urgent ? "#DC2626" : "#F4F5F6",
+                    color: s.urgent ? "#fff" : "#0F1214",
+                    fontSize: 11, fontWeight: s.urgent ? 700 : 600,
+                    display: "inline-flex", alignItems: "center",
+                    whiteSpace: "nowrap",
+                  }}>{s.text}</span>
+                );
+              })()}
             </div>
             {/* Content — strict vertical rhythm:
                   24px → title
@@ -2360,14 +2383,17 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
   // doesn't repeat the same placeholder over and over.
   const allRows = [
     // ---- Today ----------------------------------------------------------
-    { time: "6:00 AM",  spotsLeft: 2, title: "Open Play: All Levels Welcome",   attending: 8,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • 3.0 - 3.5 DUPR • Coach Mike Alvarado", price: "$15 - $25" },
-    { time: "9:00 AM",  spotsLeft: 4, title: "Intermediate Skills Clinic",      attending: 6,  club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", meta: "Doubles • 3.5 - 4.0 DUPR • Coach Priya Shah",    price: "$30" },
-    { time: "12:00 PM", spotsLeft: 1, title: "Round Robin Doubles",             attending: 11, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 3.0+ DUPR • All Levels",               price: "$20" },
-    { time: "5:30 PM",  spotsLeft: 6, title: "Drill & Play Session",            attending: 4,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • 3.0 - 4.0 DUPR • Coach Reid Anders",   price: "$25 - $40" },
+    // totalSpots added so the spots-left tag can decide between the
+    // urgent red pill (low remaining) and the neutral count pill
+    // (plenty of room). Threshold lives in supplyState() below.
+    { time: "6:00 AM",  spotsLeft: 2,  totalSpots: 12, title: "Open Play: All Levels Welcome",   attending: 8,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • 3.0 - 3.5 DUPR • Coach Mike Alvarado", price: "$15 - $25" },
+    { time: "9:00 AM",  spotsLeft: 4,  totalSpots: 16, title: "Intermediate Skills Clinic",      attending: 6,  club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", meta: "Doubles • 3.5 - 4.0 DUPR • Coach Priya Shah",    price: "$30" },
+    { time: "12:00 PM", spotsLeft: 1,  totalSpots: 8,  title: "Round Robin Doubles",             attending: 11, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 3.0+ DUPR • All Levels",               price: "$20" },
+    { time: "5:30 PM",  spotsLeft: 6,  totalSpots: 16, title: "Drill & Play Session",            attending: 4,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • 3.0 - 4.0 DUPR • Coach Reid Anders",   price: "$25 - $40" },
     // ---- Tomorrow -------------------------------------------------------
-    { time: "6:30 AM",  spotsLeft: 3, title: "Sunrise Pickleball",              attending: 9,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • All Levels • Coach Mike Alvarado",     price: "$15" },
-    { time: "10:00 AM", spotsLeft: 8, title: "Beginner Bootcamp",               attending: 2,  club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", meta: "Singles & Doubles • 2.5 - 3.0 DUPR • Coach Jana Ellis", price: "$45" },
-    { time: "6:00 PM",  spotsLeft: 2, title: "Open Play: All Levels Welcome",   attending: 12, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 2.5 - 4.5 DUPR • League Director Sam B.", price: "$15 - $35" },
+    { time: "6:30 AM",  spotsLeft: 3,  totalSpots: 12, title: "Sunrise Pickleball",              attending: 9,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • All Levels • Coach Mike Alvarado",     price: "$15" },
+    { time: "10:00 AM", spotsLeft: 8,  totalSpots: 16, title: "Beginner Bootcamp",               attending: 2,  club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", meta: "Singles & Doubles • 2.5 - 3.0 DUPR • Coach Jana Ellis", price: "$45" },
+    { time: "6:00 PM",  spotsLeft: 2,  totalSpots: 16, title: "Open Play: All Levels Welcome",   attending: 12, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 2.5 - 4.5 DUPR • League Director Sam B.", price: "$15 - $35" },
   ];
   const groups = [
     { id: "today",    label: "Today, Monday, May 11, 2026",     rows: allRows.slice(0, 4) },
@@ -2564,12 +2590,19 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, color: "#0F1214" }}>{r.time}</span>
-            <span style={{
-              height: 20, padding: "0 8px", borderRadius: 6,
-              background: "#FEE2E2", color: "#DC2626",
-              fontSize: 11, fontWeight: 700,
-              display: "inline-flex", alignItems: "center",
-            }}>{r.spotsLeft} Spots Left</span>
+            {(() => {
+              const s = supplyState(r);
+              return (
+                <span style={{
+                  height: 20, padding: "0 8px", borderRadius: 6,
+                  background: s.urgent ? "#FEE2E2" : "#F4F5F6",
+                  color: s.urgent ? "#DC2626" : "#0F1214",
+                  fontSize: 11, fontWeight: s.urgent ? 700 : 600,
+                  display: "inline-flex", alignItems: "center",
+                  whiteSpace: "nowrap",
+                }}>{s.text}</span>
+              );
+            })()}
           </div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 15, color: "#0F1214", whiteSpace: "nowrap" }}>{r.price}</span>
@@ -2619,12 +2652,19 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
       <div>
         <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", lineHeight: "21px" }}>{r.time}</div>
         <div style={{ marginTop: 6 }}>
-          <span style={{
-            height: 22, padding: "0 8px", borderRadius: 6,
-            background: "#FEE2E2", color: "#DC2626",
-            fontSize: 11, fontWeight: 700,
-            display: "inline-flex", alignItems: "center",
-          }}>{r.spotsLeft} Spots Left</span>
+          {(() => {
+            const s = supplyState(r);
+            return (
+              <span style={{
+                height: 22, padding: "0 8px", borderRadius: 6,
+                background: s.urgent ? "#FEE2E2" : "#F4F5F6",
+                color: s.urgent ? "#DC2626" : "#0F1214",
+                fontSize: 11, fontWeight: s.urgent ? 700 : 600,
+                display: "inline-flex", alignItems: "center",
+                whiteSpace: "nowrap",
+              }}>{s.text}</span>
+            );
+          })()}
         </div>
       </div>
       <div style={{ minWidth: 0 }}>
