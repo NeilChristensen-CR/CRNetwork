@@ -1114,7 +1114,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                   disabled={playerCount <= 1}
                   aria-label="Fewer players"
                   style={{
-                    width: 36, height: 36, borderRadius: 999,
+                    width: 44, height: 44, borderRadius: 999,
                     border: "1px solid #E9EBEC", background: "#FFFFFF",
                     color: "#0F1214", cursor: playerCount <= 1 ? "not-allowed" : "pointer",
                     opacity: playerCount <= 1 ? 0.4 : 1,
@@ -1135,7 +1135,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                   disabled={playerCount >= 8}
                   aria-label="More players"
                   style={{
-                    width: 36, height: 36, borderRadius: 999,
+                    width: 44, height: 44, borderRadius: 999,
                     border: "1px solid #E9EBEC", background: "#FFFFFF",
                     color: "#0F1214", cursor: playerCount >= 8 ? "not-allowed" : "pointer",
                     opacity: playerCount >= 8 ? 0.4 : 1,
