@@ -412,31 +412,19 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
       {/* Card body — equal top and bottom padding so the time slots have
           breathing room before the gray footer below them. */}
       <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-        {/* Title + location block — single row anchored by a pin icon on the
-            left, stacked text on the right. align-items: flex-start keeps the
-            icon glued to the first line of the name even when long titles
-            wrap to two or three lines. */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-          <span style={{
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            // marginTop nudges the icon onto the cap-height of the title
-            // (the 17px display font sits a few px below its container top).
-            marginTop: 3,
-            flexShrink: 0,
-          }}>
-            <Icon name="MapPin" size={14} strokeWidth={2.2} color="#0F1214" />
-          </span>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{
-              fontFamily: theme.display, fontWeight: 800, fontSize: 17,
-              color: "#0F1214", letterSpacing: -0.3, lineHeight: 1.2,
-            }}>{v.name}</div>
-            <div style={{
-              marginTop: 2,
-              fontSize: 13, fontWeight: 500, color: "#4B5052",
-              lineHeight: 1.3,
-            }}>{v.city}{v.state ? `, ${v.state}` : ""}</div>
-          </div>
+        {/* Title — own row, full width. */}
+        <div style={{
+          fontFamily: theme.display, fontWeight: 800, fontSize: 17,
+          color: "#0F1214", letterSpacing: -0.3, lineHeight: 1.2,
+        }}>{v.name}</div>
+
+        {/* Location row — pin icon + "City, State" sitting beneath the title. */}
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 6,
+          fontSize: 13, fontWeight: 500, color: "#4B5052",
+        }}>
+          <Icon name="MapPin" size={13} strokeWidth={2.2} color="#4B5052" />
+          <span>{v.city}{v.state ? `, ${v.state}` : ""}</span>
         </div>
 
         {/* Sport tag + booked-today caption. Sport is rendered as a pill
@@ -759,8 +747,11 @@ function MiniMap({ venue, theme }) {
   const xDiag = 80 + r(22) * 100;
 
   return (
-    <div style={{ position: "relative", width: "100%" }}>
-      <svg viewBox="0 0 280 90" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: 90, background: land }}>
+    // 3:1 aspect ratio — width follows the parent card, height auto-scales.
+    // SVG inside uses preserveAspectRatio="none" so the painted shapes stretch
+    // edge-to-edge with no letter-boxing.
+    <div style={{ position: "relative", width: "100%", aspectRatio: "3 / 1" }}>
+      <svg viewBox="0 0 280 90" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "100%", background: land }}>
         {/* a subtle "water" wedge on one edge so the map reads as a real
                 place rather than a uniform plate */}
         <path d={`M 0 ${60 + r(30) * 20} Q 60 ${50 + r(31) * 30} 140 ${70 + r(32) * 15} T 280 ${75 + r(33) * 10} L 280 90 L 0 90 Z`} fill={water} opacity="0.65" />
