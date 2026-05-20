@@ -2428,29 +2428,43 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
           {isMobile ? "More Events" : "More events near you"}
         </h2>
         <div ref={filterRef} style={{ position: "relative", minWidth: 0, maxWidth: "100%" }}>
-          {/* Single-line combo trigger. Caret removed; the three values
-              render as one wrapping-free run with bullet separators, and
-              the whole row truncates with an ellipsis when it can't fit. */}
-          <button onClick={() => setFilterOpen((o) => !o)} aria-expanded={filterOpen} style={{
-            height: 40, padding: "0 14px", borderRadius: 8,
-            border: "1px solid #E9EBEC", background: "#fff",
-            display: "block",
-            maxWidth: "100%",
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-            fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: "#0F1214",
-            cursor: "pointer",
-            textAlign: "left",
-            lineHeight: "38px",
-          }}>
+          {/* Single-line combo trigger. A leading SlidersHorizontal glyph
+              signals "filters" so the chips read as a button, not as a
+              passive sentence. Hover deepens the border + lightens the
+              fill; open state inverts to dark so it's obvious which row
+              is driving the open popover. */}
+          <button
+            onClick={() => setFilterOpen((o) => !o)}
+            aria-expanded={filterOpen}
+            onMouseEnter={(e) => { if (!filterOpen) { e.currentTarget.style.borderColor = "#0F1214"; e.currentTarget.style.background = "#F4F5F6"; } }}
+            onMouseLeave={(e) => { if (!filterOpen) { e.currentTarget.style.borderColor = "#E9EBEC"; e.currentTarget.style.background = "#fff"; } }}
+            style={{
+              height: 40, padding: "0 14px", borderRadius: 8,
+              border: `1px solid ${filterOpen ? "#0F1214" : "#E9EBEC"}`,
+              background: filterOpen ? "#0F1214" : "#fff",
+              color: filterOpen ? "#fff" : "#0F1214",
+              display: "block",
+              maxWidth: "100%",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              fontFamily: "inherit", fontSize: 13, fontWeight: 500,
+              cursor: "pointer",
+              textAlign: "left",
+              lineHeight: "38px",
+              transition: "background 140ms ease, border-color 140ms ease, color 140ms ease",
+            }}
+          >
+            <span style={{ display: "inline-block", verticalAlign: "-3px", marginRight: 8 }}>
+              <Icon name="SlidersHorizontal" size={14} strokeWidth={2} color={filterOpen ? "#fff" : "#0F1214"} />
+            </span>
             <span style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}>
-              <Icon name="Calendar" size={14} strokeWidth={2} color="#0F1214" />
+              <Icon name="Calendar" size={14} strokeWidth={2} color={filterOpen ? "#fff" : "#0F1214"} />
             </span>
             {filterWindow}
-            <span style={{ color: "#C8CDCD", margin: "0 10px" }}>·</span>
+            <span style={{ color: filterOpen ? "rgba(255,255,255,.4)" : "#C8CDCD", margin: "0 10px" }}>·</span>
             {filterTime}
-            <span style={{ color: "#C8CDCD", margin: "0 10px" }}>·</span>
+            <span style={{ color: filterOpen ? "rgba(255,255,255,.4)" : "#C8CDCD", margin: "0 10px" }}>·</span>
             <span style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}>
-              <Icon name="Navigation" size={13} strokeWidth={2.2} color="#5B7CFA" />
+              <Icon name="Navigation" size={13} strokeWidth={2.2} color={filterOpen ? "#8AB6FF" : "#5B7CFA"} />
             </span>
             {filterLoc}
           </button>
