@@ -944,8 +944,14 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         display: "flex", alignItems: "center", gap: 12,
         width: "100%",
         minHeight: 56,
-        padding: "10px 12px",
-        margin: "0 -12px",
+        // Symmetric horizontal padding so the leading icon and trailing
+        // radio sit at matching offsets from the row edges. No negative
+        // margin escape: with `width: 100%`, the right margin can't
+        // extend the box even when the left can — produces visibly
+        // uneven left/right alignment. Keeping margin at 0 and letting
+        // the row sit inside the body's 16px padding lines the radio
+        // up with the header's close icon at the same right offset.
+        padding: "10px 0",
         border: 0,
         background: active ? "#F4F5F6" : "transparent",
         borderRadius: 10,
@@ -1005,10 +1011,14 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   const whoChip = v.who || null;
 
   // ---- WHERE suggestions -------------------------------------------------
-  // Single full-list render — order in SB_WHERE_SUGGESTIONS doubles as
-  // proximity (clubs are pre-sorted by distance from the user's region).
-  // Typing in the input filters; otherwise the list scrolls.
-  const whereMatches = filterWhereSuggestions(whereQuery, 50);
+  // Mobile sheet shows the 3 nearest clubs/cities at rest — bigger
+  // selection surface, faster to tap. Zip-code matches are filtered
+  // out entirely (clubs and cities cover the same physical area; the
+  // raw zip codes added noise). Typing in the input still filters,
+  // and the cap lifts so the user can see all matching results.
+  const whereMatches = filterWhereSuggestions(whereQuery, 50)
+    .filter((s) => s.kind !== "zip");
+  const whereVisible = whereQuery ? whereMatches : whereMatches.slice(0, 3);
 
   // Portal target — the device frame's inner container has
   // `position: relative` and `overflow: hidden`, so anchoring the sheet
@@ -1086,8 +1096,13 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             aria-label="Close"
             style={{
               width: 44, height: 44, border: 0,
+              padding: 0,
               background: "transparent",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              // Icon right-aligned inside the button so its right edge
+              // sits at the body content's right edge (16px from sheet
+              // right) — matches the row radios' right edge for a clean
+              // vertical alignment down the trailing column.
+              display: "inline-flex", alignItems: "center", justifyContent: "flex-end",
               cursor: "pointer",
             }}
           >
@@ -1104,7 +1119,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           padding: "0 16px 8px 16px",
         }}>
           {/* ---- WHERE ----------------------------------------------------- */}
-          <SectionAccordion id="where" label="Where would you like to reserve" chip={whereChip}>
+          <SectionAccordion id="where" label="Where" chip={whereChip}>
             {/* Search input with the new copy. */}
             <div style={{
               display: "flex", alignItems: "center", gap: 8,
@@ -1164,18 +1179,22 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                 sub="Oakland, CA, 94619 (my current location)"
                 onClick={() => { set("where", "Current location"); setOpenSection("what"); }}
               />
-              {whereMatches.length === 0 ? (
+              {whereVisible.length === 0 ? (
                 <div style={{ padding: "16px 0", fontSize: 13, color: "#858F8F" }}>
                   No matches for "{whereQuery}"
                 </div>
               ) : (
-                whereMatches.map((s) => (
+                whereVisible.map((s) => (
                   <Row
                     key={`${s.kind}-${s.name}`}
                     active={v.where === s.name}
                     icon={SB_WHERE_KIND_ICON[s.kind] || "MapPin"}
                     label={s.name}
-                    sub={s.sub}
+                    // Strip the trailing zip code from the sub line — the
+                    // raw data is "City, ST · 32084", mobile sheet wants
+                    // just the city/state. Desktop popover still gets
+                    // the full sub from the same data.
+                    sub={(s.sub || "").replace(/\s·\s\d{5}.*$/, "")}
                     onClick={() => { set("where", s.name); setOpenSection("what"); }}
                   />
                 ))
@@ -1184,7 +1203,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           </SectionAccordion>
 
           {/* ---- WHAT — radio single-select, auto-advance to WHEN -------- */}
-          <SectionAccordion id="what" label="What would you like to reserve" chip={whatChip}>
+          <SectionAccordion id="what" label="What" chip={whatChip}>
             <div>
               {SB_SPORTS.map((s) => (
                 <Row
@@ -1207,7 +1226,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               underline). Both lists are rendered at once so the user can
               jump between Day range and Time of day without an extra tap.
               Defaults are seeded to "Any day" / "Any time" on open. */}
-          <SectionAccordion id="when" label="When would you like to reserve" chip={whenChip}>
+          <SectionAccordion id="when" label="When" chip={whenChip}>
             {/* ---- Day range eyebrow ---- */}
             <div style={{
               padding: "12px 0 6px 0",
@@ -1262,7 +1281,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           </SectionAccordion>
 
           {/* ---- WHO — borderless row + contained pill stepper ----------- */}
-          <SectionAccordion id="who" label="Who's playing" chip={whoChip}>
+          <SectionAccordion id="who" label="Who" chip={whoChip}>
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: "12px 0",
