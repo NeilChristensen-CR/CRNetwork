@@ -32,6 +32,60 @@ const SB_LOCATIONS = [
   "Vilano Beach, FL",
   "Ponte Vedra, FL",
 ];
+
+// Type-ahead corpus for the WHERE segment. Each entry has a `kind` that
+// drives the row icon + label, a primary `name` (what becomes the value
+// when picked), and a secondary `sub` line for disambiguation. The filter
+// matches against name + sub so a user can type "32084" to find any club
+// or city that resolves to that zip.
+const SB_WHERE_SUGGESTIONS = [
+  // Clubs
+  { kind: "club", name: "Old Coast Pickleball",       sub: "St. Augustine, FL · 32084" },
+  { kind: "club", name: "Anastasia Tennis Club",      sub: "St. Augustine, FL · 32080" },
+  { kind: "club", name: "Vilano Beach Racquet",       sub: "Vilano Beach, FL · 32084" },
+  { kind: "club", name: "Dill Dinkers Jacksonville",  sub: "Jacksonville, FL · 32256" },
+  { kind: "club", name: "Treaty Park Tennis",         sub: "St. Augustine, FL · 32084" },
+  { kind: "club", name: "South St. Augustine",        sub: "St. Augustine, FL · 32086" },
+  { kind: "club", name: "The Hub Padel",              sub: "Jacksonville Beach, FL · 32250" },
+  { kind: "club", name: "World Golf Village Tennis",  sub: "St. Augustine, FL · 32092" },
+  // Cities
+  { kind: "city", name: "Oakland, CA",                sub: "Alameda County" },
+  { kind: "city", name: "San Francisco, CA",          sub: "Bay Area" },
+  { kind: "city", name: "Berkeley, CA",               sub: "Alameda County" },
+  { kind: "city", name: "St. Augustine, FL",          sub: "St. Johns County" },
+  { kind: "city", name: "Jacksonville, FL",           sub: "Duval County" },
+  { kind: "city", name: "Vilano Beach, FL",           sub: "St. Johns County" },
+  { kind: "city", name: "Ponte Vedra, FL",            sub: "St. Johns County" },
+  { kind: "city", name: "Jacksonville Beach, FL",     sub: "Duval County" },
+  // Zip codes
+  { kind: "zip", name: "94609",                       sub: "Oakland, CA" },
+  { kind: "zip", name: "94110",                       sub: "San Francisco, CA" },
+  { kind: "zip", name: "94704",                       sub: "Berkeley, CA" },
+  { kind: "zip", name: "32084",                       sub: "St. Augustine, FL" },
+  { kind: "zip", name: "32080",                       sub: "St. Augustine, FL" },
+  { kind: "zip", name: "32086",                       sub: "St. Augustine, FL" },
+  { kind: "zip", name: "32092",                       sub: "St. Augustine, FL" },
+  { kind: "zip", name: "32250",                       sub: "Jacksonville Beach, FL" },
+  { kind: "zip", name: "32256",                       sub: "Jacksonville, FL" },
+];
+
+// Icon name + label noun for each suggestion kind.
+const SB_WHERE_KIND_ICON = { club: "Building2", city: "MapPin", zip: "Hash" };
+
+// Case-insensitive filter — query matches if it appears in name OR sub.
+// Returns up to `limit` results so the popover doesn't balloon.
+function filterWhereSuggestions(query, limit = 8) {
+  const q = (query || "").trim().toLowerCase();
+  if (!q) return SB_WHERE_SUGGESTIONS.slice(0, limit);
+  const out = [];
+  for (const s of SB_WHERE_SUGGESTIONS) {
+    if (s.name.toLowerCase().includes(q) || s.sub.toLowerCase().includes(q)) {
+      out.push(s);
+      if (out.length >= limit) break;
+    }
+  }
+  return out;
+}
 const SB_SPORTS = [
   { id: "Any Sport",   icon: "LayoutGrid" },
   { id: "Pickleball",  icon: "Hexagon" },
@@ -262,6 +316,23 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // Which segment is currently focused. `null` = default state.
   const [active, setActive] = useStateSB(null);
   const containerRef = useRefSB(null);
+
+  // Type-ahead state for the WHERE segment. The query is the user's
+  // in-progress text; the committed value lives in v.where.
+  const [whereQuery, setWhereQuery] = useStateSB("");
+  const whereInputRef = useRefSB(null);
+  // When the WHERE popover opens, seed the query with the current value
+  // (so the user sees what they last picked + can edit) and focus the
+  // input. Reset on close.
+  useEffectSB(() => {
+    if (active === "where") {
+      setWhereQuery(touched.where ? v.where : "");
+      // Defer focus until the popover has actually rendered.
+      const t = setTimeout(() => { whereInputRef.current && whereInputRef.current.focus(); }, 50);
+      return () => clearTimeout(t);
+    }
+    setWhereQuery("");
+  }, [active]);
 
   // Refs for each segment so popovers can anchor + position to them.
   const whereRef    = useRefSB(null);
@@ -512,20 +583,87 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     if (!active) return null;
     const anchorRef = refByKey[active];
     if (active === "where") {
+      const matches = filterWhereSuggestions(whereQuery);
+      const commit = (val) => { setValue("where", val); setActive(null); };
       return (
-        <SBPopover anchorRef={anchorRef}>
-          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
-            Search by location
+        <SBPopover anchorRef={anchorRef} minWidth={320}>
+          {/* Type-ahead input — anchored at the top of the popover, gets
+              focus on open. Free-text Enter commits whatever's typed; an
+              arrow key flow / explicit picks come from the rows below. */}
+          <div style={{ padding: "6px 10px 8px" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "0 12px",
+              height: 40, borderRadius: 10,
+              border: "1px solid #E9EBEC",
+              background: "#FFFFFF",
+            }}>
+              <window.Icon name="Search" size={14} strokeWidth={2} color="#4B5052" />
+              <input
+                ref={whereInputRef}
+                type="text"
+                value={whereQuery}
+                onChange={(e) => setWhereQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (matches[0]) commit(matches[0].name);
+                    else if (whereQuery.trim()) commit(whereQuery.trim());
+                  }
+                  if (e.key === "Escape") { setActive(null); }
+                }}
+                placeholder="Club, city, or zip"
+                aria-label="Search location"
+                style={{
+                  flex: 1, minWidth: 0,
+                  border: 0, outline: "none", background: "transparent",
+                  fontFamily: "inherit", fontSize: 14, color: "#0F1214",
+                }}
+              />
+              {whereQuery && (
+                <button
+                  type="button"
+                  onClick={() => { setWhereQuery(""); whereInputRef.current && whereInputRef.current.focus(); }}
+                  aria-label="Clear"
+                  style={{
+                    width: 20, height: 20, borderRadius: 999, border: 0,
+                    background: "#F4F5F6", cursor: "pointer",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  <window.Icon name="X" size={12} strokeWidth={2.4} color="#4B5052" />
+                </button>
+              )}
+            </div>
           </div>
-          {SB_LOCATIONS.map((loc) => (
-            <SBRow
-              key={loc}
-              icon={loc === "Current location" ? "Navigation" : "MapPin"}
-              label={loc}
-              selected={v.where === loc}
-              onClick={() => { setValue("where", loc); setActive(null); }}
-            />
-          ))}
+
+          {/* Always-on "Use current location" affordance, sits above results. */}
+          <SBRow
+            icon="Navigation"
+            label="Use current location"
+            selected={v.where === "Current location"}
+            onClick={() => commit("Current location")}
+          />
+
+          {/* Section divider */}
+          <div style={{ height: 1, background: "#F4F5F6", margin: "4px 12px" }} />
+
+          {matches.length === 0 ? (
+            <div style={{ padding: "12px 14px", fontSize: 12.5, color: "#858F8F" }}>
+              No matches for "{whereQuery}"
+            </div>
+          ) : (
+            matches.map((s) => (
+              <SBRow
+                key={`${s.kind}-${s.name}`}
+                icon={SB_WHERE_KIND_ICON[s.kind] || "MapPin"}
+                label={s.name}
+                sub={s.sub}
+                selected={touched.where && v.where === s.name}
+                onClick={() => commit(s.name)}
+              />
+            ))
+          )}
         </SBPopover>
       );
     }
@@ -657,6 +795,21 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   const v = values;
   const set = (k, val) => onChange({ ...v, [k]: val });
 
+  // Type-ahead state for the WHERE section. Same model as the desktop
+  // popover — local query separate from the committed v.where value.
+  const [whereQuery, setWhereQuery] = useStateSB("");
+  // Seed query with the current committed value when the sheet opens so
+  // the user sees what they last picked + can edit; reset on close.
+  useEffectSB(() => {
+    if (open) {
+      // Skip seeding when the value is still the placeholder.
+      const isPlaceholder = v && (v.where === "Oakland, CA" || !v.where);
+      setWhereQuery(isPlaceholder ? "" : (v && v.where) || "");
+    } else {
+      setWhereQuery("");
+    }
+  }, [open]);
+
   // Section heading row — uppercase microlabel + current value, separated
   // by a hairline. Used for every facet so the four sections read uniformly.
   const SectionHeader = ({ label, value }) => (
@@ -681,8 +834,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
       onClick={onClick}
       style={{
         display: "flex", alignItems: "center", gap: 12,
-        width: "100%", height: 48,
-        padding: "0 14px",
+        width: "100%",
+        // Rows with a sub line grow to fit two stacked lines + padding;
+        // single-line rows keep the 48px target.
+        minHeight: 48,
+        padding: sub ? "8px 14px" : "0 14px",
         borderRadius: 10,
         border: active ? "1px solid #0F1214" : "1px solid #E9EBEC",
         background: active ? "#0F1214" : "#FFFFFF",
@@ -695,8 +851,16 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
       {icon && window.Icon && (
         <window.Icon name={icon} size={16} strokeWidth={2.2} color={active ? "#fff" : "#0F1214"} />
       )}
-      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
-      {sub && <span style={{ fontSize: 12, fontWeight: 500, color: active ? "rgba(255,255,255,.7)" : "#4B5052" }}>{sub}</span>}
+      <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{label}</span>
+        {sub && (
+          <span style={{
+            fontSize: 12, fontWeight: 500, lineHeight: 1.2,
+            color: active ? "rgba(255,255,255,.7)" : "#4B5052",
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>{sub}</span>
+        )}
+      </span>
     </button>
   );
 
@@ -804,19 +968,85 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           padding: "8px 16px 16px 16px",
           display: "flex", flexDirection: "column", gap: 20,
         }}>
-          {/* ---- WHERE ---- */}
+          {/* ---- WHERE — type-ahead with club / city / zip matches ---- */}
           <section>
             <SectionHeader label="Where" value={v.where} />
+            {/* Search input — typing filters the list below. Free-text
+                Enter commits whatever's typed. */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "0 14px",
+              height: 48, borderRadius: 10,
+              border: "1px solid #E9EBEC",
+              background: "#FFFFFF",
+              marginBottom: 8,
+            }}>
+              {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2} color="#4B5052" />}
+              <input
+                type="text"
+                value={whereQuery}
+                onChange={(e) => setWhereQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const first = filterWhereSuggestions(whereQuery)[0];
+                    if (first) set("where", first.name);
+                    else if (whereQuery.trim()) set("where", whereQuery.trim());
+                  }
+                }}
+                placeholder="Club, city, or zip"
+                aria-label="Search location"
+                style={{
+                  flex: 1, minWidth: 0,
+                  border: 0, outline: "none", background: "transparent",
+                  fontFamily: "inherit", fontSize: 14, color: "#0F1214",
+                }}
+              />
+              {whereQuery && (
+                <button
+                  type="button"
+                  onClick={() => setWhereQuery("")}
+                  aria-label="Clear"
+                  style={{
+                    width: 24, height: 24, borderRadius: 999, border: 0,
+                    background: "#F4F5F6", cursor: "pointer",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  {window.Icon && <window.Icon name="X" size={14} strokeWidth={2.4} color="#4B5052" />}
+                </button>
+              )}
+            </div>
+
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {SB_LOCATIONS.map((loc) => (
-                <OptionRow
-                  key={loc}
-                  active={v.where === loc}
-                  icon={loc === "Current location" ? "Navigation" : "MapPin"}
-                  label={loc}
-                  onClick={() => set("where", loc)}
-                />
-              ))}
+              {/* Always-visible "Use current location" — sits above filter
+                  results so it's always reachable. */}
+              <OptionRow
+                active={v.where === "Current location"}
+                icon="Navigation"
+                label="Use current location"
+                onClick={() => set("where", "Current location")}
+              />
+              {(() => {
+                const matches = filterWhereSuggestions(whereQuery);
+                if (matches.length === 0) {
+                  return (
+                    <div style={{ padding: "16px 14px", fontSize: 13, color: "#858F8F" }}>
+                      No matches for "{whereQuery}"
+                    </div>
+                  );
+                }
+                return matches.map((s) => (
+                  <OptionRow
+                    key={`${s.kind}-${s.name}`}
+                    active={v.where === s.name}
+                    icon={SB_WHERE_KIND_ICON[s.kind] || "MapPin"}
+                    label={s.name}
+                    sub={s.sub}
+                    onClick={() => set("where", s.name)}
+                  />
+                ));
+              })()}
             </div>
           </section>
 
