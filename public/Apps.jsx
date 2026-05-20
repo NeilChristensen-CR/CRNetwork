@@ -2037,14 +2037,14 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
-            width: 36, height: 36, borderRadius: 8, border: 0,
+            width: 44, height: 44, borderRadius: 8, border: 0,
             background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
             <Icon name="ChevronLeft" size={18} strokeWidth={2} color="#0F1214" />
           </button>
           <button onClick={() => scrollBy(340)} aria-label="Next" style={{
-            width: 36, height: 36, borderRadius: 8, border: 0,
+            width: 44, height: 44, borderRadius: 8, border: 0,
             background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
@@ -2202,14 +2202,14 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             </button>
           )}
           <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
-            width: 36, height: 36, borderRadius: 8, border: 0,
+            width: 44, height: 44, borderRadius: 8, border: 0,
             background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
             <Icon name="ChevronLeft" size={18} strokeWidth={2} color="#0F1214" />
           </button>
           <button onClick={() => scrollBy(340)} aria-label="Next" style={{
-            width: 36, height: 36, borderRadius: 8, border: 0,
+            width: 44, height: 44, borderRadius: 8, border: 0,
             background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
