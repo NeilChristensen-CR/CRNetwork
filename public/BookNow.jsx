@@ -377,26 +377,12 @@ function SearchPill({ placeholder, value, onChange, theme }) {
 
 }
 
-// ---- BookNowCard — compact venue card, no imagery ----
+// ---- BookNowCard — shared venue card used by "Available to play now"
+// AND by "Popular clubs near you". MiniMap header on top, pin + stacked
+// name/city block, sport + booked caption, 2x2 time-slot grid, and a
+// grey footer CTA. Pure presentational — parents own the slot/CTA wiring.
 function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
   const t = theme.t || {};
-  // Star icon row sized to read as metadata, not as a focal point.
-  const stars = (() => {
-    const full = Math.floor(v.rating);
-    const half = v.rating - full >= 0.4 && v.rating - full < 0.9;
-    const out = [];
-    for (let i = 0; i < 5; i++) {
-      let fill = "#E9EBEC";
-      if (i < full) fill = "#FFB400";else
-      if (i === full && half) fill = "url(#half-grad)";
-      out.push(
-        <svg key={i} width="11" height="11" viewBox="0 0 24 24" fill={fill} style={{ flexShrink: 0 }}>
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 6.91-1.01z" />
-        </svg>
-      );
-    }
-    return out;
-  })();
 
   // Deterministic distance + active-players count per venue. These are
   // prototype demo numbers — stable across renders so the cards don't churn.
@@ -426,20 +412,31 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
       {/* Card body — equal top and bottom padding so the time slots have
           breathing room before the gray footer below them. */}
       <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-        {/* Title */}
-        <div style={{
-          fontFamily: theme.display, fontWeight: 800, fontSize: 17,
-          color: "#0F1214", letterSpacing: -0.3,
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
-        }}>{v.name}</div>
-
-        {/* Rating row — stars + 4.8 (256) • $$$ */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#0F1214" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>{stars}</span>
-          <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{v.rating.toFixed(1)}</span>
-          <span style={{ color: "#4B5052" }}>({v.reviews})</span>
-          <span style={{ color: "#4B5052" }}>•</span>
-          <span style={{ fontWeight: 700, color: "#0F1214" }}>{v.price}</span>
+        {/* Title + location block — single row anchored by a pin icon on the
+            left, stacked text on the right. align-items: flex-start keeps the
+            icon glued to the first line of the name even when long titles
+            wrap to two or three lines. */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+          <span style={{
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            // marginTop nudges the icon onto the cap-height of the title
+            // (the 17px display font sits a few px below its container top).
+            marginTop: 3,
+            flexShrink: 0,
+          }}>
+            <Icon name="MapPin" size={14} strokeWidth={2.2} color="#0F1214" />
+          </span>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{
+              fontFamily: theme.display, fontWeight: 800, fontSize: 17,
+              color: "#0F1214", letterSpacing: -0.3, lineHeight: 1.2,
+            }}>{v.name}</div>
+            <div style={{
+              marginTop: 2,
+              fontSize: 13, fontWeight: 500, color: "#4B5052",
+              lineHeight: 1.3,
+            }}>{v.city}{v.state ? `, ${v.state}` : ""}</div>
+          </div>
         </div>
 
         {/* Sport tag + booked-today caption. Sport is rendered as a pill

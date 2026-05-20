@@ -2052,39 +2052,21 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
   // card's single-sport pill), a `booked` count and 4 upcoming `times` so
   // Popular Clubs reads with the same affordances as Available to Play Now.
   const clubs = [
-    { id: "old-coast",      name: "Old Coast Pickelball",      city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 23, distance: "2.1mi", times: ["9:00 AM", "9:30 AM", "10:00 AM", "11:30 AM"] },
-    { id: "anastasia",      name: "Anastasia Tennis Club",     city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 14, distance: "2.4mi", times: ["8:00 AM", "8:30 AM", "12:00 PM",  "2:00 PM"] },
-    { id: "vilano-beach",   name: "Vilano Beach Racquet",      city: "Vilano Beach",       state: "FL", sport: "Tennis",     booked: 41, distance: "2.6mi", times: ["10:00 AM", "10:30 AM", "11:00 AM", "12:30 PM"] },
-    { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", city: "Jacksonville",       state: "FL", sport: "Pickleball", booked: 18, distance: "8.4mi", times: ["8:00 AM", "12:00 PM", "2:30 PM", "4:00 PM"] },
-    { id: "treaty-park",    name: "Treaty Park Tennis",        city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 9,  distance: "3.2mi", times: ["7:00 AM", "9:00 AM", "3:00 PM", "5:30 PM"] },
-    { id: "south-st-aug",   name: "South St. Augustine",       city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 27, distance: "3.6mi", times: ["8:30 AM", "11:00 AM", "1:30 PM", "4:30 PM"] },
-    { id: "the-hub-padel",  name: "The Hub Padel",             city: "Jacksonville Beach", state: "FL", sport: "Padel",      booked: 12, distance: "5.1mi", times: ["9:00 AM", "10:30 AM", "1:00 PM", "6:00 PM"] },
-    { id: "world-golf",     name: "World Golf Village Tennis", city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 31, distance: "6.8mi", times: ["7:30 AM", "9:00 AM", "2:00 PM", "6:30 PM"] },
+    // `distance` is numeric-string so MiniMap can append "mi" to render
+    // "2.1mi" in its top-left pill — matches the BookNow data shape so
+    // both sections feed the shared <BookNowCard>.
+    { id: "old-coast",      name: "Old Coast Pickelball",      city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 23, distance: "2.1", times: ["9:00 AM", "9:30 AM", "10:00 AM", "11:30 AM"] },
+    { id: "anastasia",      name: "Anastasia Tennis Club",     city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 14, distance: "2.4", times: ["8:00 AM", "8:30 AM", "12:00 PM",  "2:00 PM"] },
+    { id: "vilano-beach",   name: "Vilano Beach Racquet",      city: "Vilano Beach",       state: "FL", sport: "Tennis",     booked: 41, distance: "2.6", times: ["10:00 AM", "10:30 AM", "11:00 AM", "12:30 PM"] },
+    { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", city: "Jacksonville",       state: "FL", sport: "Pickleball", booked: 18, distance: "8.4", times: ["8:00 AM", "12:00 PM", "2:30 PM", "4:00 PM"] },
+    { id: "treaty-park",    name: "Treaty Park Tennis",        city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 9,  distance: "3.2", times: ["7:00 AM", "9:00 AM", "3:00 PM", "5:30 PM"] },
+    { id: "south-st-aug",   name: "South St. Augustine",       city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 27, distance: "3.6", times: ["8:30 AM", "11:00 AM", "1:30 PM", "4:30 PM"] },
+    { id: "the-hub-padel",  name: "The Hub Padel",             city: "Jacksonville Beach", state: "FL", sport: "Padel",      booked: 12, distance: "5.1", times: ["9:00 AM", "10:30 AM", "1:00 PM", "6:00 PM"] },
+    { id: "world-golf",     name: "World Golf Village Tennis", city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 31, distance: "6.8", times: ["7:30 AM", "9:00 AM", "2:00 PM", "6:30 PM"] },
   ];
   const scrollBy = (dx) => {
     const el = trackRef.current; if (!el) return;
     el.scrollBy({ left: dx, behavior: "smooth" });
-  };
-  // Inline-SVG stars (Lucide can't render a fill via the Icon component, so
-  // we draw the star path ourselves). Matches the BookNowCard layout so the
-  // ratings read the same across Popular clubs and Available to play now.
-  const Stars = ({ rating }) => {
-    const full = Math.floor(rating);
-    const half = rating - full >= 0.4 && rating - full < 0.9;
-    return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
-        {[0, 1, 2, 3, 4].map((i) => {
-          let fill = "#E9EBEC";
-          if (i < full) fill = "#FFB400";
-          else if (i === full && half) fill = "#FFB400";
-          return (
-            <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill={fill} style={{ flexShrink: 0 }}>
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 6.91-1.01z" />
-            </svg>
-          );
-        })}
-      </span>
-    );
   };
   return (
     <div style={{ marginTop: 8 }}>
@@ -2120,127 +2102,19 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
         paddingLeft: 4, paddingRight: 4
       }}>
         {clubs.map((c) => (
-          // Outer is a div, not a button, because the card now contains
-          // interactive time-slot buttons (nested <button>s are invalid HTML).
-          // role="button" + tabIndex + onKeyDown keeps it keyboard-reachable.
-          <div
-            key={c.id}
-            role="button"
-            tabIndex={0}
-            onClick={() => onOpenClub && onOpenClub(c.id)}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpenClub && onOpenClub(c.id); } }}
-            style={{
-              flex: "0 0 280px", scrollSnapAlign: "start",
-              background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
-              overflow: "hidden", textAlign: "left",
-              cursor: "pointer", fontFamily: "inherit", color: "inherit",
-              display: "flex", flexDirection: "column",
-              transition: "box-shadow 160ms, transform 160ms"
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
-            <div style={{
-              position: "relative", height: 140,
-              backgroundImage: `linear-gradient(135deg, rgba(232,240,229,0.92) 0%, rgba(223,233,219,0.92) 40%, rgba(241,235,217,0.92) 100%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 140'><g fill='none' stroke='%23B6C2A8' stroke-width='1.2'><path d='M-20 30 Q60 20 140 50 T300 40'/><path d='M-20 90 Q60 80 140 110 T300 100'/><path d='M40 -10 Q60 60 100 80 T140 160'/><path d='M180 -10 Q200 50 220 90 T240 160'/></g><circle cx='140' cy='70' r='8' fill='%231F4ED8' stroke='%23fff' stroke-width='3'/></svg>")`,
-              backgroundSize: "cover",
-              backgroundPosition: "center"
-            }}>
-              <div style={{
-                position: "absolute", top: 12, left: 12,
-                height: 24, padding: "0 10px", borderRadius: 6,
-                background: "#fff", color: "#0F1214",
-                fontSize: 11, fontWeight: 700,
-                display: "inline-flex", alignItems: "center",
-                boxShadow: "0 1px 2px rgba(15,18,20,0.08)"
-              }}>{c.distance}</div>
-            </div>
-            {/* Card content — mirrors the BookNowCard layout: title,
-                location meta (City, State with pin icon), sport tag +
-                booked-today caption, and a 2x2 time slot grid. The CTA
-                lives below this block on the grey footer. */}
-            <div style={{
-              padding: "14px 16px",
-              display: "flex", flexDirection: "column",
-              gap: 8,
-            }}>
-              <div style={{
-                fontFamily: theme.display, fontWeight: 800, fontSize: 17,
-                color: "#0F1214", letterSpacing: -0.3,
-                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
-              }}>
-                {c.name}
-              </div>
-
-              {/* Location meta — pin icon + "City, State". Replaces the
-                  previous rating/price row. */}
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                fontSize: 13, color: "#4B5052", fontWeight: 500,
-              }}>
-                <Icon name="MapPin" size={13} strokeWidth={2.2} color="#4B5052" />
-                <span>{c.city}, {c.state}</span>
-              </div>
-
-              {/* Sport tag + booked-today caption — matches BookNowCard. */}
-              <div style={{
-                display: "flex", alignItems: "center", gap: 8,
-                fontSize: 13, color: "#4B5052", fontWeight: 500,
-              }}>
-                <span style={{
-                  display: "inline-flex", alignItems: "center",
-                  height: 22, padding: "0 8px", borderRadius: 6,
-                  background: "#F4F5F6", color: "#0F1214",
-                  fontSize: 11, fontWeight: 600,
-                  whiteSpace: "nowrap",
-                }}>{c.sport}</span>
-                <span>Booked {c.booked} × Today</span>
-              </div>
-
-              {/* Time slot pills — 2x2 grid identical to BookNowCard. Clicks
-                  bubble up to the parent card's onOpenClub via stopPropagation
-                  on the slot button (the click still opens the club). */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 4 }}>
-                {c.times.slice(0, 4).map((time) => (
-                  <button
-                    key={time}
-                    onClick={(e) => { e.stopPropagation(); onOpenClub && onOpenClub(c.id); }}
-                    style={{
-                      height: 40, padding: "0 8px", borderRadius: 8,
-                      border: "1px solid #DEE1E5",
-                      background: "#FFFFFF", color: "#0F1214",
-                      fontFamily: "inherit", fontWeight: 600, fontSize: 12,
-                      cursor: "pointer",
-                      display: "inline-flex", alignItems: "center", justifyContent: "center",
-                      transition: "border-color 120ms, background 120ms"
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = "#0F1214";
-                      e.currentTarget.style.background = "#F4F5F6";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "#DEE1E5";
-                      e.currentTarget.style.background = "#FFFFFF";
-                    }}
-                  >
-                    {time}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* Card footer — sits at the bottom edge of the card, full-width,
-                subtle grey background matching the SearchBar's selected-state
-                track so the design system reads consistently. */}
-            <div style={{
-              marginTop: "auto",
-              padding: "12px 16px",
-              borderTop: "1px solid #E9EBEC",
-              background: "#F4F5F6",
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              fontSize: 12, fontWeight: 600, color: "#0F1214",
-            }}>
-              See Events & Info
-              <Icon name="ArrowRight" size={14} strokeWidth={2} color="#0F1214" />
-            </div>
+          // Carousel slot — fixed width + scroll-snap so the card sizing
+          // stays consistent across viewports. The shared <BookNowCard>
+          // fills the slot via its own width:100% and handles the entire
+          // card body, header (MiniMap), time pills, and footer.
+          <div key={c.id} style={{ flex: "0 0 280px", scrollSnapAlign: "start", display: "flex" }}>
+            {window.BookNowCard && (
+              <window.BookNowCard
+                v={c}
+                theme={theme}
+                onPickSlot={() => onOpenClub && onOpenClub(c.id)}
+                onOpenClub={onOpenClub}
+              />
+            )}
           </div>
         ))}
       </div>
