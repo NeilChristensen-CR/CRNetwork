@@ -820,19 +820,33 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   // Which WHEN sub-accordion is open. "day" by default when WHEN opens.
   const [openWhenSub, setOpenWhenSub] = useStateSB("day");
 
-  // Reset on open — clean slate every time the sheet appears. WHEN's two
-  // sub-facets default to "Any day" / "Any time" so the user can submit
-  // without explicitly picking — and they read as set state in their
-  // respective subsection lists.
+  // Reset on open — every facet starts with a sensible default so the
+  // sheet shows a populated "what you'd search for if you tapped Search
+  // right now" state. The user only edits what they want to refine.
+  //
+  // WHERE opens by default since it's the most common refinement; the
+  // other three sections sit collapsed with their default chips visible.
+  //
+  // Parent-owned facets (where, activity, who) are all written through a
+  // SINGLE onChange call to avoid stale-closure clobber — multiple
+  // independent set/setPlayers calls inside the same effect each see the
+  // pre-effect `v` and the last one wins.
   useEffectSB(() => {
     if (open) {
-      setOpenSection(null);
+      setOpenSection("where");
       setWhereQuery("");
       setShowAllWhere(false);
-      setActivity("");
+      setActivity("Any Sport");
       setWhenDay("Any day");
       setWhenTime("Any time");
       setOpenWhenSub("day");
+      onChange({
+        ...v,
+        where: "Current location",
+        activity: "Any Sport",
+        who: "1 Player",
+        whoCount: 1,
+      });
     }
   }, [open]);
 
@@ -970,14 +984,15 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   );
 
   // ---- Chip text per section ---------------------------------------------
-  // Show committed value as a chip on the closed accordion. Single-select
-  // now, so the chip is just the picked id (or a "Day · Time" join for
-  // WHEN when both subsections have a value).
-  const whereChip = v.where && v.where !== "Oakland, CA" ? v.where : null;
+  // Every section ALWAYS shows its current value as a chip on the closed
+  // accordion — even when that value is the default (Current location,
+  // Any Sport, Any day · Any time, 1 Player). Reads as "here's what
+  // you'd be searching for; tap to refine."
+  const whereChip = v.where || null;
   const whatChip = activity || null;
   const whenChip = whenDay && whenTime ? `${whenDay} · ${whenTime}`
     : (whenDay || whenTime || null);
-  const whoChip = v.who && v.who !== "1 Player" ? v.who : null;
+  const whoChip = v.who || null;
 
   // ---- WHERE suggestion ranking ------------------------------------------
   // For the prototype we treat order in SB_WHERE_SUGGESTIONS as proximity
