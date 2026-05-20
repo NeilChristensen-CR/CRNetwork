@@ -433,7 +433,7 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
         }}>{v.name}</div>
 
         {/* Rating row — stars + 4.8 (256) • $$$ */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#0F1214" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#0F1214" }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>{stars}</span>
           <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{v.rating.toFixed(1)}</span>
           <span style={{ color: "#4B5052" }}>({v.reviews})</span>
@@ -446,7 +446,7 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
             a discrete attribute. */}
         <div style={{
           display: "flex", alignItems: "center", gap: 8,
-          fontSize: 12, color: "#4B5052", fontWeight: 500,
+          fontSize: 13, color: "#4B5052", fontWeight: 500,
         }}>
           <span style={{
             display: "inline-flex", alignItems: "center",
@@ -495,7 +495,7 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
         borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: "#E9EBEC",
         background: "#F4F5F6",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        fontFamily: "inherit", fontSize: 12, fontWeight: 600, color: "#0F1214",
+        fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: "#0F1214",
         cursor: "pointer",
         transition: "background 120ms",
       }}

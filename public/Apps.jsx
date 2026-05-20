@@ -2100,7 +2100,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
               <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3 }}>
                 {c.name}
               </div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#0F1214" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#0F1214" }}>
                 <Stars rating={c.rating} />
                 <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{c.rating}</span>
                 <span style={{ color: "#4B5052" }}>({c.reviews})</span>
@@ -2539,13 +2539,13 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         </div>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <Avatars />
-          <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
+          <span style={{ fontSize: 13, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
         </div>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#4B5052" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#4B5052" }}>
           <Icon name="MapPin" size={13} strokeWidth={1.75} color="#858F8F" />
           <span>{r.club} · {r.city} · {r.distance}</span>
         </div>
-        <div style={{ fontSize: 12, color: "#4B5052" }}>
+        <div style={{ fontSize: 13, color: "#4B5052" }}>
           {r.meta}
         </div>
         {/* Bottom row — time + spots tag on the left, price + Reserve CTA
@@ -2622,7 +2622,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
           <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.2 }}>{r.title}</span>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
             <Avatars />
-            <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
+            <span style={{ fontSize: 13, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
           </div>
         </div>
         <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#4B5052" }}>
