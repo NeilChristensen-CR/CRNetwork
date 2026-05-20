@@ -713,12 +713,15 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
 
   return (
     <>
-      {/* Backdrop — fades in/out. Tapping it dismisses the sheet. */}
+      {/* Backdrop — fades in/out. Tapping it dismisses the sheet.
+          position: absolute (not fixed) so the overlay is contained by the
+          nearest positioned ancestor — the prototype's device-frame inner
+          container — instead of escaping to the browser viewport. */}
       <div
         onClick={onClose}
         aria-hidden={!open}
         style={{
-          position: "fixed", inset: 0,
+          position: "absolute", inset: 0,
           background: "rgba(15,18,20,.45)",
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
@@ -726,16 +729,16 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           zIndex: 100,
         }}
       />
-      {/* Sheet — slides up from the bottom. 92% of viewport height so a
-          peek of the backdrop remains visible at the top, signaling the
-          sheet is modal and dismissible. */}
+      {/* Sheet — slides up from the bottom of the device frame. 92% of the
+          frame height so a peek of the backdrop remains visible at the top,
+          signaling the sheet is modal and dismissible. */}
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Search"
         style={{
-          position: "fixed", left: 0, right: 0, bottom: 0,
-          height: "92vh",
+          position: "absolute", left: 0, right: 0, bottom: 0,
+          height: "92%",
           background: "#FFFFFF",
           borderTopLeftRadius: 20, borderTopRightRadius: 20,
           boxShadow: "0 -8px 32px rgba(15,18,20,.22)",
