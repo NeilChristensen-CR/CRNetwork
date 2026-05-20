@@ -47,7 +47,7 @@ function fmtDateBCW(d) {
 // ---- Field shell --------------------------------------------------------
 // One cell in the pill row. Owns its own popover anchor + outside-click
 // to close, so the parent just drops <Field> in and forwards value/onChange.
-function FieldBCW({ icon, label, value, popover, last, first, onOpen, isOpen, onClose, compact }) {
+function FieldBCW({ icon, label, value, popover, last, first, onOpen, isOpen, onClose, compact, trailing }) {
   const ref = useRefBCW(null);
   useEffectBCW(() => {
     if (!isOpen) return;
@@ -60,35 +60,34 @@ function FieldBCW({ icon, label, value, popover, last, first, onOpen, isOpen, on
       <button
         onClick={isOpen ? onClose : onOpen}
         style={{
-          width: "100%", height: compact ? 56 : 64,
-          padding: "0 18px",
+          width: "100%", height: compact ? 44 : 52,
+          padding: "0 22px",
           background: isOpen ? "#F4F5F6" : "transparent",
           border: 0,
-          borderLeft: first ? "0" : "1px solid #E9EBEC",
-          borderRadius: 0,
+          borderRadius: 999,
           display: "flex", alignItems: "center", gap: 12,
           cursor: "pointer", textAlign: "left",
           color: "#0F1214", fontFamily: "Inter, system-ui, sans-serif",
           transition: "background 120ms"
         }}
-        onMouseEnter={(e) => {if (!isOpen) e.currentTarget.style.background = "#FAFBFC";}}
+        onMouseEnter={(e) => {if (!isOpen) e.currentTarget.style.background = "#F4F5F6";}}
         onMouseLeave={(e) => {if (!isOpen) e.currentTarget.style.background = "transparent";}}>
 
-        <Icon name={icon} size={18} strokeWidth={1.75} color="#0F1214" />
+        {icon && <Icon name={icon} size={18} strokeWidth={1.75} color="#0F1214" />}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: "#858F8F", lineHeight: 1 }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: "#858F8F", lineHeight: 1 }}>
             {label}
           </div>
           <div style={{ marginTop: 4, fontSize: 14, fontWeight: 600, color: "#0F1214", letterSpacing: -0.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {value}
           </div>
         </div>
-        <Icon name="ChevronDown" size={14} strokeWidth={2} color="#858F8F" />
+        {trailing}
       </button>
       {isOpen ?
       <div style={{
         position: "absolute", top: "calc(100% + 8px)", left: 0,
-        background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
+        background: "#fff", border: "1px solid #E9EBEC", borderRadius: 12,
         boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
         zIndex: 30, minWidth: 280,
         overflow: "hidden"
@@ -344,38 +343,49 @@ function LocationPopBCW({ value, onPick }) {
 }
 
 // ---- Main widget --------------------------------------------------------
-function BookCourtWidget({ onSubmit, compact = false, defaultSport = "pickleball" }) {
+function BookCourtWidget({ onSubmit, compact = false, defaultSport = "any" }) {
   const [open, setOpen] = useStateBCW(null);// "sport" | "date" | "time" | "players" | "loc" | null
   const [sport, setSport] = useStateBCW(defaultSport);
   const [date, setDate] = useStateBCW(() => {const d = new Date();d.setHours(0, 0, 0, 0);return d;});
-  const [time, setTime] = useStateBCW("18:0");// 6:00 PM default
-  const [players, setPlayers] = useStateBCW(4);
-  const [loc, setLoc] = useStateBCW("St. Augustine, FL");
+  const [time, setTime] = useStateBCW(null);
+  const [players, setPlayers] = useStateBCW(1);
+  const [loc, setLoc] = useStateBCW("Oakland, CA");
 
-  const sportLabel = SPORTS_BCW.find((s) => s.id === sport)?.label || "Any sport";
+  const sportLabel = SPORTS_BCW.find((s) => s.id === sport)?.label || "Any Sport";
   const sportIcon = SPORTS_BCW.find((s) => s.id === sport)?.icon || "LayoutGrid";
-  const timeLabel = TIMES_BCW.find((t) => t.key === time)?.label || "Any time";
+  const timeLabel = time ? (TIMES_BCW.find((t) => t.key === time)?.label || "Any Time") : "Any Time";
 
   const close = () => setOpen(null);
   const submit = () => {
     if (onSubmit) onSubmit({ sport, date, time, players, loc });
   };
 
+  const ctaSize = compact ? 44 : 52;
   return (
-    <div style={{ display: "flex", alignItems: "stretch", gap: 12, fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, system-ui, sans-serif" }}>
       <div style={{
-      flex: 1, minWidth: 0,
-      background: "#fff", border: "1px solid #E9EBEC", borderRadius: 12,
-      boxShadow: "0 1px 2px rgba(15,18,20,0.06)",
-      display: "flex", alignItems: "stretch",
-      overflow: "visible", position: "relative"
+      flex: 1, maxWidth: 900,
+      background: "#fff", border: "1px solid #E9EBEC", borderRadius: 999,
+      boxShadow: "0 8px 24px rgba(15,18,20,0.06), 0 1px 2px rgba(15,18,20,0.04)",
+      display: "flex", alignItems: "center",
+      overflow: "visible", position: "relative",
+      padding: 6
     }}>
       <FieldBCW
         first
         compact={compact}
-        icon={sportIcon}
-        label="What"
-        value={sportLabel}
+        label="Where"
+        value={loc}
+        trailing={<Icon name="Navigation" size={16} strokeWidth={1.75} color="#1F4ED8" />}
+        isOpen={open === "loc"}
+        onOpen={() => setOpen("loc")}
+        onClose={close}
+        popover={<LocationPopBCW value={loc} onPick={(v) => {setLoc(v);close();}} />} />
+
+      <FieldBCW
+        compact={compact}
+        label="Activity"
+        value={sport === "any" ? "Any Sport" : sportLabel}
         isOpen={open === "sport"}
         onOpen={() => setOpen("sport")}
         onClose={close}
@@ -383,55 +393,40 @@ function BookCourtWidget({ onSubmit, compact = false, defaultSport = "pickleball
 
       <FieldBCW
         compact={compact}
-        icon="Calendar"
         label="When"
-        value={fmtDateBCW(date)}
+        value={time ? `${fmtDateBCW(date)} • ${timeLabel}` : "Any Day • Any Time"}
         isOpen={open === "date"}
         onOpen={() => setOpen("date")}
         onClose={close}
-        popover={<DatePopBCW value={date} onPick={(v) => {setDate(v);close();}} />} />
+        popover={<DatePopBCW value={date} onPick={(v) => {setDate(v);setTime("18:0");close();}} />} />
 
       <FieldBCW
         compact={compact}
-        icon="Users"
         label="Who"
-        value={`${players} ${players === 1 ? "player" : "players"}`}
+        value={`${players} ${players === 1 ? "Player" : "Players"}`}
         isOpen={open === "players"}
         onOpen={() => setOpen("players")}
         onClose={close}
         popover={<PlayersPopBCW value={players} onPick={(v) => setPlayers(v)} />} />
 
-      <FieldBCW
-        compact={compact}
-        icon="MapPin"
-        label="Where"
-        value={loc}
-        isOpen={open === "loc"}
-        onOpen={() => setOpen("loc")}
-        onClose={close}
-        popover={<LocationPopBCW value={loc} onPick={(v) => {setLoc(v);close();}} />} />
-
-      </div>
       <button
           onClick={submit}
+          aria-label="Find courts"
           style={{
             background: "#0F1214", color: "#fff",
-            border: 0, borderRadius: 12,
-            padding: "0 24px",
-            minHeight: compact ? 56 : 64,
-            fontFamily: "inherit", fontSize: 14.5, fontWeight: 700, letterSpacing: -0.1,
+            border: 0, borderRadius: 999,
+            width: ctaSize, height: ctaSize,
             cursor: "pointer",
-            display: "inline-flex", alignItems: "center", gap: 8,
-            flexShrink: 0,
-            boxShadow: "0 1px 2px rgba(15,18,20,0.06)",
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, marginLeft: 6,
             transition: "background 120ms"
           }}
           onMouseEnter={(e) => {e.currentTarget.style.background = "#212424";}}
           onMouseLeave={(e) => {e.currentTarget.style.background = "#0F1214";}}>
 
-          <Icon name="Search" size={16} strokeWidth={2.2} color="#fff" />
-          Find courts
+          <Icon name="ArrowRight" size={18} strokeWidth={2.2} color="#fff" />
         </button>
+      </div>
     </div>);
 
 }

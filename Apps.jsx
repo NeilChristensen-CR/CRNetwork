@@ -1900,6 +1900,369 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
 
 }
 
+// ---- Verified popular clubs near you — horizontal carousel of map-image
+// venue cards. Each card: map preview with distance badge, club name,
+// rating + price, sport tag, and a See Events & Info link.
+function VerifiedPopularClubs({ theme, onOpenClub }) {
+  const trackRef = React.useRef(null);
+  const clubs = [
+    { id: "old-coast-1", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" },
+    { id: "old-coast-2", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" },
+    { id: "old-coast-3", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" },
+    { id: "old-coast-4", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" },
+    { id: "old-coast-5", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" },
+    { id: "old-coast-6", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" }
+  ];
+  const scrollBy = (dx) => {
+    const el = trackRef.current; if (!el) return;
+    el.scrollBy({ left: dx, behavior: "smooth" });
+  };
+  const Stars = ({ rating }) => {
+    const full = Math.floor(rating);
+    return (
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
+        {[0,1,2,3,4].map((i) => (
+          <Icon key={i} name="Star" size={13} strokeWidth={0}
+            color={i < full ? "#F59E0B" : "#E9EBEC"}
+            style={{ fill: i < full ? "#F59E0B" : "#E9EBEC" }} />
+        ))}
+      </span>
+    );
+  };
+  return (
+    <div style={{ marginTop: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
+          Verified popular clubs near you
+        </h2>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
+            width: 36, height: 36, borderRadius: 8, border: "1px solid #E9EBEC",
+            background: "#fff", cursor: "pointer",
+            display: "inline-flex", alignItems: "center", justifyContent: "center"
+          }}>
+            <Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />
+          </button>
+          <button onClick={() => scrollBy(340)} aria-label="Next" style={{
+            width: 36, height: 36, borderRadius: 8, border: "1px solid #E9EBEC",
+            background: "#fff", cursor: "pointer",
+            display: "inline-flex", alignItems: "center", justifyContent: "center"
+          }}>
+            <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
+          </button>
+        </div>
+      </div>
+      <div ref={trackRef} style={{
+        display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
+        paddingBottom: 4, scrollbarWidth: "none",
+        margin: "0 -4px", paddingLeft: 4, paddingRight: 4
+      }}>
+        {clubs.map((c) => (
+          <button key={c.id} onClick={() => onOpenClub && onOpenClub(c.id)} style={{
+            flex: "0 0 280px", scrollSnapAlign: "start",
+            background: "#fff", border: "1px solid #E9EBEC", borderRadius: 12,
+            overflow: "hidden", textAlign: "left", padding: 0,
+            cursor: "pointer", fontFamily: "inherit", color: "inherit",
+            display: "flex", flexDirection: "column",
+            transition: "box-shadow 160ms, transform 160ms"
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
+            <div style={{
+              position: "relative", height: 140,
+              backgroundImage: `linear-gradient(135deg, rgba(232,240,229,0.92) 0%, rgba(223,233,219,0.92) 40%, rgba(241,235,217,0.92) 100%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 140'><g fill='none' stroke='%23B6C2A8' stroke-width='1.2'><path d='M-20 30 Q60 20 140 50 T300 40'/><path d='M-20 90 Q60 80 140 110 T300 100'/><path d='M40 -10 Q60 60 100 80 T140 160'/><path d='M180 -10 Q200 50 220 90 T240 160'/></g><circle cx='140' cy='70' r='8' fill='%231F4ED8' stroke='%23fff' stroke-width='3'/></svg>")`,
+              backgroundSize: "cover",
+              backgroundPosition: "center"
+            }}>
+              <div style={{
+                position: "absolute", top: 12, left: 12,
+                height: 24, padding: "0 10px", borderRadius: 6,
+                background: "#fff", color: "#0F1214",
+                fontSize: 11, fontWeight: 700,
+                display: "inline-flex", alignItems: "center",
+                boxShadow: "0 1px 2px rgba(15,18,20,0.08)"
+              }}>{c.distance}</div>
+            </div>
+            <div style={{ padding: "14px 16px 4px" }}>
+              <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3 }}>
+                {c.name}
+              </div>
+              <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#0F1214" }}>
+                <Stars rating={c.rating} />
+                <span style={{ fontWeight: 600 }}>{c.rating}</span>
+                <span style={{ color: "#858F8F" }}>({c.reviews})</span>
+                <span style={{ color: "#858F8F" }}>•</span>
+                <span style={{ fontWeight: 700, color: "#0F1214" }}>{c.price}</span>
+              </div>
+              <div style={{ marginTop: 10 }}>
+                <span style={{
+                  display: "inline-flex", alignItems: "center",
+                  height: 24, padding: "0 10px", borderRadius: 6,
+                  background: "#F4F5F6", color: "#0F1214",
+                  fontSize: 11, fontWeight: 600
+                }}>{c.sport}</span>
+              </div>
+            </div>
+            <div style={{
+              margin: "12px 16px 14px", marginTop: "auto",
+              padding: "10px 12px", borderRadius: 8,
+              background: "#F4F5F6",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              fontSize: 12, fontWeight: 600, color: "#0F1214"
+            }}>
+              See Events & Info
+              <Icon name="ArrowRight" size={14} strokeWidth={2} color="#0F1214" />
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---- Popular events near you — carousel of event cards. Each card:
+// club brand mark, spots-left badge, title, club row, distance, schedule,
+// tag pills, and price + spots-remaining footer.
+function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you" }) {
+  const trackRef = React.useRef(null);
+  const events = [
+    { id: "e1", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball", distance: "2.1 miles away", city: "St. Augustine, FL", date: "Wed, 4/29", time: "6:00 PM - 7:00 PM", spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 Rating", "Men's Only", "Ages 12-15"] },
+    { id: "e2", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball", distance: "2.1 miles away", city: "St. Augustine, FL", date: "Wed, 4/29", time: "6:00 PM - 7:00 PM", spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 Rating", "Men's Only", "Ages 12-15"] },
+    { id: "e3", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball", distance: "2.1 miles away", city: "St. Augustine, FL", date: "Wed, 4/29", time: "6:00 PM - 7:00 PM", spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 Rating", "Men's Only", "Ages 12-15"] },
+    { id: "e4", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball", distance: "2.1 miles away", city: "St. Augustine, FL", date: "Wed, 4/29", time: "6:00 PM - 7:00 PM", spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 Rating", "Men's Only", "Ages 12-15"] },
+    { id: "e5", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball", distance: "2.1 miles away", city: "St. Augustine, FL", date: "Wed, 4/29", time: "6:00 PM - 7:00 PM", spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 Rating", "Men's Only", "Ages 12-15"] }
+  ];
+  const scrollBy = (dx) => {
+    const el = trackRef.current; if (!el) return;
+    el.scrollBy({ left: dx, behavior: "smooth" });
+  };
+  return (
+    <div style={{ marginTop: 40 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
+          {title}
+        </h2>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
+            width: 36, height: 36, borderRadius: 8, border: "1px solid #E9EBEC",
+            background: "#fff", cursor: "pointer",
+            display: "inline-flex", alignItems: "center", justifyContent: "center"
+          }}>
+            <Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />
+          </button>
+          <button onClick={() => scrollBy(340)} aria-label="Next" style={{
+            width: 36, height: 36, borderRadius: 8, border: "1px solid #E9EBEC",
+            background: "#fff", cursor: "pointer",
+            display: "inline-flex", alignItems: "center", justifyContent: "center"
+          }}>
+            <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
+          </button>
+        </div>
+      </div>
+      <div ref={trackRef} style={{
+        display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
+        paddingBottom: 4, scrollbarWidth: "none",
+        margin: "0 -4px", paddingLeft: 4, paddingRight: 4,
+        alignItems: "stretch"
+      }}>
+        {events.map((ev) => (
+          <div key={ev.id} style={{
+            flex: "0 0 320px", scrollSnapAlign: "start",
+            background: "#fff", border: "1px solid #E9EBEC", borderRadius: 12,
+            overflow: "hidden",
+            display: "flex", flexDirection: "column"
+          }}>
+            <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <div style={{
+                  width: 22, height: 22, borderRadius: 4,
+                  background: "#2E5D52",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  position: "relative"
+                }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, color: "#F2A93B", lineHeight: 1 }}>OC</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+                  <span style={{ fontFamily: theme.display, fontSize: 11, fontWeight: 800, color: "#2E5D52", letterSpacing: 0.4 }}>OLD COAST</span>
+                  <span style={{ fontFamily: theme.display, fontSize: 9, fontWeight: 700, color: "#2E5D52", letterSpacing: 1.4, marginTop: 2 }}>PICKLEBALL</span>
+                </div>
+              </div>
+              <span style={{
+                height: 22, padding: "0 10px", borderRadius: 999,
+                background: "#DC2626", color: "#fff",
+                fontSize: 11, fontWeight: 700,
+                display: "inline-flex", alignItems: "center"
+              }}>{ev.spotsLeft} Spots Left</span>
+            </div>
+            <div style={{ padding: "12px 16px 0" }}>
+              <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 18, lineHeight: "22px", letterSpacing: -0.3, color: "#0F1214" }}>
+                {ev.title}
+              </div>
+              <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 6, fontSize: 12.5, color: "#4B5052" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <Icon name="Building2" size={14} strokeWidth={1.75} color="#858F8F" />
+                  <span>{ev.club}</span>
+                </div>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <Icon name="MapPin" size={14} strokeWidth={1.75} color="#858F8F" />
+                  <span>{ev.distance} • {ev.city}</span>
+                </div>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <Icon name="Clock" size={14} strokeWidth={1.75} color="#858F8F" />
+                  <span>{ev.date} • {ev.time}</span>
+                </div>
+              </div>
+              <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {ev.tags.map((tag, i) => (
+                  <span key={i} style={{
+                    height: 24, padding: "0 10px", borderRadius: 6,
+                    background: "#F4F5F6", color: "#0F1214",
+                    fontSize: 11.5, fontWeight: 600,
+                    display: "inline-flex", alignItems: "center"
+                  }}>{tag}</span>
+                ))}
+              </div>
+            </div>
+            <div style={{
+              marginTop: 16,
+              padding: "14px 16px",
+              borderTop: "1px solid #F4F5F6",
+              background: "#F9FAFB",
+              display: "flex", alignItems: "center", justifyContent: "space-between"
+            }}>
+              <div>
+                <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214" }}>{ev.price}</div>
+                <div style={{ marginTop: 2, fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: "#858F8F" }}>
+                  {ev.taken} of {ev.totalSpots} spots remaining
+                </div>
+              </div>
+              <button onClick={() => onOpenEvent && onOpenEvent(ev.id)} aria-label="Open event" style={{
+                width: 40, height: 40, borderRadius: 8,
+                background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
+                display: "inline-flex", alignItems: "center", justifyContent: "center"
+              }}>
+                <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---- More events near you — date-grouped list of upcoming sessions.
+// Each row: time + status on the left, title + spots-left pill + meta + avatars
+// in the middle, price + arrow CTA on the right. Date headers carry a count
+// chip showing how many sessions fall under that day.
+function MoreEventsNearYou({ theme, onOpenEvent }) {
+  const Pill = ({ children }) => (
+    <button style={{
+      height: 40, padding: "0 14px", borderRadius: 8,
+      border: "1px solid #E9EBEC", background: "#fff",
+      display: "inline-flex", alignItems: "center", gap: 8,
+      fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: "#0F1214",
+      cursor: "pointer"
+    }}>{children}</button>
+  );
+  const Avatars = () => {
+    const bgs = [
+      "linear-gradient(135deg, #60A5FA, #2563EB)",
+      "linear-gradient(135deg, #F87171, #DC2626)",
+      "linear-gradient(135deg, #FBBF24, #D97706)"
+    ];
+    return (
+      <span style={{ display: "inline-flex", alignItems: "center" }}>
+        {bgs.map((bg, i) => (
+          <span key={i} style={{
+            width: 20, height: 20, borderRadius: 999,
+            background: bg, border: "2px solid #fff",
+            marginLeft: i === 0 ? 0 : -8
+          }} />
+        ))}
+        <span style={{
+          marginLeft: -8,
+          height: 20, padding: "0 6px", borderRadius: 999,
+          background: "#F4F5F6", border: "2px solid #fff",
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          fontSize: 10, fontWeight: 700, color: "#0F1214"
+        }}>+4</span>
+      </span>
+    );
+  };
+  const sampleRow = { time: "6:00 AM", status: "In Progress", title: "Open Play: All Levels Welcome", spotsLeft: 2, meta: "Doubles • 3.0 - 3.5 • Coach Mike Alvarado", price: "$15 - $60" };
+  const groups = [
+    { id: "today", label: "Today, Monday, May 11, 2026", count: 4, rows: [sampleRow, sampleRow] },
+    { id: "tomorrow", label: "Tomorrow, Tuesday, May 11, 2026", count: 4, rows: [sampleRow, sampleRow, sampleRow] }
+  ];
+  return (
+    <div style={{ marginTop: 40 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
+          More events near you
+        </h2>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+          <Pill>This Week<Icon name="ChevronDown" size={14} strokeWidth={2} color="#858F8F" /></Pill>
+          <Pill>Any Time<Icon name="ChevronDown" size={14} strokeWidth={2} color="#858F8F" /></Pill>
+        </div>
+      </div>
+      {groups.map((g) => (
+        <div key={g.id} style={{ marginBottom: 24 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, letterSpacing: -0.2, color: "#0F1214" }}>{g.label}</span>
+            <span style={{
+              minWidth: 22, height: 22, padding: "0 6px", borderRadius: 6,
+              background: "#0F1214", color: "#fff",
+              fontSize: 11, fontWeight: 700,
+              display: "inline-flex", alignItems: "center", justifyContent: "center"
+            }}>{g.count}</span>
+          </div>
+          <div>
+            {g.rows.map((r, i) => (
+              <div key={i} style={{
+                display: "grid",
+                gridTemplateColumns: "140px 1fr auto auto",
+                gap: 24, alignItems: "center",
+                padding: "18px 0",
+                borderTop: i === 0 ? "1px solid #E9EBEC" : "1px solid #F4F5F6"
+              }}>
+                <div>
+                  <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214" }}>{r.time}</div>
+                  <div style={{ marginTop: 4, fontSize: 12, color: "#858F8F" }}>{r.status}</div>
+                </div>
+                <div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214" }}>{r.title}</span>
+                    <span style={{
+                      height: 22, padding: "0 10px", borderRadius: 999,
+                      background: "#FEE2E2", color: "#DC2626",
+                      fontSize: 11, fontWeight: 700,
+                      display: "inline-flex", alignItems: "center"
+                    }}>{r.spotsLeft} Spots Left</span>
+                  </div>
+                  <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 10, fontSize: 13, color: "#4B5052" }}>
+                    <span>{r.meta}</span>
+                    <span style={{ color: "#858F8F" }}>•</span>
+                    <Avatars />
+                  </div>
+                </div>
+                <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", whiteSpace: "nowrap" }}>{r.price}</div>
+                <button onClick={() => onOpenEvent && onOpenEvent()} aria-label="Open event" style={{
+                  width: 40, height: 40, borderRadius: 8,
+                  background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center"
+                }}>
+                  <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ---- Web-optimized dashboard ----
 function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onBookCourt, isCR, app, setApp }) {
   // Reveal the floating CTA once PrimaryActionGrid has scrolled out of view
@@ -1945,15 +2308,12 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
           </div>
         }
         <div style={{ marginBottom: 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 32, flexWrap: "wrap" }}>
-          <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 64, lineHeight: "64px", letterSpacing: -2, color: theme.t.text, margin: 0 }}>
+          <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 64, lineHeight: "68px", letterSpacing: -2, color: theme.t.text, margin: 0 }}>
             {isCR ?
-            <>Welcome to <span style={{ color: "#2E7D32" }}>CourtReserve</span>!</> :
+            <>Welcome to Court Reserve<br /><span style={{ color: "#858F8F" }}>Let's Play.</span></> :
             <>Hi {PLAYER.name}.<br /><span style={{ color: theme.t.textSubtle }}>Welcome back to {theme.logoText}!</span></>}
           </h1>
           <div style={{ paddingBottom: 8, display: "inline-flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-            {/* Subtle club-detail entry — only meaningful in branded mode
-                               where we have a single anchor club; in CR view (multi-club),
-                               "more info" doesn't have a clear target so we omit it. */}
             {!isCR &&
             <button onClick={onOpenClub} style={{
               height: 36, padding: "0 14px", borderRadius: 8,
@@ -1973,20 +2333,27 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
           </div>
         </div>
         {window.BookCourtWidget &&
-        <div style={{ marginBottom: 32 }}>
+        <div style={{ marginBottom: 40 }}>
             <window.BookCourtWidget onSubmit={() => onBookCourt && onBookCourt()} />
           </div>
         }
-        <div ref={actionGridRef} aria-hidden="true" style={{ marginTop: 32 }} />
-        {/* Cross-club discovery — only shown in the universal CR view.
-                           Branded experiences (Old Coast, Dill Dinkers) hide other clubs'
-                           content since surfacing competitor inventory in a branded app
-                           is a conflict of interest. The MyClubBookingPanel below
-                           replaces this surface for branded views. */}
+        <div ref={actionGridRef} aria-hidden="true" style={{ marginTop: 8 }} />
         {isCR &&
-        <div style={{ marginTop: 8 }}>
+        <VerifiedPopularClubs theme={theme} onOpenClub={onOpenClub} />
+        }
+        {isCR &&
+        <div style={{ marginTop: 32 }}>
             <BookNowSegment theme={theme} />
           </div>
+        }
+        {isCR &&
+        <PopularEventsNearYou theme={theme} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        }
+        {isCR &&
+        <MoreEventsNearYou theme={theme} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        }
+        {isCR &&
+        <PopularEventsNearYou theme={theme} title="Recurring events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {!isCR && window.MyClubBookingPanel &&
         <window.MyClubBookingPanel
@@ -2001,33 +2368,14 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
           }} />
 
         }
-        {isCR &&
-        <div style={{ marginTop: 8 }}>
-            <MatchesSegment theme={theme} />
-          </div>
-        }
-        {isCR &&
-        <div style={{ marginTop: 8 }}>
-            <PeopleSegment theme={theme} />
-          </div>
-        }
-        {isCR &&
-        <div style={{ marginTop: 8 }}>
-            <ForYouSegment theme={theme} />
-          </div>
-        }
-
+        {!isCR &&
         <div style={{ marginTop: 8, display: "grid", gridTemplateColumns: "1fr 1px 1fr", gap: 40, alignItems: "stretch" }}>
           <NextStepsList theme={theme} viewport="desktop" />
           <div style={{ background: theme.t.line, width: 1 }} aria-hidden="true" />
           <SuggestedSegment theme={theme} viewport="desktop" />
         </div>
-        {isCR &&
-        <div style={{ marginTop: 8 }}>
-            <EventsFeedSegment theme={theme} onOpenEventList={onOpenEventList} />
-          </div>
         }
-        <ClubLeaderboardSegment theme={theme} isCR={isCR} />
+        {!isCR && <ClubLeaderboardSegment theme={theme} isCR={isCR} />}
       </div>
       <DesktopActionFloater theme={theme} visible={pastActions} onOpenEventList={onOpenEventList} onFindClubs={onFindClubs} isCR={isCR} />
       {qrOpen && <MemberQRSheet theme={theme} onClose={() => setQrOpen(false)} />}
