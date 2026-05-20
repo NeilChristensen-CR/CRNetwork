@@ -711,12 +711,19 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
     set("who", `${next} ${next === 1 ? "Player" : "Players"}`);
   };
 
-  return (
+  // Portal target — the device frame's inner container has
+  // `position: relative` and `overflow: hidden`, so anchoring the sheet
+  // there gives us a clean modal overlay scoped to the mobile frame.
+  // Without the portal the sheet inherits the sticky-shelf's containing
+  // block and leaks through as a sliver under the search bar.
+  const portalTarget = typeof document !== "undefined"
+    ? document.getElementById("device-frame-inner")
+    : null;
+  if (!portalTarget) return null;
+
+  const sheet = (
     <>
-      {/* Backdrop — fades in/out. Tapping it dismisses the sheet.
-          position: absolute (not fixed) so the overlay is contained by the
-          nearest positioned ancestor — the prototype's device-frame inner
-          container — instead of escaping to the browser viewport. */}
+      {/* Backdrop — fades in/out. Tapping it dismisses the sheet. */}
       <div
         onClick={onClose}
         aria-hidden={!open}
@@ -747,6 +754,10 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           zIndex: 101,
           display: "flex", flexDirection: "column",
           fontFamily: "Inter, system-ui, sans-serif",
+          // Disable pointer events when closed so the backdrop's
+          // pointerEvents: none is honored — otherwise the off-screen
+          // sheet still intercepts taps in some browsers.
+          pointerEvents: open ? "auto" : "none",
         }}
       >
         {/* Drag handle + header row */}
@@ -757,9 +768,17 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "10px 16px 12px 16px",
         }}>
+          {/* Heading — matches the desktop segment label style (small,
+              uppercase, grey, bold, letter-spaced 1.3) so the sheet reads
+              as "this is the search facet bar, expanded". */}
           <span style={{
             fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-            fontWeight: 800, fontSize: 16, color: "#0F1214", letterSpacing: -0.2,
+            fontWeight: 800,
+            fontSize: 10.5,
+            color: "#858F8F",
+            letterSpacing: 1.3,
+            textTransform: "uppercase",
+            lineHeight: 1,
           }}>Search for anything</span>
           <button
             type="button"
@@ -924,6 +943,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
       </div>
     </>
   );
+  // Render the sheet into the device-frame portal target so it escapes the
+  // sticky search shelf's containing block and overlays the full mobile
+  // viewport. ReactDOM.createPortal is exposed globally by the React UMD
+  // bundle loaded in networkPOC.html.
+  return ReactDOM.createPortal(sheet, portalTarget);
 }
 
 // ---- Mobile compact variant ----------------------------------------------
@@ -972,11 +996,15 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 3, overflow: "hidden", flex: 1, minWidth: 0 }}>
-        {/* Title — "Search for anything" reads as a prompt the way Google /
-            Airbnb compact bars frame their entry point. */}
+        {/* Title — uppercase micro-label matching the desktop SearchBar's
+            segment headers (WHERE / ACTIVITY / etc) so the pill reads as
+            "this is the search facet bar, compacted". */}
         <div style={{
           fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-          fontWeight: 800, fontSize: 13, color: "#0F1214", letterSpacing: -0.1,
+          fontWeight: 800,
+          fontSize: 9.5, color: "#858F8F",
+          letterSpacing: 1.2, textTransform: "uppercase",
+          lineHeight: 1,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%",
         }}>
           Search for anything
