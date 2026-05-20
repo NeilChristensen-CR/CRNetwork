@@ -19,11 +19,11 @@ function GoingStack({ friends = [], total }) {
           <div key={i} style={{
             width: 22, height: 22, borderRadius: 999, background: i % 2 === 0 ? "#0F1214" : "#4B5052",
             color: "#fff", fontSize: 9, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center",
-            border: "2px solid #fff", marginLeft: i === 0 ? 0 : -8, fontFamily: "Axiforma",
+            border: "2px solid #fff", marginLeft: i === 0 ? 0 : -8, fontFamily: "Axiforma, Inter, system-ui, sans-serif",
           }}>{init}</div>
         ))}
         {shown.length === 0 && (
-          <div style={{ width: 22, height: 22, borderRadius: 999, background: "#0F1214", color: "#fff", fontSize: 9, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "Axiforma" }}>{total}</div>
+          <div style={{ width: 22, height: 22, borderRadius: 999, background: "#0F1214", color: "#fff", fontSize: 9, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "Axiforma, Inter, system-ui, sans-serif" }}>{total}</div>
         )}
       </div>
       <div style={{ fontSize: 12, color: "#4B5052", fontWeight: 500 }}>{total} going</div>
@@ -64,12 +64,12 @@ function EventCard({ ev, onClick, theme }) {
       }}
     >
       <div>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 22, lineHeight: "26px", color: t.text, letterSpacing: -0.4 }}>{ev.timeShort}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 22, lineHeight: "26px", color: t.text, letterSpacing: -0.4 }}>{ev.timeShort}</div>
         <div style={{ marginTop: 4, fontSize: 12, color: t.textMuted, fontWeight: 500 }}>{ev.dateShort}</div>
       </div>
       <div style={{ minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 20, lineHeight: "24px", color: t.text, letterSpacing: -0.3 }}>{ev.name}</div>
+          <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 20, lineHeight: "24px", color: t.text, letterSpacing: -0.3 }}>{ev.name}</div>
           {urg && (
             <span style={{
               display: "inline-flex", alignItems: "center", gap: 6,
@@ -101,7 +101,7 @@ function EventCard({ ev, onClick, theme }) {
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 20, position: "relative" }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 20, color: t.text, minWidth: 44, textAlign: "right", letterSpacing: -0.3 }}>{ev.priceLabel}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 20, color: t.text, minWidth: 44, textAlign: "right", letterSpacing: -0.3 }}>{ev.priceLabel}</div>
         {/* Reserve button slides in on hover */}
         <div style={{
           display: "inline-flex", alignItems: "center", gap: 8,
@@ -168,7 +168,7 @@ function HeroSlide({ ev, hover, setHover, onClick }) {
         <div style={{ minWidth: 0 }}>
           <h2 style={{
             margin: 0,
-            fontFamily: "Axiforma", fontWeight: 800,
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800,
             fontSize: titleSize, lineHeight: `${titleLh}px`, letterSpacing: -1.4,
             color: "#fff",
             textWrap: "balance",
@@ -198,7 +198,7 @@ function HeroSlide({ ev, hover, setHover, onClick }) {
                   <div key={i} style={{
                     width: 26, height: 26, borderRadius: 999, background: i % 2 === 0 ? "#fff" : "#BBBFC1",
                     color: t.text, fontSize: 10, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    border: "2px solid #0F1214", marginLeft: i === 0 ? 0 : -10, fontFamily: "Axiforma",
+                    border: "2px solid #0F1214", marginLeft: i === 0 ? 0 : -10, fontFamily: "Axiforma, Inter, system-ui, sans-serif",
                   }}>{init}</div>
                 ))}
               </div>
@@ -210,7 +210,7 @@ function HeroSlide({ ev, hover, setHover, onClick }) {
         </div>
 
         <div style={{ textAlign: "right", flexShrink: 0, alignSelf: "flex-end" }}>
-          <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 36, color: "#fff", letterSpacing: -0.8, lineHeight: 1 }}>{ev.priceLabel}</div>
+          <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 36, color: "#fff", letterSpacing: -0.8, lineHeight: 1 }}>{ev.priceLabel}</div>
           <button style={{
             marginTop: 14, height: 48, padding: "0 24px", borderRadius: 8, border: 0,
             background: "#fff", color: t.text, fontFamily: "inherit", fontWeight: 600, fontSize: 14, cursor: "pointer",

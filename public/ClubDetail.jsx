@@ -829,7 +829,7 @@ function CDProgramRow({ p, theme, last }) {
                   quiet caption line; flex-wrap is allowed by leaving overflow
                   unclamped so "Mon/Wed/Fri 8–10am · Recreational" stays readable. */}
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 17, lineHeight: "22px", color: "#0F1214", letterSpacing: -0.3 }}>{p.name}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 17, lineHeight: "22px", color: "#0F1214", letterSpacing: -0.3 }}>{p.name}</div>
         {p.schedule &&
         <div style={{ marginTop: 4, fontSize: 13, color: "#4B5052", fontWeight: 500, lineHeight: 1.4 }}>{p.schedule}</div>
         }
@@ -837,7 +837,7 @@ function CDProgramRow({ p, theme, last }) {
 
       {/* Right rail — price + hover-reveal Join button. */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, position: "relative" }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 17, color: "#0F1214", textAlign: "right", letterSpacing: -0.2, whiteSpace: "nowrap" }}>{p.price}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 17, color: "#0F1214", textAlign: "right", letterSpacing: -0.2, whiteSpace: "nowrap" }}>{p.price}</div>
         <div style={{
           display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
           height: 36, padding: hover ? "0 16px" : 0,

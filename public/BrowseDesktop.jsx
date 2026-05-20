@@ -5,7 +5,7 @@ function TopBar() {
   return (
     <div style={{ background: "#0F1214", color: "#fff", position: "sticky", top: 0, zIndex: 60, boxShadow: "0 1px 0 rgba(0,0,0,.04)" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px", height: 64, display: "flex", alignItems: "center", gap: 32 }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 18, letterSpacing: -0.3 }}>Court</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: -0.3 }}>Court</div>
         <nav style={{ display: "flex", gap: 24 }}>
           {["Reserve", "Events", "Leagues", "Account"].map((l, i) =>
           <a key={l} href="#" style={{ color: i === 1 ? "#fff" : "#BBBFC1", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>{l}</a>
@@ -58,7 +58,7 @@ function StatStrip() {
         border: "1px solid #E9EBEC",
         borderRadius: 8
       }}>
-          <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 32, color: "#0F1214", letterSpacing: -0.7, lineHeight: 1 }}>{s.k}</div>
+          <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 32, color: "#0F1214", letterSpacing: -0.7, lineHeight: 1 }}>{s.k}</div>
           <div style={{ fontSize: 12, color: "#4B5052", fontWeight: 500, marginTop: 8 }}>{s.v}</div>
         </div>
       )}
@@ -188,7 +188,7 @@ function BrowseDesktop({ theme, app, setApp, onOpenQR, onFindClubs, onBack } = {
     const split = mine.length > 0 && other.length > 0;
     const Sub = ({ label, count }) =>
     <div style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 24, paddingBottom: 10 }}>
-        <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{label}</span>
+        <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{label}</span>
         <span style={{ flex: 1, height: 1, background: "#E9EBEC" }} />
         <span style={{ fontSize: 11, color: "#858F8F", fontWeight: 600 }}>{count}</span>
       </div>;
@@ -200,7 +200,7 @@ function BrowseDesktop({ theme, app, setApp, onOpenQR, onFindClubs, onBack } = {
              count on the right. Replaces the heavier 14px black-underline
              head this list used to use. */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: first ? 8 : 48, paddingBottom: 14, marginBottom: 8 }}>
-          <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>{title}</span>
+          <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>{title}</span>
           <span style={{ flex: 1, height: 1, background: "#E9EBEC" }} aria-hidden="true" />
           <span style={{ fontSize: 12, color: "#858F8F", fontWeight: 500, whiteSpace: "nowrap" }}>{items.length}</span>
         </div>
@@ -251,7 +251,7 @@ function BrowseDesktop({ theme, app, setApp, onOpenQR, onFindClubs, onBack } = {
                 placeholder="Search by name, instructor, format"
                 style={{
                   flex: 1, height: "100%", border: 0, outline: 0, background: "transparent",
-                  fontFamily: "Axiforma", fontSize: 15, fontWeight: 500, color: "#0F1214"
+                  fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontSize: 15, fontWeight: 500, color: "#0F1214"
                 }} />
               
               {query &&
@@ -283,7 +283,7 @@ function BrowseDesktop({ theme, app, setApp, onOpenQR, onFindClubs, onBack } = {
                 position: "absolute", top: -4, right: -4,
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 minWidth: 20, height: 20, padding: "0 6px", borderRadius: 8,
-                background: "#E11D2A", color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "Axiforma",
+                background: "#E11D2A", color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "Axiforma, Inter, system-ui, sans-serif",
                 border: "2px solid #fff"
               }}>{sidebarFacetsActive}</span>
               }
@@ -354,7 +354,7 @@ function BrowseDesktop({ theme, app, setApp, onOpenQR, onFindClubs, onBack } = {
           <div style={{ minWidth: 0 }}>
             {filtered.length === 0 ?
             <div style={{ padding: "80px 0", textAlign: "center", borderTop: "1px solid #0F1214", marginTop: 32 }}>
-                <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 28, color: "#0F1214", letterSpacing: -0.6 }}>No events match.</div>
+                <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 28, color: "#0F1214", letterSpacing: -0.6 }}>No events match.</div>
                 <div style={{ marginTop: 8, fontSize: 14, color: "#4B5052" }}>Try a wider window or a different skill level.</div>
               </div> :
 
@@ -443,9 +443,9 @@ function InteractiveGroup({ title, group, items, facets, toggleFacet, clearGroup
       <div onClick={onToggleOpen}
       style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", padding: "4px 0", marginBottom: open ? 8 : 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{title}</span>
+          <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{title}</span>
           {selected > 0 &&
-          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma" }}>{selected}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma, Inter, system-ui, sans-serif" }}>{selected}</span>
           }
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -478,8 +478,8 @@ function PriceSlider({ value, onChange }) {
   return (
     <div style={{ paddingBottom: 18, marginBottom: 18, borderBottom: "1px solid #E9EBEC" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase" }}>Max price</span>
-        <span style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 14, color: "#0F1214" }}>{value === 60 ? "Any" : `$${value}`}</span>
+        <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase" }}>Max price</span>
+        <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 14, color: "#0F1214" }}>{value === 60 ? "Any" : `$${value}`}</span>
       </div>
       <div style={{ position: "relative", height: 24, display: "flex", alignItems: "center" }}>
         <div style={{ position: "absolute", left: 0, right: 0, height: 4, background: "#E9EBEC", borderRadius: 999 }} />
@@ -510,9 +510,9 @@ function MultiSelectDropdown({ title, group, items, facets, toggleFacet, clearGr
       onMouseEnter={(e) => {if (!open) e.currentTarget.style.background = "#FAFAFB";}}
       onMouseLeave={(e) => {if (!open) e.currentTarget.style.background = "transparent";}}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-          <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{title}</span>
+          <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{title}</span>
           {count > 0 &&
-          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma" }}>{count}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma, Inter, system-ui, sans-serif" }}>{count}</span>
           }
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
@@ -565,12 +565,12 @@ function InteractiveSidebar({ facets, toggleFacet, clearGroup, openGroups, toggl
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 8, paddingBottom: 14, marginBottom: 8 }}>
-        <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>Refine</span>
+        <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>Refine</span>
         <span style={{ flex: 1, height: 1, background: "#E9EBEC" }} aria-hidden="true" />
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ fontSize: 13, color: "#4B5052", fontWeight: 500 }}>{resultCount}</div>
           {totalSelected > 0 &&
-          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma" }}>{totalSelected}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma, Inter, system-ui, sans-serif" }}>{totalSelected}</span>
           }
         </div>
       </div>
@@ -618,7 +618,7 @@ function InteractiveSidebar({ facets, toggleFacet, clearGroup, openGroups, toggl
         <button onClick={() => toggleGroup("more")} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "transparent", border: 0, padding: "8px 10px", marginLeft: -10, marginRight: -10, borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}
         onMouseEnter={(e) => e.currentTarget.style.background = "#FAFAFB"}
         onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
-          <h3 style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", margin: 0 }}>More filters</h3>
+          <h3 style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", margin: 0 }}>More filters</h3>
           <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, transform: openGroups.more ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 200ms" }}>
             <Icon name="ChevronDown" size={14} strokeWidth={2.4} />
           </span>

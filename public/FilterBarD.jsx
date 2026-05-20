@@ -70,7 +70,7 @@ function FilterPill({ label, summary, count, open, hasActive, onClick }) {
       transition: "all 140ms",
       maxWidth: 320, minWidth: 0,
     }}>
-      <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 10, letterSpacing: 1.2, textTransform: "uppercase", opacity: dark ? 0.7 : 0.55 }}>{label}</span>
+      <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 10, letterSpacing: 1.2, textTransform: "uppercase", opacity: dark ? 0.7 : 0.55 }}>{label}</span>
       <span style={{
         fontSize: 13, fontWeight: 600,
         whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
@@ -81,7 +81,7 @@ function FilterPill({ label, summary, count, open, hasActive, onClick }) {
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8,
           background: dark ? "#fff" : "#0F1214", color: dark ? "#0F1214" : "#fff",
-          fontSize: 10, fontWeight: 700, fontFamily: "Axiforma",
+          fontSize: 10, fontWeight: 700, fontFamily: "Axiforma, Inter, system-ui, sans-serif",
         }}>{count}</span>
       )}
       <span style={{ display: "inline-flex", marginLeft: -4, transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 180ms" }}>
@@ -120,7 +120,7 @@ function ChipGrid({ items, set, toggle }) {
 function PanelHeader({ title, onClear, canClear }) {
   return (
     <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
-      <h3 style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", margin: 0 }}>{title}</h3>
+      <h3 style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", margin: 0 }}>{title}</h3>
       {canClear && (
         <button onClick={onClear} style={{ border: 0, background: "transparent", color: "#4B5052", fontSize: 11, fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}>clear</button>
       )}
@@ -267,11 +267,11 @@ function FilterBarD({
     return (
       <div>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", paddingBottom: 14, borderBottom: "1px solid #0F1214", marginBottom: 8 }}>
-          <h2 style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 14, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", margin: 0 }}>Refine</h2>
+          <h2 style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", margin: 0 }}>Refine</h2>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ fontSize: 13, color: "#4B5052", fontWeight: 500 }}>{resultCount}</div>
             {totalActive > 0 && (
-              <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma" }}>{totalActive}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma, Inter, system-ui, sans-serif" }}>{totalActive}</span>
             )}
           </div>
         </div>
@@ -284,9 +284,9 @@ function FilterBarD({
                 background: "transparent", border: 0, padding: "14px 0", cursor: "pointer", fontFamily: "inherit",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-                  <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{r.label}</span>
+                  <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{r.label}</span>
                   {r.count > 0 && (
-                    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma" }}>{r.count}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma, Inter, system-ui, sans-serif" }}>{r.count}</span>
                   )}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
@@ -303,7 +303,7 @@ function FilterBarD({
           );
         })}
         <div style={{ paddingTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-          <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>Sort</div>
+          <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>Sort</div>
           <select value={sort} onChange={(e) => setSort(e.target.value)} style={{ height: 32, padding: "0 10px", borderRadius: 8, border: "1px solid #DEE1E5", background: "#fff", fontFamily: "inherit", fontSize: 12, fontWeight: 600, color: "#0F1214", cursor: "pointer" }}>
             {SORT_ITEMS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
           </select>

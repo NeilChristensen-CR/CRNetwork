@@ -35,14 +35,14 @@ function MiniAvatar({ p, size = 36 }) {
       width: size, height: size, borderRadius: 8,
       background: p.color || "#0F1214", color: "#fff",
       display: "inline-flex", alignItems: "center", justifyContent: "center",
-      fontFamily: "Axiforma", fontWeight: 700, fontSize: size * 0.32, flexShrink: 0,
+      fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: size * 0.32, flexShrink: 0,
     }}>{p.avatar}</div>
   );
 }
 
 function FieldLabel({ children, required }) {
   return (
-    <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", marginBottom: 8 }}>
+    <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", marginBottom: 8 }}>
       {children}{required && <span style={{ color: "#E11D2A" }}> *</span>}
     </div>
   );
@@ -94,7 +94,7 @@ function DatesBlock({ event, type, hybridSelected, toggleHybrid, hybridExpanded,
     expandable = true;
     picker = (
       <div style={{ marginTop: 14, padding: "16px 18px", background: "#F4F5F6", border: "1px solid #E9EBEC", borderRadius: 8 }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 18, color: "#0F1214", letterSpacing: -0.3 }}>{d.date}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 18, color: "#0F1214", letterSpacing: -0.3 }}>{d.date}</div>
         <div style={{ marginTop: 4, fontSize: 13, color: "#4B5052", fontWeight: 500 }}>{d.time}</div>
         <div style={{ marginTop: 10, fontSize: 12, color: "#858F8F", fontWeight: 500 }}>This event meets once — date is fixed.</div>
       </div>
@@ -123,7 +123,7 @@ function DatesBlock({ event, type, hybridSelected, toggleHybrid, hybridExpanded,
               borderRadius: 8, cursor: "pointer", fontFamily: "inherit", position: "relative",
             }}>
               <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.2, color: on ? "rgba(255,255,255,.6)" : "#858F8F" }}>{d.label}</div>
-              <div style={{ marginTop: 2, fontFamily: "Axiforma", fontWeight: 800, fontSize: 14, letterSpacing: -0.2 }}>{d.sub}</div>
+              <div style={{ marginTop: 2, fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: -0.2 }}>{d.sub}</div>
               {on && (
                 <span style={{ position: "absolute", top: 6, right: 6, width: 12, height: 12, borderRadius: 999, background: "#fff", color: "#0F1214", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   <Icon name="Check" size={8} strokeWidth={3} />
@@ -145,7 +145,7 @@ function DatesBlock({ event, type, hybridSelected, toggleHybrid, hybridExpanded,
         width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
         background: "transparent", border: 0, padding: 0, cursor: expandable ? "pointer" : "default", fontFamily: "inherit",
       }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3 }}>{title}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3 }}>{title}</div>
         {expandable && <Icon name={open ? "ChevronUp" : "ChevronDown"} size={16} strokeWidth={2.2} />}
       </button>
       {!open && (
@@ -177,7 +177,7 @@ function DatesRow({ event, selected, toggle, expanded, setExpanded }) {
         width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
         background: "transparent", border: 0, padding: 0, cursor: "pointer", fontFamily: "inherit",
       }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3 }}>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3 }}>
           {selectedList.length} dates selected
         </div>
         <Icon name={expanded ? "ChevronUp" : "ChevronDown"} size={16} strokeWidth={2.2} />
@@ -221,7 +221,7 @@ function DatesRow({ event, selected, toggle, expanded, setExpanded }) {
                   position: "relative",
                 }}>
                   <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.2, color: on ? "rgba(255,255,255,.6)" : "#858F8F" }}>{d.weekday}</div>
-                  <div style={{ marginTop: 2, fontFamily: "Axiforma", fontWeight: 800, fontSize: 14, letterSpacing: -0.2 }}>{d.date}</div>
+                  <div style={{ marginTop: 2, fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: -0.2 }}>{d.date}</div>
                   {on && (
                     <span style={{ position: "absolute", top: 6, right: 6, width: 12, height: 12, borderRadius: 999, background: "#fff", color: "#0F1214", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                       <Icon name="Check" size={8} strokeWidth={3} />
@@ -246,10 +246,10 @@ function PlayerRow({ player, lead, onSwap, onRemove, onAssignPartner, partnerOpt
         <MiniAvatar p={player} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>
+            <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>
               {player.name}{isLead ? " (you)" : player.relation ? ` (G)` : ""}
             </span>
-            <span style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 13, color: "#0F1214" }}>· $5</span>
+            <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 13, color: "#0F1214" }}>· $5</span>
           </div>
           <div style={{ fontSize: 12, color: "#4B5052", fontWeight: 500, marginTop: 2 }}>{player.email}</div>
         </div>
@@ -316,7 +316,7 @@ function PlayerRow({ player, lead, onSwap, onRemove, onAssignPartner, partnerOpt
                   onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
                   <MiniAvatar p={o} size={32} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 13, color: "#0F1214" }}>{o.name}</div>
+                    <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 13, color: "#0F1214" }}>{o.name}</div>
                     <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 1 }}>{o.relation}</div>
                   </div>
                 </button>
@@ -349,7 +349,7 @@ function SwapSheet({ open, onClose, options, onPick }) {
           <div style={{ width: 36, height: 4, borderRadius: 999, background: "#DEE1E5" }} />
         </div>
         <div style={{ padding: "8px 20px 16px" }}>
-          <h3 style={{ margin: 0, fontFamily: "Axiforma", fontWeight: 800, fontSize: 22, letterSpacing: -0.6 }}>Register a family member instead.</h3>
+          <h3 style={{ margin: 0, fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 22, letterSpacing: -0.6 }}>Register a family member instead.</h3>
           <p style={{ margin: "6px 0 0", fontSize: 13, color: "#4B5052", fontWeight: 500 }}>You'll be removed from this lineup and replaced.</p>
         </div>
         <div style={{ padding: "0 8px" }}>
@@ -361,7 +361,7 @@ function SwapSheet({ open, onClose, options, onPick }) {
             }}>
               <MiniAvatar p={o} size={40} />
               <div style={{ flex: 1, textAlign: "left" }}>
-                <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 15, color: "#0F1214" }}>{o.name}</div>
+                <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 15, color: "#0F1214" }}>{o.name}</div>
                 <div style={{ fontSize: 12, color: "#4B5052", fontWeight: 500, marginTop: 2 }}>{o.relation}</div>
               </div>
               <Icon name="ChevronRight" size={16} color="#858F8F" />
@@ -396,8 +396,8 @@ function Cart({ players, perPlayer = 5, baseFee = 20, taxRate = 0.1075 }) {
       </div>
       <div style={{ height: 1, background: "#E9EBEC", margin: "8px 0" }} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 14, color: "#0F1214" }}>Total Due</span>
-        <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 18, color: "#0F1214", fontVariantNumeric: "tabular-nums" }}>{fmt(total)}</span>
+        <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 14, color: "#0F1214" }}>Total Due</span>
+        <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 18, color: "#0F1214", fontVariantNumeric: "tabular-nums" }}>{fmt(total)}</span>
       </div>
     </div>
   );
@@ -410,7 +410,7 @@ function AdditionalInfoBlock({ player, isLead, value, onChange }) {
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <MiniAvatar p={player} size={44} />
         <div>
-          <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 16, color: "#0F1214", letterSpacing: -0.2 }}>
+          <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 16, color: "#0F1214", letterSpacing: -0.2 }}>
             {player.name} {isLead ? "(you)" : "(player)"}
           </div>
           <div style={{ fontSize: 12, color: "#4B5052", fontWeight: 500, marginTop: 2 }}>{player.email}</div>
@@ -490,9 +490,9 @@ function EventRegistration({ viewport = "mobile", type = "hybrid", onBack }) {
     <React.Fragment>
       {/* Event summary block */}
       <div style={{ paddingTop: 4 }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid #0F1214" }}>Registering for</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid #0F1214" }}>Registering for</div>
         <h1 style={{
-          margin: 0, fontFamily: "Axiforma", fontWeight: 800,
+          margin: 0, fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800,
           fontSize: desktop ? 36 : 24, lineHeight: 1.05, letterSpacing: desktop ? -1 : -0.6, color: "#0F1214",
         }}>{event.name}.</h1>
         <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap", gap: 12, fontSize: 12, color: "#4B5052", fontWeight: 500 }}>
@@ -519,7 +519,7 @@ function EventRegistration({ viewport = "mobile", type = "hybrid", onBack }) {
 
       {/* Who's attending */}
       <div style={{ marginTop: 28 }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3, marginBottom: 8 }}>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3, marginBottom: 8 }}>
           Who's attending? <span style={{ color: "#E11D2A" }}>*</span>
         </div>
         <div>
@@ -564,7 +564,7 @@ function EventRegistration({ viewport = "mobile", type = "hybrid", onBack }) {
           <Icon name="ChevronLeft" size={14} strokeWidth={2.2} /> Back to players
         </button>
         <h2 style={{
-          margin: 0, fontFamily: "Axiforma", fontWeight: 800,
+          margin: 0, fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800,
           fontSize: desktop ? 32 : 22, lineHeight: 1.1, letterSpacing: desktop ? -0.8 : -0.5, color: "#0F1214",
         }}>Additional information.</h2>
         <p style={{ margin: "8px 0 0", fontSize: 13, color: "#4B5052", fontWeight: 500 }}>
@@ -624,7 +624,7 @@ function EventRegistration({ viewport = "mobile", type = "hybrid", onBack }) {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 48, alignItems: "flex-start" }}>
             <div>{step === 1 ? stepOne : stepTwo}</div>
             <aside style={{ position: "sticky", top: 88, background: "#fff", padding: 0 }}>
-              <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", marginBottom: 6, paddingBottom: 12, borderBottom: "1px solid #0F1214" }}>Order summary</div>
+              <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 13, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", marginBottom: 6, paddingBottom: 12, borderBottom: "1px solid #0F1214" }}>Order summary</div>
               <div style={{ fontSize: 12, color: "#4B5052", fontWeight: 500, marginTop: 8 }}>{allPlayers.length} player{allPlayers.length !== 1 ? "s" : ""} · {selectedDates.size} session{selectedDates.size !== 1 ? "s" : ""}</div>
               {cartAndCta}
             </aside>
@@ -645,7 +645,7 @@ function EventRegistration({ viewport = "mobile", type = "hybrid", onBack }) {
         <button onClick={onBack} style={{ background: "transparent", border: 0, padding: 8, marginLeft: -8, cursor: "pointer", display: "inline-flex" }}>
           <Icon name="ArrowLeft" size={20} />
         </button>
-        <div style={{ flex: 1, textAlign: "center", fontFamily: "Axiforma", fontWeight: 800, fontSize: 13, letterSpacing: 0.4 }}>
+        <div style={{ flex: 1, textAlign: "center", fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 13, letterSpacing: 0.4 }}>
           {step === 1 ? "Register" : "Additional info"}
         </div>
         <div style={{ display: "inline-flex", gap: 4 }}>
@@ -692,7 +692,7 @@ function StepDot({ n, active, done, label, muted }) {
         width: 22, height: 22, borderRadius: 999, background: bg, color: fg,
         border: active || done ? "0" : "1px solid #DEE1E5",
         display: "inline-flex", alignItems: "center", justifyContent: "center",
-        fontFamily: "Axiforma", fontWeight: 800, fontSize: 11,
+        fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
       }}>{done ? <Icon name="Check" size={11} color="#fff" strokeWidth={3} /> : n}</span>
       <span style={{ color: muted ? "#858F8F" : "#0F1214", fontSize: 12, fontWeight: 600 }}>{label}</span>
     </div>
