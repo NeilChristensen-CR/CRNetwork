@@ -2839,11 +2839,16 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             emphasized "Get Current Location" link to override. */}
         {isCR &&
         <div style={{
+          // Single-row blurb on both viewports — wraps naturally if the
+          // line can't fit so "Get Current Location" sits next to "Not
+          // Correct?" instead of dropping to its own line.
           display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          alignItems: isMobile ? "flex-start" : "center",
-          justifyContent: "center",
-          gap: isMobile ? 6 : 12,
+          flexDirection: "row",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: isMobile ? "flex-start" : "center",
+          columnGap: 6,
+          rowGap: 4,
           fontSize: 13,
           color: "#4B5052",
           // Mobile: 24px blurb-marginBottom + 8px section-marginTop = 32px
