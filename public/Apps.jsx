@@ -1899,13 +1899,40 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
   // original scroll-revealed behavior.
   const persistent = isCR;
   const shown = persistent || visible;
-  // Hover-driven selection — when nothing is hovered the white "active"
-  // pill stays on whichever item is marked primary. As the cursor moves
-  // across items the pill snaps to the hovered one and that item's text /
+  // Hover-driven selection — when nothing is hovered the white pill rests
+  // on the primary item ("Book a Court"). As the cursor moves across items
+  // the pill SLIDES (not snaps) to the hovered one, and that item's text /
   // icon invert to black so they read against the new white background.
   const [hovered, setHovered] = React.useState(null);
   const primaryIdx = items.findIndex((it) => it.primary);
   const activeIdx = hovered != null ? hovered : (primaryIdx === -1 ? 0 : primaryIdx);
+
+  // Sliding pill geometry — measured from the DOM after layout so the
+  // moving capsule lands exactly under the active item, regardless of
+  // label length. Re-measures on hover changes and on resize.
+  const trackRef = React.useRef(null);
+  const itemRefs = React.useRef([]);
+  const [pillRect, setPillRect] = React.useState({ left: 0, width: 0 });
+  React.useLayoutEffect(() => {
+    const el = itemRefs.current[activeIdx];
+    const trackEl = trackRef.current;
+    if (!el || !trackEl) return;
+    const eRect = el.getBoundingClientRect();
+    const tRect = trackEl.getBoundingClientRect();
+    setPillRect({ left: eRect.left - tRect.left, width: eRect.width });
+  }, [activeIdx, items.length, isMobile]);
+  React.useEffect(() => {
+    const onResize = () => {
+      const el = itemRefs.current[activeIdx];
+      const trackEl = trackRef.current;
+      if (!el || !trackEl) return;
+      const eRect = el.getBoundingClientRect();
+      const tRect = trackEl.getBoundingClientRect();
+      setPillRect({ left: eRect.left - tRect.left, width: eRect.width });
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [activeIdx]);
 
   return (
     // Sticky positioning differs per viewport:
@@ -1918,9 +1945,10 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
       bottom: isMobile ? 0 : 24,
       zIndex: 30,
       display: "flex", justifyContent: "center", pointerEvents: "none",
-      // Mobile: 16 top, 12 sides, 8 bottom — pill sits near the bottom of
-      // the viewport with a small cushion. Desktop: floats inset.
-      padding: isMobile ? "16px 12px 8px 12px" : "0 24px",
+      // Mobile: 16 top, 12 sides, 24 bottom — bottom cushion bumped from
+      // 8 → 24 so the pill doesn't disappear into the bottom of the device
+      // frame as the page scrolls. Desktop: floats inset.
+      padding: isMobile ? "16px 12px 24px 12px" : "0 24px",
       marginTop: isMobile ? -88 : -88,
       // Gradient on mobile so the page content visibly fades into the
       // sticky action shelf instead of cutting at a hard edge.
@@ -1932,9 +1960,11 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
       transition: "transform 320ms cubic-bezier(.2,.8,.2,1), opacity 240ms ease",
     }}>
       <div
+        ref={trackRef}
         onMouseLeave={() => setHovered(null)}
         style={{
           pointerEvents: "auto",
+          position: "relative",
           display: isMobile ? "flex" : "inline-flex",
           width: isMobile ? "100%" : "auto",
           alignItems: "center",
@@ -1946,21 +1976,42 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
           boxShadow: "0 14px 40px rgba(15,18,20,.28), 0 2px 8px rgba(15,18,20,.18)",
         }}
       >
+        {/* Sliding pill — single absolutely-positioned capsule that tracks
+            the active item via transform + width. Sits BEHIND the buttons
+            (zIndex: 0) so the button text stays interactive on top. */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top: 6, bottom: 6,
+            left: 0,
+            width: pillRect.width,
+            transform: `translateX(${pillRect.left}px)`,
+            background: "#fff",
+            borderRadius: 999,
+            transition: "transform 280ms cubic-bezier(.2,.8,.2,1), width 280ms cubic-bezier(.2,.8,.2,1)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
         {items.map((it, idx) => {
           const isActive = idx === activeIdx;
           return (
             <button
               key={it.label}
+              ref={(el) => { itemRefs.current[idx] = el; }}
               onClick={it.onClick || undefined}
               onMouseEnter={() => setHovered(idx)}
               style={{
                 // Desktop hugs content; mobile fills the row evenly.
+                position: "relative",
+                zIndex: 1,
                 flex: isMobile ? 1 : "0 0 auto",
                 minWidth: 0,
                 height: isMobile ? 36 : 44,
                 padding: isMobile ? "0 8px" : "0 18px",
                 borderRadius: 999, border: 0,
-                background: isActive ? "#fff" : "transparent",
+                background: "transparent",
                 color: isActive ? "#0F1214" : "#fff",
                 fontFamily: "inherit", fontWeight: 700,
                 fontSize: isMobile ? 12 : 13,
@@ -1968,7 +2019,9 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 gap: isMobile ? 0 : 8,
                 whiteSpace: "nowrap",
-                transition: "background 140ms ease, color 140ms ease",
+                // Only color animates per-button; the white background is
+                // owned by the sliding pill above.
+                transition: "color 200ms ease",
               }}
             >
               {/* Icons appear only on desktop; mobile hides them so labels
