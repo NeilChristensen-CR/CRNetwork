@@ -11,6 +11,20 @@
 <style>
   html, body { margin: 0; padding: 0; background: #F4F5F6; font-family: "Inter", system-ui, sans-serif; }
   * { box-sizing: border-box; }
+  /* Focus-visible rings — keyboard users get an obvious blue ring on
+     every interactive element. :focus-visible avoids ringing on click,
+     so mouse users don't see them. */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role="button"]:focus-visible,
+  [role="dialog"] :focus-visible {
+    outline: 2px solid #1F4ED8;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
   @keyframes pulse {
     0%   { transform: scale(1);   opacity: .55; }
     70%  { transform: scale(2.4); opacity: 0; }
