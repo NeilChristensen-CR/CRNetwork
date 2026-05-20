@@ -42,6 +42,32 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /* Card-hover tag pop. Tags sit in a subtle palette at rest; when the
+     enclosing card (any element marked [data-card-hover]) is hovered,
+     descendants marked with [data-tag] flip to their vibrant variant.
+     Selectors use !important to win over the inline background/color
+     written by the JSX renderers. */
+  [data-tag] {
+    transition: background-color 160ms ease, color 160ms ease;
+  }
+  [data-card-hover]:hover [data-tag="default"] {
+    background: #0F1214 !important;
+    color: #FFFFFF !important;
+  }
+  [data-card-hover]:hover [data-tag="warning"] {
+    background: #DC2626 !important;
+    color: #FFFFFF !important;
+  }
+  [data-card-hover]:hover [data-tag="positive"] {
+    background: #1F8C5A !important;
+    color: #FFFFFF !important;
+  }
+  /* The small dot inside the "positive" pill needs to invert too so it
+     stays visible on the green fill. */
+  [data-card-hover]:hover [data-tag="positive"] [data-tag-dot] {
+    background: #FFFFFF !important;
+  }
 </style>
 </head>
 <body>

@@ -396,18 +396,21 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
   const venueForMap = { ...v, distance, activePlayers };
 
   return (
-    <div style={{
-      width: "100%",
-      padding: 0,
-      background: t.surface,
-      border: `1px solid ${t.line}`,
-      borderRadius: 8,
-      display: "flex", flexDirection: "column",
-      overflow: "hidden",
-      transition: "box-shadow 160ms, transform 160ms"
-    }}
-    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
+    <div
+      data-card-hover
+      style={{
+        width: "100%",
+        padding: 0,
+        background: t.surface,
+        border: `1px solid ${t.line}`,
+        borderRadius: 8,
+        display: "flex", flexDirection: "column",
+        overflow: "hidden",
+        transition: "box-shadow 160ms, transform 160ms"
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
+    >
       
       {/* Mini map — distance pill top-left, "X Active" green pill top-right.
               Same SVG illustration underneath. */}
@@ -438,7 +441,7 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
           display: "flex", alignItems: "center", gap: 8,
           fontSize: 13, color: "#4B5052", fontWeight: 500,
         }}>
-          <span style={{
+          <span data-tag="default" style={{
             display: "inline-flex", alignItems: "center",
             height: 22, padding: "0 10px", borderRadius: 6,
             background: "#F4F5F6", color: "#0F1214",
@@ -781,7 +784,7 @@ function MiniMap({ venue, theme }) {
       {/* Top-left distance pill — anchored to where players sit relative to
           the club. Falls back to city/state/zip if no distance is provided
           so the legacy callers still render. */}
-      <span style={{
+      <span data-tag="default" style={{
         position: "absolute", top: 10, left: 10,
         display: "inline-flex", alignItems: "center",
         height: 22, padding: "0 10px", borderRadius: 6,
@@ -793,11 +796,11 @@ function MiniMap({ venue, theme }) {
       }}>
         {venue.distance != null ? `${venue.distance}mi` : `${venue.city}, ${venue.state} ${venue.zip}`}
       </span>
-      {/* Top-right active-players pill — softened from vibrant green to a
-          pale "positive" tone so it sits in the same subtle palette as the
-          other tags. The little dot stays as a kinetic accent. */}
+      {/* Top-right active-players pill — pale "positive" tone at rest,
+          flips to the vibrant solid green via the [data-card-hover]:hover
+          rule when the parent card is hovered. */}
       {venue.activePlayers != null && (
-        <span style={{
+        <span data-tag="positive" style={{
           position: "absolute", top: 10, right: 10,
           display: "inline-flex", alignItems: "center", gap: 6,
           height: 22, padding: "0 10px 0 8px", borderRadius: 6,
@@ -807,7 +810,7 @@ function MiniMap({ venue, theme }) {
           boxShadow: "0 1px 3px rgba(15,18,20,.08)",
           whiteSpace: "nowrap",
         }}>
-          <span style={{
+          <span data-tag-dot style={{
             width: 6, height: 6, borderRadius: 999, background: "#166534", flexShrink: 0,
           }} />
           {venue.activePlayers} Active

@@ -2224,6 +2224,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
         {events.map((ev) => (
           <div
             key={ev.id}
+            data-card-hover
             style={{
               flex: "0 0 320px", scrollSnapAlign: "start",
               background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
@@ -2253,7 +2254,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               {(() => {
                 const s = supplyState(ev);
                 return (
-                  <span style={{
+                  <span data-tag={s.urgent ? "warning" : "default"} style={{
                     height: 22, padding: "0 10px", borderRadius: 6,
                     background: s.urgent ? "#FEE2E2" : "#F4F5F6",
                     color: s.urgent ? "#B91C1C" : "#0F1214",
@@ -2301,7 +2302,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               </div>
               <div style={{ marginTop: 24, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {ev.tags.map((tag, i) => (
-                  <span key={i} style={{
+                  <span key={i} data-tag="default" style={{
                     height: 22, padding: "0 10px", borderRadius: 6,
                     background: "#F4F5F6", color: "#0F1214",
                     fontSize: 11.5, fontWeight: 600,
@@ -2558,6 +2559,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
   if (isMobile) {
     return (
       <div
+        data-card-hover
         onClick={() => onOpenEvent && onOpenEvent()}
         style={{
           display: "flex", flexDirection: "column", gap: 6,
@@ -2591,7 +2593,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
             {(() => {
               const s = supplyState(r);
               return (
-                <span style={{
+                <span data-tag={s.urgent ? "warning" : "default"} style={{
                   height: 22, padding: "0 10px", borderRadius: 6,
                   background: s.urgent ? "#FEE2E2" : "#F4F5F6",
                   color: s.urgent ? "#B91C1C" : "#0F1214",
@@ -2630,6 +2632,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
   // ---- Desktop layout (unchanged) -----------------------------------------
   return (
     <div
+      data-card-hover
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={() => onOpenEvent && onOpenEvent()}
@@ -2653,7 +2656,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
           {(() => {
             const s = supplyState(r);
             return (
-              <span style={{
+              <span data-tag={s.urgent ? "warning" : "default"} style={{
                 height: 22, padding: "0 10px", borderRadius: 6,
                 background: s.urgent ? "#FEE2E2" : "#F4F5F6",
                 color: s.urgent ? "#B91C1C" : "#0F1214",
