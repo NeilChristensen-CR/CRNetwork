@@ -2591,12 +2591,20 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
           <Avatars />
           <span style={{ fontSize: 13, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
         </div>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#4B5052" }}>
+        {/* Single location+meta line — mobile collapses what was two
+            stacked rows on the desktop layout into one truncated row so
+            the card stays at 4 lines instead of 5. Meta detail (level,
+            format, coach) is still available on tap-through. */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6,
+          fontSize: 13, color: "#4B5052",
+          minWidth: 0,
+        }}>
           <Icon name="MapPin" size={13} strokeWidth={1.75} color="#858F8F" />
-          <span>{r.club} · {r.city} · {r.distance}</span>
-        </div>
-        <div style={{ fontSize: 13, color: "#4B5052" }}>
-          {r.meta}
+          <span style={{
+            flex: 1, minWidth: 0,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>{r.club} · {r.distance} · {r.meta}</span>
         </div>
         {/* Bottom row — time + spots tag on the left, price + Reserve CTA
             on the right, balanced via space-between. */}
