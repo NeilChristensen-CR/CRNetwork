@@ -1225,27 +1225,40 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
         fontFamily: "Inter, system-ui, sans-serif",
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 3, overflow: "hidden", flex: 1, minWidth: 0 }}>
-        {/* Title — uppercase micro-label matching the desktop SearchBar's
-            segment headers (WHERE / ACTIVITY / etc) so the pill reads as
-            "this is the search facet bar, compacted". */}
+      <div style={{
+        display: "flex", flexDirection: "column", alignItems: "flex-start",
+        gap: 4,
+        overflow: "hidden",
+        flex: 1, minWidth: 0,
+        // gutter so the truncating value text doesn't visually collide
+        // with the search button on the right.
+        paddingRight: 8,
+      }}>
+        {/* Label — matches the desktop segment label exactly:
+            Axiforma 800 / 10.5px / letter-spacing 1.3 / uppercase /
+            color #858F8F. */}
         <div style={{
           fontFamily: "Axiforma, Inter, system-ui, sans-serif",
           fontWeight: 800,
-          fontSize: 9.5, color: "#858F8F",
-          letterSpacing: 1.2, textTransform: "uppercase",
+          fontSize: 10.5, color: "#858F8F",
+          letterSpacing: 1.3, textTransform: "uppercase",
           lineHeight: 1,
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%",
+          maxWidth: "100%",
         }}>
           Search for anything
         </div>
-        {/* Subtitle — all four current values joined on a single line by
-            bullets. Truncates with ellipsis if it can't fit. */}
+        {/* Value — matches the desktop segment value style:
+            Inter 500 / 14px / color #0F1214. All four facet values join
+            on a single line with bullets; ellipsis kicks in before the
+            row reaches the search button so it never visually overlaps. */}
         <div style={{
-          fontSize: 11, fontWeight: 500, color: "#4B5052",
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%",
+          fontFamily: "Inter, system-ui, sans-serif",
+          fontSize: 14, fontWeight: 500, color: "#0F1214",
+          lineHeight: 1.2,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          maxWidth: "100%", width: "100%",
         }}>
-          {v.where} <span style={{ color: "#C8CDCD" }}>•</span> {v.activity} <span style={{ color: "#C8CDCD" }}>•</span> {v.when} <span style={{ color: "#C8CDCD" }}>•</span> {v.who}
+          {v.where}<span style={{ color: "#C8CDCD", margin: "0 6px" }}>•</span>{v.activity}<span style={{ color: "#C8CDCD", margin: "0 6px" }}>•</span>{v.when}<span style={{ color: "#C8CDCD", margin: "0 6px" }}>•</span>{v.who}
         </div>
       </div>
       <span style={{
