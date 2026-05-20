@@ -2804,7 +2804,11 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             style={{
               background: "transparent",
               border: 0,
-              padding: 0,
+              // 10px y-padding inflates the tap area to ~36px while keeping
+              // the visual text size unchanged. Negative margins reclaim
+              // the layout space so the link sits where the eye expects.
+              padding: "10px 6px",
+              margin: "-10px -6px",
               cursor: "pointer",
               fontFamily: "inherit",
               fontSize: 13,
