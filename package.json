@@ -1,0 +1,30 @@
+{
+  "name": "crnetwork",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CourtReserve network prototype — Vite + @courtreserve/admin, with the legacy Babel-standalone prototype served from public/",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NeilChristensen-CR/CRNetwork.git"
+  },
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/NeilChristensen-CR/CRNetwork/issues"
+  },
+  "homepage": "https://neilchristensen-cr.github.io/CRNetwork/",
+  "dependencies": {
+    "@courtreserve/admin": "^0.3.13",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.2",
+    "vite": "^8.0.13"
+  }
+}

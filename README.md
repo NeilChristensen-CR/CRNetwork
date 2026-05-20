@@ -1,22 +1,37 @@
-# networkPOC
+# CRNetwork
 
-CourtReserve events-discovery prototype. HTML + JSX (Babel-standalone) — no build step.
+CourtReserve network prototype. Vite + React app at the root, with the
+original Babel-standalone prototype preserved alongside it.
 
 ## Run
 
 ```sh
-python3 -m http.server 8080
+npm install   # needs .npmrc — see Auth below
+npm run dev   # http://localhost:5173/CRNetwork/
 ```
 
-Then open <http://localhost:8080/networkPOC.html>.
+`npm run build` outputs to `dist/`. `npm run preview` serves the built site.
 
 ## Layout
 
-- `networkPOC.html` — entry point; loads React/ReactDOM/Babel/Lucide from unpkg and stitches the JSX modules together.
-- `*.jsx` — components (transformed in the browser by Babel-standalone).
-- `colors_and_type.css` — design tokens + `@font-face` declarations.
-- `fonts/` — Axiforma font files referenced by the CSS.
+- `src/` — new Vite + React app (`main.jsx`, `App.jsx`).
+- `index.html` — Vite entry; mounts `src/main.jsx` into `#root`.
+- `vite.config.js` — `base: '/CRNetwork/'` for GitHub Pages.
+- `public/` — the original prototype (HTML + JSX + fonts). Served verbatim
+  by Vite at `/CRNetwork/networkPOC.html` etc.
+- `.github/workflows/deploy.yml` — builds and deploys to Pages on every
+  push to `main`.
+
+## Auth (private npm registry)
+
+`@courtreserve` packages live on a private Azure DevOps Artifacts feed.
+`.npmrc` is gitignored because it contains a PAT.
+
+- **Local:** put a `.npmrc` with the registry block at the repo root.
+- **CI:** the `AZURE_DEVOPS_PAT` repo secret is templated into a CI-only
+  `.npmrc` by the deploy workflow.
 
 ## Origin
 
-Exported from Claude Design and dropped in as-is. See the design bundle's `chats/` for the iteration history.
+Imported from a Claude Design handoff. The original chats live with the
+design bundle, not in this repo.

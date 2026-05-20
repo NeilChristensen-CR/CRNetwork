@@ -1,0 +1,66 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; cancel in-progress runs when a new commit lands.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "26"
+          cache: "npm"
+
+      # The Azure DevOps Artifacts feed for @courtreserve packages is
+      # private. CI gets its credentials from the AZURE_DEVOPS_PAT secret
+      # rather than the local .npmrc (which is gitignored).
+      - name: Write .npmrc for Azure DevOps feed
+        env:
+          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+        run: |
+          if [ -z "$AZURE_DEVOPS_PAT" ]; then
+            echo "::error::AZURE_DEVOPS_PAT secret is not set. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          cat > .npmrc <<EOF
+          @courtreserve:registry=https://pkgs.dev.azure.com/courtreserve2/_packaging/courtreserve2/npm/registry/
+          //pkgs.dev.azure.com/courtreserve2/_packaging/courtreserve2/npm/registry/:username=AzureDevOps
+          //pkgs.dev.azure.com/courtreserve2/_packaging/courtreserve2/npm/registry/:_password=${AZURE_DEVOPS_PAT}
+          //pkgs.dev.azure.com/courtreserve2/_packaging/courtreserve2/npm/registry/:email=npm-readonly@courtreserve.com
+          //pkgs.dev.azure.com/courtreserve2/_packaging/courtreserve2/npm/registry/:always-auth=true
+          EOF
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
