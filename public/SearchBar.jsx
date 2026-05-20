@@ -95,13 +95,14 @@ const SB_SPORTS = [
   { id: "Platform Tennis", icon: "Grid3X3" },
 ];
 const SB_WHEN_OPTIONS = [
-  { id: "Any Day • Any Time", label: "Any time" },
-  { id: "Today",              label: "Today" },
-  { id: "Tomorrow",           label: "Tomorrow" },
-  { id: "This Weekend",       label: "This weekend" },
-  { id: "Next 7 Days",        label: "Next 7 days" },
+  { id: "Any day",      label: "Any day" },
+  { id: "Today",        label: "Today" },
+  { id: "Tomorrow",     label: "Tomorrow" },
+  { id: "This weekend", label: "This weekend" },
+  { id: "Next 7 days",  label: "Next 7 days" },
 ];
 const SB_WHEN_TIME_BUCKETS = [
+  { id: "Any time",  sub: "Whenever you can play" },
   { id: "Morning",   sub: "6 AM – 12 PM" },
   { id: "Afternoon", sub: "12 PM – 5 PM" },
   { id: "Evening",   sub: "5 PM – 10 PM" },
@@ -819,15 +820,18 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   // Which WHEN sub-accordion is open. "day" by default when WHEN opens.
   const [openWhenSub, setOpenWhenSub] = useStateSB("day");
 
-  // Reset on open — clean slate every time the sheet appears.
+  // Reset on open — clean slate every time the sheet appears. WHEN's two
+  // sub-facets default to "Any day" / "Any time" so the user can submit
+  // without explicitly picking — and they read as set state in their
+  // respective subsection lists.
   useEffectSB(() => {
     if (open) {
       setOpenSection(null);
       setWhereQuery("");
       setShowAllWhere(false);
       setActivity("");
-      setWhenDay("");
-      setWhenTime("");
+      setWhenDay("Any day");
+      setWhenTime("Any time");
       setOpenWhenSub("day");
     }
   }, [open]);
@@ -854,13 +858,14 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   };
 
   // ---- Section accordion shell --------------------------------------------
-  // Title bar reads as the page section header (h2-style: 20/800), with a
-  // chip on the right showing the currently-committed value when the
-  // section is closed and there's something selected.
+  // Section title sits one step BELOW the sheet's main heading. No
+  // chevron — the chip on the right doubles as the affordance ("there's
+  // a selection here, tap to change it"). No borderBottom between
+  // sections either; the sheet reads as a flat list.
   const SectionAccordion = ({ id, label, chip, children }) => {
     const isOpen = openSection === id;
     return (
-      <section style={{ borderBottom: "1px solid #F4F5F6" }}>
+      <section>
         <button
           type="button"
           onClick={() => setOpenSection(isOpen ? null : id)}
@@ -875,24 +880,21 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         >
           <span style={{
             fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-            fontWeight: 800, fontSize: 20, lineHeight: 1.15, letterSpacing: -0.4,
+            fontWeight: 800,
+            // Section header: one step down from the 24px sheet title.
+            fontSize: 17, lineHeight: 1.2, letterSpacing: -0.3,
             color: "#0F1214",
           }}>{label}</span>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-            {chip && !isOpen && (
-              <span style={{
-                height: 22, padding: "0 10px", borderRadius: 6,
-                background: "#F4F5F6", color: "#0F1214",
-                fontSize: 11.5, fontWeight: 600,
-                display: "inline-flex", alignItems: "center",
-                maxWidth: 200,
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              }}>{chip}</span>
-            )}
-            {window.Icon && (
-              <window.Icon name={isOpen ? "ChevronUp" : "ChevronDown"} size={18} strokeWidth={2} color="#4B5052" />
-            )}
-          </span>
+          {chip && !isOpen && (
+            <span style={{
+              height: 22, padding: "0 10px", borderRadius: 6,
+              background: "#F4F5F6", color: "#0F1214",
+              fontSize: 11.5, fontWeight: 600,
+              display: "inline-flex", alignItems: "center",
+              maxWidth: 200,
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>{chip}</span>
+          )}
         </button>
         {isOpen && (
           <div style={{ paddingBottom: 16 }}>
@@ -903,36 +905,57 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
     );
   };
 
-  // ---- Borderless list row -----------------------------------------------
-  // Used by all section bodies. Stacked, no border, tight padding so the
-  // list reads as a vertical list of selectable items. `kind` controls
-  // the leading affordance:
-  //   "icon"   — leading 18px icon (WHERE rows)
-  //   "select" — radio-style row, trailing check on the active row only
-  //              (WHAT, WHEN day, WHEN time)
-  const Row = ({ active, icon, label, sub, onClick, kind = "icon", trailing }) => (
+  // ---- List row ----------------------------------------------------------
+  // Every body row carries a radio indicator on the left so the list
+  // reads as a single-select group at a glance. The selected row also
+  // gets a subtle grey fill so the picked state is visible without
+  // relying solely on the dot. WHERE rows still use a leading list-icon
+  // (MapPin / Building2 / Hash) — the radio sits BEFORE that icon.
+  const Row = ({ active, icon, label, sub, onClick, accent = "#0F1214" }) => (
     <button
       type="button"
       onClick={onClick}
       style={{
         display: "flex", alignItems: "center", gap: 12,
         width: "100%",
-        padding: "12px 0",
-        border: 0, background: "transparent",
+        padding: "10px 12px",
+        margin: "0 -12px",
+        border: 0,
+        // Picked rows get a subtle grey fill so the selection reads even
+        // without looking at the radio glyph.
+        background: active ? "#F4F5F6" : "transparent",
+        borderRadius: 10,
         color: "#0F1214",
         fontFamily: "inherit", textAlign: "left", cursor: "pointer",
+        transition: "background 120ms ease",
       }}
     >
-      {kind === "icon" && icon && window.Icon && (
-        <span style={{ display: "inline-flex", flexShrink: 0, color: "#4B5052" }}>
-          <window.Icon name={icon} size={18} strokeWidth={2} color="#4B5052" />
+      {/* Radio indicator — outline ring with a filled dot when active.
+          `accent` lets WHERE's "Show more" row swap in blue. */}
+      <span style={{
+        width: 18, height: 18, borderRadius: 999,
+        border: `2px solid ${active ? accent : "#C8CDCD"}`,
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        flexShrink: 0,
+        transition: "border-color 120ms ease",
+      }}>
+        {active && (
+          <span style={{
+            width: 8, height: 8, borderRadius: 999,
+            background: accent,
+          }} />
+        )}
+      </span>
+      {icon && window.Icon && (
+        <span style={{ display: "inline-flex", flexShrink: 0 }}>
+          <window.Icon name={icon} size={18} strokeWidth={2} color={accent === "#1F4ED8" ? accent : "#4B5052"} />
         </span>
       )}
       <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
         <span style={{
           fontSize: 15,
-          fontWeight: active ? 700 : 500,
-          color: "#0F1214",
+          fontWeight: active ? 600 : 500,
+          color: accent === "#1F4ED8" ? accent : "#0F1214",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           lineHeight: 1.3,
         }}>{label}</span>
@@ -943,12 +966,6 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           }}>{sub}</span>
         )}
       </span>
-      {kind === "select" && active && window.Icon && (
-        <span style={{ display: "inline-flex", flexShrink: 0 }}>
-          <window.Icon name="Check" size={18} strokeWidth={2.4} color="#0F1214" />
-        </span>
-      )}
-      {trailing}
     </button>
   );
 
@@ -1028,9 +1045,13 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px 0" }}>
           <div style={{ width: 40, height: 4, borderRadius: 999, background: "#E9EBEC" }} />
         </div>
-        {/* Header row — h2-style "Search for anything" (left), ghost X (right).
-            Matches the page section headers ("Popular clubs near you") so the
-            sheet's title reads as a real heading, not a microlabel. */}
+        {/* Header row — sheet title (largest in the hierarchy) + ghost X.
+            Hierarchy now reads:
+              Title (24/800)  ──  largest
+              Section (17/800) ──  step down
+              Subsection (11.5/800 uppercase) ── eyebrow
+            so the user's eye lands on the title first, then the section
+            currently in focus. */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "8px 16px 12px 16px",
@@ -1038,7 +1059,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           <h2 style={{
             margin: 0,
             fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-            fontWeight: 800, fontSize: 20, lineHeight: 1.15, letterSpacing: -0.4,
+            fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
             color: "#0F1214",
           }}>Search for anything</h2>
           <button
@@ -1138,19 +1159,38 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                 ))
               )}
               {hiddenCount > 0 && (
+                // "Show more" — matches the Row layout exactly so it
+                // aligns with the list items above. Plus icon sits where
+                // the radio would sit (18px round, same -12px hit area),
+                // label uses the blue accent.
                 <button
                   type="button"
                   onClick={() => setShowAllWhere(true)}
                   style={{
-                    width: "100%", padding: "12px 0",
+                    display: "flex", alignItems: "center", gap: 12,
+                    width: "100%",
+                    padding: "10px 12px",
+                    margin: "0 -12px",
                     border: 0, background: "transparent",
-                    fontFamily: "inherit", fontSize: 14, fontWeight: 600,
-                    color: "#1F4ED8", textAlign: "left", cursor: "pointer",
-                    display: "inline-flex", alignItems: "center", gap: 8,
+                    borderRadius: 10,
+                    fontFamily: "inherit", textAlign: "left", cursor: "pointer",
                   }}
                 >
-                  {window.Icon && <window.Icon name="Plus" size={14} strokeWidth={2.4} color="#1F4ED8" />}
-                  Show more within 5 mi ({hiddenCount})
+                  <span style={{
+                    width: 18, height: 18, borderRadius: 999,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                  }}>
+                    {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#1F4ED8" />}
+                  </span>
+                  <span style={{
+                    flex: 1, minWidth: 0,
+                    fontSize: 15, fontWeight: 600, color: "#1F4ED8",
+                    lineHeight: 1.3,
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  }}>
+                    Show more within 5 mi ({hiddenCount})
+                  </span>
                 </button>
               )}
             </div>
@@ -1162,7 +1202,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               {SB_SPORTS.map((s) => (
                 <Row
                   key={s.id}
-                  kind="select"
+
                   active={activity === s.id}
                   label={s.id}
                   onClick={() => {
@@ -1175,111 +1215,62 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             </div>
           </SectionAccordion>
 
-          {/* ---- WHEN — two nested radio subsections --------------------- */}
-          {/* Day range and Time of day. Each is its own mini-accordion;
-              picking from Day range collapses it and auto-opens Time of
-              day. Picking from Time of day collapses both and advances
-              the outer accordion to WHO. */}
+          {/* ---- WHEN — two radio subsections, always visible ----------- */}
+          {/* Subsection labels are now eyebrows (small uppercase + 1px
+              underline). Both lists are rendered at once so the user can
+              jump between Day range and Time of day without an extra tap.
+              Defaults are seeded to "Any day" / "Any time" on open. */}
           <SectionAccordion id="when" label="When" chip={whenChip}>
-            {/* ---- Day range subsection ---- */}
-            <div style={{ borderTop: "1px solid #F4F5F6" }}>
-              <button
-                type="button"
-                onClick={() => setOpenWhenSub(openWhenSub === "day" ? null : "day")}
-                aria-expanded={openWhenSub === "day"}
-                style={{
-                  width: "100%",
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "12px 0",
-                  border: 0, background: "transparent",
-                  fontFamily: "inherit", textAlign: "left", cursor: "pointer",
-                }}
-              >
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#0F1214" }}>Day range</span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-                  {whenDay && openWhenSub !== "day" && (
-                    <span style={{
-                      height: 22, padding: "0 10px", borderRadius: 6,
-                      background: "#F4F5F6", color: "#0F1214",
-                      fontSize: 11.5, fontWeight: 600,
-                      display: "inline-flex", alignItems: "center",
-                    }}>{whenDay}</span>
-                  )}
-                  {window.Icon && (
-                    <window.Icon name={openWhenSub === "day" ? "ChevronUp" : "ChevronDown"} size={16} strokeWidth={2} color="#4B5052" />
-                  )}
-                </span>
-              </button>
-              {openWhenSub === "day" && (
-                <div style={{ paddingBottom: 8 }}>
-                  {SB_WHEN_OPTIONS.map((w) => (
-                    <Row
-                      key={w.id}
-                      kind="select"
-                      active={whenDay === w.id}
-                      label={w.label}
-                      onClick={() => {
-                        setWhenDay(w.id);
-                        // Advance to Time of day. If time is already set
-                        // skip to the outer WHO section instead.
-                        if (whenTime) setOpenSection("who");
-                        else setOpenWhenSub("time");
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
+            {/* ---- Day range eyebrow ---- */}
+            <div style={{
+              padding: "12px 0 6px 0",
+              borderBottom: "1px solid #E9EBEC",
+              fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+              fontSize: 10.5, fontWeight: 800,
+              letterSpacing: 1.2, textTransform: "uppercase",
+              color: "#858F8F", lineHeight: 1,
+            }}>Day range</div>
+            <div style={{ paddingTop: 4, paddingBottom: 8 }}>
+              {SB_WHEN_OPTIONS.map((w) => (
+                <Row
+                  key={w.id}
+                  active={whenDay === w.id}
+                  label={w.label}
+                  onClick={() => {
+                    setWhenDay(w.id);
+                    // Time of day already defaults to "Any time", so
+                    // picking a day satisfies both WHEN sub-facets and
+                    // advances to WHO. User can re-open WHEN to refine.
+                    setOpenSection("who");
+                  }}
+                />
+              ))}
             </div>
 
-            {/* ---- Time of day subsection ---- */}
-            <div style={{ borderTop: "1px solid #F4F5F6" }}>
-              <button
-                type="button"
-                onClick={() => setOpenWhenSub(openWhenSub === "time" ? null : "time")}
-                aria-expanded={openWhenSub === "time"}
-                style={{
-                  width: "100%",
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "12px 0",
-                  border: 0, background: "transparent",
-                  fontFamily: "inherit", textAlign: "left", cursor: "pointer",
-                }}
-              >
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#0F1214" }}>Time of day</span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-                  {whenTime && openWhenSub !== "time" && (
-                    <span style={{
-                      height: 22, padding: "0 10px", borderRadius: 6,
-                      background: "#F4F5F6", color: "#0F1214",
-                      fontSize: 11.5, fontWeight: 600,
-                      display: "inline-flex", alignItems: "center",
-                    }}>{whenTime}</span>
-                  )}
-                  {window.Icon && (
-                    <window.Icon name={openWhenSub === "time" ? "ChevronUp" : "ChevronDown"} size={16} strokeWidth={2} color="#4B5052" />
-                  )}
-                </span>
-              </button>
-              {openWhenSub === "time" && (
-                <div style={{ paddingBottom: 8 }}>
-                  {SB_WHEN_TIME_BUCKETS.map((tb) => (
-                    <Row
-                      key={tb.id}
-                      kind="select"
-                      active={whenTime === tb.id}
-                      label={tb.id}
-                      sub={tb.sub}
-                      onClick={() => {
-                        setWhenTime(tb.id);
-                        // Time picked — close WHEN entirely and advance
-                        // to WHO. The chip on the closed WHEN accordion
-                        // shows "Day · Time" combined.
-                        setOpenSection("who");
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
+            {/* ---- Time of day eyebrow ---- */}
+            <div style={{
+              padding: "12px 0 6px 0",
+              borderBottom: "1px solid #E9EBEC",
+              fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+              fontSize: 10.5, fontWeight: 800,
+              letterSpacing: 1.2, textTransform: "uppercase",
+              color: "#858F8F", lineHeight: 1,
+            }}>Time of day</div>
+            <div style={{ paddingTop: 4 }}>
+              {SB_WHEN_TIME_BUCKETS.map((tb) => (
+                <Row
+                  key={tb.id}
+                  active={whenTime === tb.id}
+                  label={tb.id}
+                  sub={tb.sub}
+                  onClick={() => {
+                    setWhenTime(tb.id);
+                    // Picking from Time of day advances to WHO since both
+                    // sub-facets have a committed value at that point.
+                    setOpenSection("who");
+                  }}
+                />
+              ))}
             </div>
           </SectionAccordion>
 
