@@ -2256,7 +2256,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                   <Icon name="MapPin" size={13} strokeWidth={2.2} color="#4B5052" />
                 </span>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13, color: "#0F1214", fontWeight: 600, lineHeight: 1.3 }}>
+                  <div style={{ fontSize: 13, color: "#0F1214", fontWeight: 500, lineHeight: 1.3 }}>
                     {ev.club}
                   </div>
                   <div style={{ marginTop: 2, fontSize: 12.5, color: "#4B5052", lineHeight: 1.3 }}>
@@ -2456,16 +2456,24 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
           </div>
         </div>
       ))}
-      {/* Show more — neutral pill at the end of the section. Could load a
-          next page of events; for the prototype it's a static affordance. */}
-      <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
+      {/* Show more — full-width bar on mobile (extends to the content
+          column edges), content-hugged pill on desktop. Same hover treatment. */}
+      <div style={{
+        marginTop: 8,
+        display: "flex",
+        justifyContent: isMobile ? "stretch" : "center",
+      }}>
         <button style={{
           height: 40, padding: "0 18px", borderRadius: 8,
           border: "1px solid #E9EBEC", background: "#fff",
-          display: "inline-flex", alignItems: "center", gap: 8,
+          display: "inline-flex", alignItems: "center",
+          justifyContent: "center", gap: 8,
           fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: "#0F1214",
           cursor: "pointer",
           transition: "background 120ms",
+          // Mobile: bar stretches to the row width so it reads as the
+          // section terminator. Desktop keeps its content-hugged pill.
+          width: isMobile ? "100%" : "auto",
         }}
         onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
         onMouseLeave={(e) => { e.currentTarget.style.background = "#fff"; }}>
