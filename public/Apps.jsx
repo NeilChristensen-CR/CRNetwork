@@ -1909,30 +1909,39 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
 
   // Sliding pill geometry — measured from the DOM after layout so the
   // moving capsule lands exactly under the active item, regardless of
-  // label length. Re-measures on hover changes and on resize.
+  // label length. Re-measures on hover changes, on resize, and via a
+  // ResizeObserver so late layout shifts (font loading, etc.) don't
+  // leave the pill misaligned.
   const trackRef = React.useRef(null);
   const itemRefs = React.useRef([]);
   const [pillRect, setPillRect] = React.useState({ left: 0, width: 0 });
-  React.useLayoutEffect(() => {
+  const measure = React.useCallback(() => {
     const el = itemRefs.current[activeIdx];
-    const trackEl = trackRef.current;
-    if (!el || !trackEl) return;
-    const eRect = el.getBoundingClientRect();
-    const tRect = trackEl.getBoundingClientRect();
-    setPillRect({ left: eRect.left - tRect.left, width: eRect.width });
-  }, [activeIdx, items.length, isMobile]);
-  React.useEffect(() => {
-    const onResize = () => {
-      const el = itemRefs.current[activeIdx];
-      const trackEl = trackRef.current;
-      if (!el || !trackEl) return;
-      const eRect = el.getBoundingClientRect();
-      const tRect = trackEl.getBoundingClientRect();
-      setPillRect({ left: eRect.left - tRect.left, width: eRect.width });
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    if (!el) return;
+    // offsetLeft/offsetWidth return integer pixels relative to the
+    // offsetParent (the position: relative track), which matches the
+    // pill's left: 0 anchor exactly — no sub-pixel drift like
+    // getBoundingClientRect produces.
+    setPillRect({ left: el.offsetLeft, width: el.offsetWidth });
   }, [activeIdx]);
+  React.useLayoutEffect(() => {
+    measure();
+    // Re-measure on the next animation frame so any post-mount layout
+    // shifts (icon glyph loading, font swap) get picked up.
+    const raf = requestAnimationFrame(measure);
+    return () => cancelAnimationFrame(raf);
+  }, [measure, items.length, isMobile]);
+  React.useEffect(() => {
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    itemRefs.current.forEach((el) => el && ro.observe(el));
+    trackRef.current && ro.observe(trackRef.current);
+    return () => ro.disconnect();
+  }, [measure, items.length]);
+  React.useEffect(() => {
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [measure]);
 
   return (
     // Sticky positioning differs per viewport:
