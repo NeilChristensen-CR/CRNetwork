@@ -2048,19 +2048,17 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
 }
 
 // ---- supplyState ---------------------------------------------------------
-// Decides how to render an event's "spots remaining" tag. When the supply
-// is healthy (>30% of seats still open) the tag drops the urgent red and
-// just shows a neutral count — "4 of 16 open spots". When supply tightens
-// it flips back to the loud red "X Spots Left" pill so the urgency reads.
-// Falls back to urgent when totalSpots is missing.
+// Decides how to render an event's "spots remaining" tag. Text is always
+// "X of Y spots" so the count reads the same across the page; the URGENCY
+// is communicated by the pill color — red when ≤30% of seats remain,
+// neutral grey otherwise. Falls back to urgent when totalSpots is missing
+// (so legacy data without a denominator still pops as scarce).
 function supplyState({ spotsLeft, totalSpots }) {
   if (typeof totalSpots !== "number" || totalSpots <= 0) {
-    return { urgent: true, text: `${spotsLeft} Spots Left` };
+    return { urgent: true, text: `${spotsLeft} spots` };
   }
   const urgent = spotsLeft / totalSpots <= 0.3;
-  return urgent
-    ? { urgent: true, text: `${spotsLeft} Spots Left` }
-    : { urgent: false, text: `${spotsLeft} of ${totalSpots} open spots` };
+  return { urgent, text: `${spotsLeft} of ${totalSpots} spots` };
 }
 
 // ---- Verified popular clubs near you — horizontal carousel of map-image
