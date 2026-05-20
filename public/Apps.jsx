@@ -333,7 +333,7 @@ function ClubSwitcher({ theme, app, setApp, onFindClubs }) {
         boxShadow: "0 18px 50px rgba(15,18,20,.16), 0 2px 8px rgba(15,18,20,.06)",
         padding: 6
       }}>
-          <div style={{ padding: "8px 12px 6px", fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>Switch view</div>
+          <div style={{ padding: "8px 12px 6px", fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>Switch view</div>
           {options.map((o) => {
           const on = app === o.id;
           return (
@@ -355,7 +355,7 @@ function ClubSwitcher({ theme, app, setApp, onFindClubs }) {
               }}>{o.id === "cr" ? <CRVerifiedMark size={26} /> : o.logoMark}</span>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "#0F1214", letterSpacing: -0.1 }}>{o.name}</div>
-                  <div style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, marginTop: 1 }}>{o.sub}</div>
+                  <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 1 }}>{o.sub}</div>
                 </div>
                 {on && <Icon name="Check" size={14} strokeWidth={2.5} color="#0F1214" />}
               </button>);
@@ -2103,8 +2103,8 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#0F1214" }}>
                 <Stars rating={c.rating} />
                 <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{c.rating}</span>
-                <span style={{ color: "#858F8F" }}>({c.reviews})</span>
-                <span style={{ color: "#858F8F" }}>•</span>
+                <span style={{ color: "#4B5052" }}>({c.reviews})</span>
+                <span style={{ color: "#4B5052" }}>•</span>
                 <span style={{ fontWeight: 700, color: "#0F1214" }}>{c.price}</span>
               </div>
               {/* Sport tag row — multiple tags can render but the row is
@@ -2306,7 +2306,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             }}>
               <div>
                 <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214" }}>{ev.price}</div>
-                <div style={{ marginTop: 2, fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: "#858F8F" }}>
+                <div style={{ marginTop: 2, fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: "#4B5052" }}>
                   {ev.taken} of {ev.totalSpots} spots remaining
                 </div>
               </div>
@@ -2492,7 +2492,7 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
 function FilterSelect({ label, value, onChange, options }) {
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#858F8F" }}>{label}</span>
+      <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#4B5052" }}>{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -2726,7 +2726,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
         <div style={{ marginBottom: isMobile ? 20 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
           <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 32 : 64, lineHeight: isMobile ? "38px" : "76px", letterSpacing: isMobile ? -0.6 : -1.8, color: theme.t.text, margin: 0 }}>
             {isCR ?
-            <>Welcome to Court Reserve<br /><span style={{ color: "#858F8F" }}>Let's Play.</span></> :
+            <>Welcome to Court Reserve<br /><span style={{ color: "#4B5052" }}>Let's Play.</span></> :
             <>Hi {PLAYER.name}.<br /><span style={{ color: theme.t.textSubtle }}>Welcome back to {theme.logoText}!</span></>}
           </h1>
           <div style={{ paddingBottom: 8, display: "inline-flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
@@ -3337,7 +3337,7 @@ function PlayerNetwork({ theme }) {
           <div style={{ minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
               <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>{p.name}</span>
-              <span style={{ fontSize: 12, color: "#858F8F", fontWeight: 500 }}>{p.dupr.toFixed(1)} DUPR · {p.reason}</span>
+              <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 500 }}>{p.dupr.toFixed(1)} DUPR · {p.reason}</span>
             </div>
             <div style={{ marginTop: 4, fontSize: 12, color: "#4B5052", fontWeight: 500, lineHeight: 1.45 }}>{p.proof}</div>
           </div>
@@ -3911,7 +3911,7 @@ function FriendActivity({ theme }) {
               <span style={{ color: "#4B5052" }}>{a.verb}</span>{" "}
               <b style={{ fontFamily: theme.display, fontWeight: 700 }}>{a.what}</b>
             </div>
-            <div style={{ marginTop: 2, fontSize: 12, color: "#858F8F", fontWeight: 500 }}>{a.where} · {a.when}</div>
+            <div style={{ marginTop: 2, fontSize: 12, color: "#4B5052", fontWeight: 500 }}>{a.where} · {a.when}</div>
           </div>
           <button style={{ height: 34, padding: "0 14px", borderRadius: 8, border: 0, background: a.live ? theme.primary : "transparent", color: a.live ? "#fff" : theme.primary, fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer", flexShrink: 0 }}>{a.action}</button>
         </div>
@@ -4709,7 +4709,7 @@ function DrillsRecs({ theme }) {
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "#0F1214", letterSpacing: -0.1 }}>{d.title}</div>
             <div style={{ marginTop: 4, fontSize: 12, color: "#4B5052", fontWeight: 500, lineHeight: 1.45 }}>{d.why}</div>
-            <div style={{ marginTop: 4, fontSize: 11, color: "#858F8F", fontWeight: 500 }}>{d.duration} · {d.coach}</div>
+            <div style={{ marginTop: 4, fontSize: 11, color: "#4B5052", fontWeight: 500 }}>{d.duration} · {d.coach}</div>
           </div>
           <button style={{ height: 34, padding: "0 14px", borderRadius: 8, border: 0, background: "transparent", color: theme.primary, fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Try ›</button>
         </div>
@@ -4723,7 +4723,7 @@ function TournamentTeaser({ theme }) {
     <div style={{ padding: "18px 0", display: "flex", flexDirection: "column", gap: 14 }}>
       <div>
         <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>Spring Doubles Bracket</div>
-        <div style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, marginTop: 2 }}>Apr 6 · Old Coast · 32 teams</div>
+        <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 2 }}>Apr 6 · Old Coast · 32 teams</div>
       </div>
       <div style={{ fontSize: 13, color: "#0F1214", fontWeight: 500, lineHeight: 1.5 }}>
         <b style={{ color: theme.primary }}>You &amp; Reese</b> would seed at <b>#5 of 32</b>. Combined DUPR 8.3 — sweet spot for this bracket.

@@ -164,7 +164,7 @@ function SBRow({ icon, label, sub, selected, onClick }) {
           {label}
         </span>
         {sub && (
-          <span style={{ fontSize: 11, color: "#858F8F", lineHeight: 1.2 }}>{sub}</span>
+          <span style={{ fontSize: 11, color: "#4B5052", lineHeight: 1.2 }}>{sub}</span>
         )}
       </span>
       {selected && (
@@ -187,7 +187,7 @@ function SBStepper({ value, min = 1, max = 8, onChange, label }) {
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: "#0F1214" }}>{label}</span>
-        <span style={{ fontSize: 11, color: "#858F8F" }}>Including you</span>
+        <span style={{ fontSize: 11, color: "#4B5052" }}>Including you</span>
       </div>
       <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
         <button
@@ -494,7 +494,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     if (active === "where") {
       return (
         <SBPopover anchorRef={anchorRef}>
-          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>
+          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
             Search by location
           </div>
           {SB_LOCATIONS.map((loc) => (
@@ -527,7 +527,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     if (active === "when") {
       return (
         <SBPopover anchorRef={anchorRef}>
-          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>
+          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
             When
           </div>
           {SB_WHEN_OPTIONS.map((opt) => (
@@ -540,7 +540,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
             />
           ))}
           <div style={{ height: 1, background: "#F0F0F0", margin: "6px 4px" }} />
-          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>
+          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
             Time of day
           </div>
           {SB_WHEN_TIME_BUCKETS.map((b) => (
@@ -646,7 +646,7 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand }) {
         <div style={{ fontFamily: "Axiforma, Inter", fontWeight: 800, fontSize: 13, color: "#0F1214", letterSpacing: -0.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
           {v.where}
         </div>
-        <div style={{ fontSize: 11, fontWeight: 500, color: "#858F8F", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
+        <div style={{ fontSize: 11, fontWeight: 500, color: "#4B5052", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
           {v.activity} · {v.when} · {v.who}
         </div>
       </div>

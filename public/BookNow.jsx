@@ -436,8 +436,8 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
         <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#0F1214" }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>{stars}</span>
           <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{v.rating.toFixed(1)}</span>
-          <span style={{ color: "#858F8F" }}>({v.reviews})</span>
-          <span style={{ color: "#858F8F" }}>•</span>
+          <span style={{ color: "#4B5052" }}>({v.reviews})</span>
+          <span style={{ color: "#4B5052" }}>•</span>
           <span style={{ fontWeight: 700, color: "#0F1214" }}>{v.price}</span>
         </div>
 
