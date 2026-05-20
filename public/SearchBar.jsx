@@ -642,12 +642,22 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand }) {
         fontFamily: "Inter, system-ui, sans-serif",
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2, overflow: "hidden", flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: "Axiforma, Inter", fontWeight: 800, fontSize: 13, color: "#0F1214", letterSpacing: -0.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
-          {v.where}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 3, overflow: "hidden", flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 6, overflow: "hidden", maxWidth: "100%" }}>
+          <span style={{ fontSize: 9, fontWeight: 700, color: "#858F8F", letterSpacing: 0.6, textTransform: "uppercase", flexShrink: 0 }}>Where</span>
+          <span style={{ fontFamily: "Axiforma, Inter", fontWeight: 800, fontSize: 13, color: "#0F1214", letterSpacing: -0.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {v.where}
+          </span>
         </div>
         <div style={{ fontSize: 11, fontWeight: 500, color: "#4B5052", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
-          {v.activity} · {v.when} · {v.who}
+          <span style={{ fontSize: 9, fontWeight: 700, color: "#858F8F", letterSpacing: 0.6, textTransform: "uppercase" }}>Activity</span>
+          <span> {v.activity}</span>
+          <span style={{ color: "#C8CDCD" }}>  ·  </span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: "#858F8F", letterSpacing: 0.6, textTransform: "uppercase" }}>When</span>
+          <span> {v.when}</span>
+          <span style={{ color: "#C8CDCD" }}>  ·  </span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: "#858F8F", letterSpacing: 0.6, textTransform: "uppercase" }}>Who</span>
+          <span> {v.who}</span>
         </div>
       </div>
       <span style={{
