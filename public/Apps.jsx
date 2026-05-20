@@ -379,6 +379,16 @@ function ChromeBar({ theme, viewport, app, setApp, onOpenQR, onFindClubs, onOpen
   const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
   const desktop = viewport === "desktop";
   const [profileOpen, setProfileOpen] = useStateAP(false);
+  // ----- Logged-out branch -----
+  // When the player is browsing the universal CourtReserve surface (app === "cr"),
+  // the chrome adopts the "find anything" hero shape: brandmark + center nav +
+  // Sign Up / Sign In on the right. No SearchBar in chrome on this branch —
+  // the SearchBar moves into the page hero on the logged-out home, matching
+  // the north-star design.
+  const loggedOut = app === "cr";
+  if (loggedOut && window.ChromeBarLoggedOut) {
+    return <window.ChromeBarLoggedOut theme={theme} viewport={viewport} active={active} onNav={onNav} />;
+  }
   return (
     <div style={{
       background: t.surface, borderBottom: `1px solid ${t.line}`,
@@ -463,6 +473,24 @@ function ChromeBar({ theme, viewport, app, setApp, onOpenQR, onFindClubs, onOpen
           }
         </div>
       </div>
+      {/* Second row — global Airbnb-style search pill (WHERE / ACTIVITY /
+          WHEN / WHO). Lives inside the sticky chrome so it follows the
+          user across every route. Desktop renders the full 4-segment pill;
+          mobile uses the compact single-line variant which expands into
+          the full bar on tap. */}
+      {window.SearchBar && (
+        <div style={{
+          maxWidth: desktop ? 1280 : "100%",
+          margin: "0 auto",
+          padding: desktop ? "0 24px 16px" : "0 12px 12px",
+        }}>
+          {desktop
+            ? <window.SearchBar theme={theme} viewport="desktop" />
+            : window.SearchBarCompact
+              ? <window.SearchBarCompact theme={theme} viewport="mobile" />
+              : <window.SearchBar theme={theme} viewport="mobile" />}
+        </div>
+      )}
     </div>);
 
 }
@@ -1846,16 +1874,30 @@ function Dashboard({ theme, viewport, onOpenEventList, onOpenClub, onFindClubs, 
 function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, isCR }) {
   const items = isCR ?
   [
-  { icon: "Calendar", label: "Book a court", onClick: onOpenEventList, primary: true },
-  { icon: "Trophy", label: "Find an event", onClick: onOpenEventList },
-  { icon: "MapPin", label: "Find clubs", onClick: onFindClubs },
-  { icon: "GraduationCap", label: "Book a pro", onClick: null }] :
+  { icon: "Calendar", label: "Book a Court", onClick: onOpenEventList, primary: true },
+  { icon: "Lightbulb", label: "Find an Event", onClick: onOpenEventList },
+  { icon: "MapPin", label: "Find a Club", onClick: onFindClubs },
+  { icon: "User", label: "Book a Pro", onClick: null }] :
 
   [
-  { icon: "Calendar", label: "Book a court", onClick: onOpenEventList, primary: true },
-  { icon: "Trophy", label: "Find an event", onClick: onOpenEventList },
-  { icon: "Users", label: "Open play", onClick: null },
-  { icon: "GraduationCap", label: "Book a pro", onClick: null }];
+  { icon: "Calendar", label: "Book a Court", onClick: onOpenEventList, primary: true },
+  { icon: "Lightbulb", label: "Find an Event", onClick: onOpenEventList },
+  { icon: "Users", label: "Open Play", onClick: null },
+  { icon: "User", label: "Book a Pro", onClick: null }];
+
+  // On the logged-out CourtReserve home the floater is persistent — it acts
+  // as the primary action selector pinned to the bottom of the viewport
+  // throughout the page. On branded / logged-in surfaces it keeps its
+  // original scroll-revealed behavior.
+  const persistent = isCR;
+  const shown = persistent || visible;
+  // Hover-driven selection — when nothing is hovered the white "active"
+  // pill stays on whichever item is marked primary. As the cursor moves
+  // across items the pill snaps to the hovered one and that item's text /
+  // icon invert to black so they read against the new white background.
+  const [hovered, setHovered] = React.useState(null);
+  const primaryIdx = items.findIndex((it) => it.primary);
+  const activeIdx = hovered != null ? hovered : (primaryIdx === -1 ? 0 : primaryIdx);
 
   return (
     <div style={{
@@ -1866,11 +1908,13 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
       // of the preceding section instead of pushing the page taller.
       padding: "0 24px",
       marginTop: -88,
-      transform: visible ? "translateY(0)" : "translateY(28px)",
-      opacity: visible ? 1 : 0,
+      transform: shown ? "translateY(0)" : "translateY(28px)",
+      opacity: shown ? 1 : 0,
       transition: "transform 320ms cubic-bezier(.2,.8,.2,1), opacity 240ms ease"
     }}>
-      <div style={{
+      <div
+        onMouseLeave={() => setHovered(null)}
+        style={{
         pointerEvents: "auto",
         display: "inline-flex", alignItems: "center", gap: 6,
         background: theme.dark ? "rgba(20,23,27,.92)" : "rgba(15,18,20,.96)",
@@ -1879,22 +1923,28 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
         padding: 6, borderRadius: 999,
         boxShadow: "0 14px 40px rgba(15,18,20,.28), 0 2px 8px rgba(15,18,20,.18)"
       }}>
-        {items.map((it) =>
-        <button key={it.label} onClick={it.onClick || undefined} style={{
-          height: 44, padding: "0 18px", borderRadius: 999, border: 0,
-          background: it.primary ? "#fff" : "transparent",
-          color: it.primary ? "#0F1214" : "#fff",
-          fontFamily: "inherit", fontWeight: 700, fontSize: 13, cursor: it.onClick ? "pointer" : "default",
-          display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
-          whiteSpace: "nowrap",
-          transition: "background 160ms"
-        }}
-        onMouseEnter={(e) => {if (!it.primary) e.currentTarget.style.background = "rgba(255,255,255,.08)";}}
-        onMouseLeave={(e) => {if (!it.primary) e.currentTarget.style.background = "transparent";}}>
-            <Icon name={it.icon} size={14} color={it.primary ? "#0F1214" : "#fff"} strokeWidth={2.2} />
-            {it.label}
-          </button>
-        )}
+        {items.map((it, idx) => {
+          const isActive = idx === activeIdx;
+          return (
+            <button
+              key={it.label}
+              onClick={it.onClick || undefined}
+              onMouseEnter={() => setHovered(idx)}
+              style={{
+                height: 44, padding: "0 18px", borderRadius: 999, border: 0,
+                background: isActive ? "#fff" : "transparent",
+                color: isActive ? "#0F1214" : "#fff",
+                fontFamily: "inherit", fontWeight: 700, fontSize: 13, cursor: it.onClick ? "pointer" : "default",
+                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+                whiteSpace: "nowrap",
+                transition: "background 140ms ease, color 140ms ease",
+              }}
+            >
+              <Icon name={it.icon} size={14} color={isActive ? "#0F1214" : "#fff"} strokeWidth={2.2} />
+              {it.label}
+            </button>
+          );
+        })}
       </div>
     </div>);
 
@@ -1905,62 +1955,81 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
 // rating + price, sport tag, and a See Events & Info link.
 function VerifiedPopularClubs({ theme, onOpenClub }) {
   const trackRef = React.useRef(null);
+  // Varied club data per card so the carousel reads as a real list rather
+  // than a repeated placeholder. Each club carries multiple sport tags so
+  // the multi-sport venues read accurately.
   const clubs = [
-    { id: "old-coast-1", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" },
-    { id: "old-coast-2", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" },
-    { id: "old-coast-3", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" },
-    { id: "old-coast-4", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" },
-    { id: "old-coast-5", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" },
-    { id: "old-coast-6", name: "Old Coast Pickelball", rating: 4.8, reviews: 256, price: "$$$", sport: "Pickleball", distance: "2.1mi" }
+    { id: "old-coast",      name: "Old Coast Pickelball",      rating: 4.8, reviews: 256, price: "$$$", sports: ["Pickleball", "Tennis"],            distance: "2.1mi" },
+    { id: "anastasia",      name: "Anastasia Tennis Club",     rating: 4.6, reviews: 132, price: "$$",  sports: ["Tennis"],                          distance: "2.4mi" },
+    { id: "vilano-beach",   name: "Vilano Beach Racquet",      rating: 4.5, reviews: 96,  price: "$$$", sports: ["Tennis", "Pickleball", "Padel"],   distance: "2.6mi" },
+    { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", rating: 4.7, reviews: 312, price: "$$$", sports: ["Pickleball"],                      distance: "8.4mi" },
+    { id: "treaty-park",    name: "Treaty Park Tennis",        rating: 4.3, reviews: 41,  price: "$",   sports: ["Tennis"],                          distance: "3.2mi" },
+    { id: "south-st-aug",   name: "South St. Augustine",       rating: 4.4, reviews: 87,  price: "$$",  sports: ["Tennis", "Pickleball"],            distance: "3.6mi" },
+    { id: "the-hub-padel",  name: "The Hub Padel",             rating: 4.7, reviews: 134, price: "$$$", sports: ["Padel"],                           distance: "5.1mi" },
+    { id: "world-golf",     name: "World Golf Village Tennis", rating: 4.7, reviews: 287, price: "$$$", sports: ["Tennis", "Pickleball"],            distance: "6.8mi" },
   ];
   const scrollBy = (dx) => {
     const el = trackRef.current; if (!el) return;
     el.scrollBy({ left: dx, behavior: "smooth" });
   };
+  // Inline-SVG stars (Lucide can't render a fill via the Icon component, so
+  // we draw the star path ourselves). Matches the BookNowCard layout so the
+  // ratings read the same across Popular clubs and Available to play now.
   const Stars = ({ rating }) => {
     const full = Math.floor(rating);
+    const half = rating - full >= 0.4 && rating - full < 0.9;
     return (
       <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
-        {[0,1,2,3,4].map((i) => (
-          <Icon key={i} name="Star" size={13} strokeWidth={0}
-            color={i < full ? "#F59E0B" : "#E9EBEC"}
-            style={{ fill: i < full ? "#F59E0B" : "#E9EBEC" }} />
-        ))}
+        {[0, 1, 2, 3, 4].map((i) => {
+          let fill = "#E9EBEC";
+          if (i < full) fill = "#FFB400";
+          else if (i === full && half) fill = "#FFB400";
+          return (
+            <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill={fill} style={{ flexShrink: 0 }}>
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 6.91-1.01z" />
+            </svg>
+          );
+        })}
       </span>
     );
   };
   return (
     <div style={{ marginTop: 8 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
         <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
-          Verified popular clubs near you
+          Popular clubs near you
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
-            width: 36, height: 36, borderRadius: 8, border: "1px solid #E9EBEC",
-            background: "#fff", cursor: "pointer",
+            width: 36, height: 36, borderRadius: 8, border: 0,
+            background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
-            <Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />
+            <Icon name="ChevronLeft" size={18} strokeWidth={2} color="#0F1214" />
           </button>
           <button onClick={() => scrollBy(340)} aria-label="Next" style={{
-            width: 36, height: 36, borderRadius: 8, border: "1px solid #E9EBEC",
-            background: "#fff", cursor: "pointer",
+            width: 36, height: 36, borderRadius: 8, border: 0,
+            background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
-            <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
+            <Icon name="ChevronRight" size={18} strokeWidth={2} color="#0F1214" />
           </button>
         </div>
       </div>
+      {/* Carousel wrapper — `position: relative` so the right-edge gradient
+          fade can sit absolutely on top, and y-padding gives card hover
+          shadows room to render without getting clipped by the scroll
+          container's overflow box. */}
+      <div style={{ position: "relative", margin: "-16px -4px -16px" }}>
       <div ref={trackRef} style={{
         display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
-        paddingBottom: 4, scrollbarWidth: "none",
-        margin: "0 -4px", paddingLeft: 4, paddingRight: 4
+        paddingTop: 28, paddingBottom: 32, scrollbarWidth: "none",
+        paddingLeft: 4, paddingRight: 4
       }}>
         {clubs.map((c) => (
           <button key={c.id} onClick={() => onOpenClub && onOpenClub(c.id)} style={{
             flex: "0 0 280px", scrollSnapAlign: "start",
-            background: "#fff", border: "1px solid #E9EBEC", borderRadius: 12,
+            background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
             overflow: "hidden", textAlign: "left", padding: 0,
             cursor: "pointer", fontFamily: "inherit", color: "inherit",
             display: "flex", flexDirection: "column",
@@ -1983,38 +2052,73 @@ function VerifiedPopularClubs({ theme, onOpenClub }) {
                 boxShadow: "0 1px 2px rgba(15,18,20,0.08)"
               }}>{c.distance}</div>
             </div>
-            <div style={{ padding: "14px 16px 4px" }}>
+            {/* Card content — 12px padding all around, vertical stack
+                of title / rating / sport tag, all left-aligned. The
+                "See Events & Info" CTA is intentionally OUTSIDE this
+                container so it can sit on the card's blue footer. */}
+            <div style={{
+              padding: 12,
+              display: "flex", flexDirection: "column", alignItems: "flex-start",
+              gap: 8,
+            }}>
               <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3 }}>
                 {c.name}
               </div>
-              <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#0F1214" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#0F1214" }}>
                 <Stars rating={c.rating} />
-                <span style={{ fontWeight: 600 }}>{c.rating}</span>
+                <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{c.rating}</span>
                 <span style={{ color: "#858F8F" }}>({c.reviews})</span>
                 <span style={{ color: "#858F8F" }}>•</span>
                 <span style={{ fontWeight: 700, color: "#0F1214" }}>{c.price}</span>
               </div>
-              <div style={{ marginTop: 10 }}>
-                <span style={{
-                  display: "inline-flex", alignItems: "center",
-                  height: 24, padding: "0 10px", borderRadius: 6,
-                  background: "#F4F5F6", color: "#0F1214",
-                  fontSize: 11, fontWeight: 600
-                }}>{c.sport}</span>
+              {/* Sport tag row — multiple tags can render but the row is
+                  capped at one line via flex nowrap + overflow hidden, so
+                  cards with many sports clip rather than break the layout. */}
+              <div style={{
+                display: "flex",
+                gap: 6,
+                flexWrap: "nowrap",
+                overflow: "hidden",
+                width: "100%",
+              }}>
+                {c.sports.map((s) => (
+                  <span key={s} style={{
+                    display: "inline-flex", alignItems: "center",
+                    height: 24, padding: "0 10px", borderRadius: 6,
+                    background: "#F4F5F6", color: "#0F1214",
+                    fontSize: 11, fontWeight: 600,
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                  }}>{s}</span>
+                ))}
               </div>
             </div>
+            {/* Card footer — sits at the bottom edge of the card, full-width,
+                subtle grey background matching the SearchBar's selected-state
+                track so the design system reads consistently. */}
             <div style={{
-              margin: "12px 16px 14px", marginTop: "auto",
-              padding: "10px 12px", borderRadius: 8,
+              marginTop: "auto",
+              padding: "12px 16px",
+              borderTop: "1px solid #E9EBEC",
               background: "#F4F5F6",
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              fontSize: 12, fontWeight: 600, color: "#0F1214"
+              fontSize: 12, fontWeight: 600, color: "#0F1214",
             }}>
               See Events & Info
               <Icon name="ArrowRight" size={14} strokeWidth={2} color="#0F1214" />
             </div>
           </button>
         ))}
+      </div>
+      {/* Right-edge fade — 16px gradient hides the hard clip of the last
+          partially-visible card so it dissolves into the page background. */}
+      <div aria-hidden="true" style={{
+        position: "absolute",
+        top: 0, bottom: 0, right: 0,
+        width: 16,
+        background: `linear-gradient(to left, ${theme.t.bg} 0%, rgba(244,245,246,0) 100%)`,
+        pointerEvents: "none",
+      }} />
       </div>
     </div>
   );
@@ -2023,112 +2127,145 @@ function VerifiedPopularClubs({ theme, onOpenClub }) {
 // ---- Popular events near you — carousel of event cards. Each card:
 // club brand mark, spots-left badge, title, club row, distance, schedule,
 // tag pills, and price + spots-remaining footer.
-function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you" }) {
+function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false }) {
   const trackRef = React.useRef(null);
+  // Varied event data — distinct clubs, titles, dates, prices, and tags per
+  // card so the carousel reads as a real list rather than a repeated stub.
+  // Each event carries its own brandmark colors so the header logo varies
+  // per card.
   const events = [
-    { id: "e1", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball", distance: "2.1 miles away", city: "St. Augustine, FL", date: "Wed, 4/29", time: "6:00 PM - 7:00 PM", spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 Rating", "Men's Only", "Ages 12-15"] },
-    { id: "e2", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball", distance: "2.1 miles away", city: "St. Augustine, FL", date: "Wed, 4/29", time: "6:00 PM - 7:00 PM", spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 Rating", "Men's Only", "Ages 12-15"] },
-    { id: "e3", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball", distance: "2.1 miles away", city: "St. Augustine, FL", date: "Wed, 4/29", time: "6:00 PM - 7:00 PM", spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 Rating", "Men's Only", "Ages 12-15"] },
-    { id: "e4", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball", distance: "2.1 miles away", city: "St. Augustine, FL", date: "Wed, 4/29", time: "6:00 PM - 7:00 PM", spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 Rating", "Men's Only", "Ages 12-15"] },
-    { id: "e5", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball", distance: "2.1 miles away", city: "St. Augustine, FL", date: "Wed, 4/29", time: "6:00 PM - 7:00 PM", spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 Rating", "Men's Only", "Ages 12-15"] }
+    { id: "e1", logoMark: "OC", logoBg: "#2E5D52", logoFg: "#F2A93B", logoLine1: "OLD COAST",  logoLine2: "PICKLEBALL", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", date: "Wed, May 13", duration: "6:00 PM – 7:00 PM",  spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 DUPR", "Men's Only", "Ages 12-15"] },
+    { id: "e2", logoMark: "VB", logoBg: "#7C3AED", logoFg: "#FBBF24", logoLine1: "VILANO",     logoLine2: "BEACH",      title: "Saturday Morning Doubles League",          club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", date: "Sat, May 16", duration: "8:00 AM – 10:00 AM", spotsLeft: 4, totalSpots: 24, taken: 20, price: "$25",       tags: ["3.5 - 4.0 DUPR", "Mixed", "League"] },
+    { id: "e3", logoMark: "DD", logoBg: "#8E5BE8", logoFg: "#FFD166", logoLine1: "DILL",       logoLine2: "DINKERS",    title: "Beginner-Friendly Open Play",              club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", date: "Thu, May 14", duration: "5:30 PM – 7:00 PM", spotsLeft: 6, totalSpots: 12, taken: 6,  price: "$10",       tags: ["2.5 - 3.0 DUPR", "All Ages", "Open Play"] },
+    { id: "e4", logoMark: "AT", logoBg: "#1F4ED8", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "Singles Ladder Match Night",               club: "Anastasia Tennis Club",     city: "St. Augustine, FL", distance: "2.4 mi", date: "Tue, May 12", duration: "6:30 PM – 9:00 PM", spotsLeft: 3, totalSpots: 8,  taken: 5,  price: "$20",       tags: ["4.0+ DUPR", "Singles", "Ladder"] },
+    { id: "e5", logoMark: "TP", logoBg: "#0F1214", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Kids Pickleball Clinic",                   club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:00 AM", spotsLeft: 5, totalSpots: 10, taken: 5,  price: "Free",      tags: ["Ages 8-12", "Coach-led", "Free"] },
+    { id: "e6", logoMark: "HP", logoBg: "#D6573B", logoFg: "#FFFFFF", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Drop-In Round Robin",                club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Fri, May 15", duration: "7:00 PM – 9:00 PM", spotsLeft: 2, totalSpots: 8,  taken: 6,  price: "$30",       tags: ["3.0 - 4.0 DUPR", "Doubles", "Drop-In"] },
   ];
   const scrollBy = (dx) => {
     const el = trackRef.current; if (!el) return;
     el.scrollBy({ left: dx, behavior: "smooth" });
   };
   return (
-    <div style={{ marginTop: 40 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+    <div style={{ marginTop: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
         <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
           {title}
         </h2>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+          {showLocationFilter && (
+            <button style={{
+              height: 40, padding: "0 14px", borderRadius: 8,
+              border: "1px solid #E9EBEC", background: "#fff",
+              display: "inline-flex", alignItems: "center", gap: 8,
+              fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: "#0F1214",
+              cursor: "pointer"
+            }}>
+              <Icon name="Navigation" size={13} strokeWidth={2.2} color="#5B7CFA" />
+              Oakland, CA
+            </button>
+          )}
           <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
-            width: 36, height: 36, borderRadius: 8, border: "1px solid #E9EBEC",
-            background: "#fff", cursor: "pointer",
+            width: 36, height: 36, borderRadius: 8, border: 0,
+            background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
-            <Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />
+            <Icon name="ChevronLeft" size={18} strokeWidth={2} color="#0F1214" />
           </button>
           <button onClick={() => scrollBy(340)} aria-label="Next" style={{
-            width: 36, height: 36, borderRadius: 8, border: "1px solid #E9EBEC",
-            background: "#fff", cursor: "pointer",
+            width: 36, height: 36, borderRadius: 8, border: 0,
+            background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
-            <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
+            <Icon name="ChevronRight" size={18} strokeWidth={2} color="#0F1214" />
           </button>
         </div>
       </div>
+      {/* Carousel wrapper — relative for the right-edge fade overlay, y
+          padding so card hover shadows aren't clipped. */}
+      <div style={{ position: "relative", margin: "-16px -4px -16px" }}>
       <div ref={trackRef} style={{
         display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
-        paddingBottom: 4, scrollbarWidth: "none",
-        margin: "0 -4px", paddingLeft: 4, paddingRight: 4,
+        paddingTop: 28, paddingBottom: 32, scrollbarWidth: "none",
+        paddingLeft: 4, paddingRight: 4,
         alignItems: "stretch"
       }}>
         {events.map((ev) => (
-          <div key={ev.id} style={{
-            flex: "0 0 320px", scrollSnapAlign: "start",
-            background: "#fff", border: "1px solid #E9EBEC", borderRadius: 12,
-            overflow: "hidden",
-            display: "flex", flexDirection: "column"
-          }}>
+          <div
+            key={ev.id}
+            style={{
+              flex: "0 0 320px", scrollSnapAlign: "start",
+              background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
+              overflow: "hidden",
+              display: "flex", flexDirection: "column",
+              transition: "box-shadow 160ms, transform 160ms",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
+          >
+            {/* Header — brandmark logo on the left, spots-left tag opposite
+                on the right. Logo colors vary per club. */}
             <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <div style={{
                   width: 22, height: 22, borderRadius: 4,
-                  background: "#2E5D52",
+                  background: ev.logoBg,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  position: "relative"
                 }}>
-                  <span style={{ fontSize: 9, fontWeight: 800, color: "#F2A93B", lineHeight: 1 }}>OC</span>
+                  <span style={{ fontSize: 9, fontWeight: 800, color: ev.logoFg, lineHeight: 1 }}>{ev.logoMark}</span>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
-                  <span style={{ fontFamily: theme.display, fontSize: 11, fontWeight: 800, color: "#2E5D52", letterSpacing: 0.4 }}>OLD COAST</span>
-                  <span style={{ fontFamily: theme.display, fontSize: 9, fontWeight: 700, color: "#2E5D52", letterSpacing: 1.4, marginTop: 2 }}>PICKLEBALL</span>
+                  <span style={{ fontFamily: theme.display, fontSize: 11, fontWeight: 800, color: ev.logoBg, letterSpacing: 0.4 }}>{ev.logoLine1}</span>
+                  <span style={{ fontFamily: theme.display, fontSize: 9, fontWeight: 700, color: ev.logoBg, letterSpacing: 1.4, marginTop: 2 }}>{ev.logoLine2}</span>
                 </div>
               </div>
               <span style={{
                 height: 22, padding: "0 10px", borderRadius: 999,
                 background: "#DC2626", color: "#fff",
                 fontSize: 11, fontWeight: 700,
-                display: "inline-flex", alignItems: "center"
+                display: "inline-flex", alignItems: "center",
               }}>{ev.spotsLeft} Spots Left</span>
             </div>
-            <div style={{ padding: "12px 16px 0" }}>
-              <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 18, lineHeight: "22px", letterSpacing: -0.3, color: "#0F1214" }}>
+            {/* Content — strict vertical rhythm:
+                  24px → title
+                  12px → club name
+                   8px → city • distance
+                   8px → date — duration
+                  24px → tag pills */}
+            <div style={{ padding: "0 16px" }}>
+              <div style={{
+                marginTop: 24,
+                fontFamily: theme.display, fontWeight: 800,
+                fontSize: 18, lineHeight: "22px", letterSpacing: -0.3,
+                color: "#0F1214",
+              }}>
                 {ev.title}
               </div>
-              <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 6, fontSize: 12.5, color: "#4B5052" }}>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <Icon name="Building2" size={14} strokeWidth={1.75} color="#858F8F" />
-                  <span>{ev.club}</span>
-                </div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <Icon name="MapPin" size={14} strokeWidth={1.75} color="#858F8F" />
-                  <span>{ev.distance} • {ev.city}</span>
-                </div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <Icon name="Clock" size={14} strokeWidth={1.75} color="#858F8F" />
-                  <span>{ev.date} • {ev.time}</span>
-                </div>
+              <div style={{ marginTop: 12, fontSize: 13, color: "#0F1214", fontWeight: 600 }}>
+                {ev.club}
               </div>
-              <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: 6 }}>
+              <div style={{ marginTop: 8, fontSize: 12.5, color: "#4B5052" }}>
+                {ev.city} • {ev.distance}
+              </div>
+              <div style={{ marginTop: 8, fontSize: 12.5, color: "#4B5052" }}>
+                {ev.date} — {ev.duration}
+              </div>
+              <div style={{ marginTop: 24, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {ev.tags.map((tag, i) => (
                   <span key={i} style={{
                     height: 24, padding: "0 10px", borderRadius: 6,
                     background: "#F4F5F6", color: "#0F1214",
                     fontSize: 11.5, fontWeight: 600,
-                    display: "inline-flex", alignItems: "center"
+                    display: "inline-flex", alignItems: "center",
                   }}>{tag}</span>
                 ))}
               </div>
             </div>
             <div style={{
-              marginTop: 16,
+              marginTop: "auto",
               padding: "14px 16px",
-              borderTop: "1px solid #F4F5F6",
-              background: "#F9FAFB",
-              display: "flex", alignItems: "center", justifyContent: "space-between"
+              borderTop: "1px solid #E9EBEC",
+              background: "#F4F5F6",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
             }}>
               <div>
                 <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214" }}>{ev.price}</div>
@@ -2139,13 +2276,23 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               <button onClick={() => onOpenEvent && onOpenEvent(ev.id)} aria-label="Open event" style={{
                 width: 40, height: 40, borderRadius: 8,
                 background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
-                display: "inline-flex", alignItems: "center", justifyContent: "center"
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
               }}>
                 <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
               </button>
             </div>
           </div>
         ))}
+      </div>
+      {/* Right-edge fade — 16px gradient hides the hard clip of the last
+          partially-visible card so it dissolves into the page background. */}
+      <div aria-hidden="true" style={{
+        position: "absolute",
+        top: 0, bottom: 0, right: 0,
+        width: 16,
+        background: `linear-gradient(to left, ${theme.t.bg} 0%, rgba(244,245,246,0) 100%)`,
+        pointerEvents: "none",
+      }} />
       </div>
     </div>
   );
@@ -2156,15 +2303,9 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
 // in the middle, price + arrow CTA on the right. Date headers carry a count
 // chip showing how many sessions fall under that day.
 function MoreEventsNearYou({ theme, onOpenEvent }) {
-  const Pill = ({ children }) => (
-    <button style={{
-      height: 40, padding: "0 14px", borderRadius: 8,
-      border: "1px solid #E9EBEC", background: "#fff",
-      display: "inline-flex", alignItems: "center", gap: 8,
-      fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: "#0F1214",
-      cursor: "pointer"
-    }}>{children}</button>
-  );
+  // Avatar stack — three overlapping player avatars. The "+X attending"
+  // count is rendered separately by the caller so the number can vary per
+  // row without re-rendering the avatar stack.
   const Avatars = () => {
     const bgs = [
       "linear-gradient(135deg, #60A5FA, #2563EB)",
@@ -2175,90 +2316,236 @@ function MoreEventsNearYou({ theme, onOpenEvent }) {
       <span style={{ display: "inline-flex", alignItems: "center" }}>
         {bgs.map((bg, i) => (
           <span key={i} style={{
-            width: 20, height: 20, borderRadius: 999,
+            width: 22, height: 22, borderRadius: 999,
             background: bg, border: "2px solid #fff",
             marginLeft: i === 0 ? 0 : -8
           }} />
         ))}
-        <span style={{
-          marginLeft: -8,
-          height: 20, padding: "0 6px", borderRadius: 999,
-          background: "#F4F5F6", border: "2px solid #fff",
-          display: "inline-flex", alignItems: "center", justifyContent: "center",
-          fontSize: 10, fontWeight: 700, color: "#0F1214"
-        }}>+4</span>
       </span>
     );
   };
-  const sampleRow = { time: "6:00 AM", status: "In Progress", title: "Open Play: All Levels Welcome", spotsLeft: 2, meta: "Doubles • 3.0 - 3.5 • Coach Mike Alvarado", price: "$15 - $60" };
-  const groups = [
-    { id: "today", label: "Today, Monday, May 11, 2026", count: 4, rows: [sampleRow, sampleRow] },
-    { id: "tomorrow", label: "Tomorrow, Tuesday, May 11, 2026", count: 4, rows: [sampleRow, sampleRow, sampleRow] }
+  // Varied event rows — each event reads as a distinct session so the list
+  // doesn't repeat the same placeholder over and over.
+  const allRows = [
+    // ---- Today ----------------------------------------------------------
+    { time: "6:00 AM",  spotsLeft: 2, title: "Open Play: All Levels Welcome",   attending: 8,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • 3.0 - 3.5 DUPR • Coach Mike Alvarado", price: "$15 - $25" },
+    { time: "9:00 AM",  spotsLeft: 4, title: "Intermediate Skills Clinic",      attending: 6,  club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", meta: "Doubles • 3.5 - 4.0 DUPR • Coach Priya Shah",    price: "$30" },
+    { time: "12:00 PM", spotsLeft: 1, title: "Round Robin Doubles",             attending: 11, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 3.0+ DUPR • All Levels",               price: "$20" },
+    { time: "5:30 PM",  spotsLeft: 6, title: "Drill & Play Session",            attending: 4,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • 3.0 - 4.0 DUPR • Coach Reid Anders",   price: "$25 - $40" },
+    // ---- Tomorrow -------------------------------------------------------
+    { time: "6:30 AM",  spotsLeft: 3, title: "Sunrise Pickleball",              attending: 9,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • All Levels • Coach Mike Alvarado",     price: "$15" },
+    { time: "10:00 AM", spotsLeft: 8, title: "Beginner Bootcamp",               attending: 2,  club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", meta: "Singles & Doubles • 2.5 - 3.0 DUPR • Coach Jana Ellis", price: "$45" },
+    { time: "6:00 PM",  spotsLeft: 2, title: "Open Play: All Levels Welcome",   attending: 12, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 2.5 - 4.5 DUPR • League Director Sam B.", price: "$15 - $35" },
   ];
+  const groups = [
+    { id: "today",    label: "Today, Monday, May 11, 2026",     rows: allRows.slice(0, 4) },
+    { id: "tomorrow", label: "Tomorrow, Tuesday, May 12, 2026", rows: allRows.slice(4) },
+  ];
+  // Single combo-filter button replacing the three separate pills. Reads
+  // as "<window> · <time> · <location>" and opens an inline dropdown with
+  // all three controls on tap.
+  const [filterOpen, setFilterOpen] = React.useState(false);
+  const [filterWindow, setFilterWindow] = React.useState("This Week");
+  const [filterTime, setFilterTime] = React.useState("Any Time");
+  const [filterLoc, setFilterLoc] = React.useState("Oakland, CA");
+  const filterRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!filterOpen) return;
+    const onDoc = (e) => { if (filterRef.current && !filterRef.current.contains(e.target)) setFilterOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [filterOpen]);
   return (
-    <div style={{ marginTop: 40 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
+    <div style={{ marginTop: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 12 }}>
         <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
           More events near you
         </h2>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-          <Pill>This Week<Icon name="ChevronDown" size={14} strokeWidth={2} color="#858F8F" /></Pill>
-          <Pill>Any Time<Icon name="ChevronDown" size={14} strokeWidth={2} color="#858F8F" /></Pill>
+        <div ref={filterRef} style={{ position: "relative" }}>
+          <button onClick={() => setFilterOpen((o) => !o)} aria-expanded={filterOpen} style={{
+            height: 40, padding: "0 14px 0 18px", borderRadius: 8,
+            border: "1px solid #E9EBEC", background: "#fff",
+            display: "inline-flex", alignItems: "center", gap: 18,
+            fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: "#0F1214",
+            cursor: "pointer",
+          }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Icon name="Calendar" size={14} strokeWidth={2} color="#0F1214" />
+              {filterWindow}
+            </span>
+            <span style={{ width: 1, height: 18, background: "#E9EBEC", flexShrink: 0 }} />
+            <span>{filterTime}</span>
+            <span style={{ width: 1, height: 18, background: "#E9EBEC", flexShrink: 0 }} />
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Icon name="Navigation" size={13} strokeWidth={2.2} color="#5B7CFA" />
+              {filterLoc}
+            </span>
+            <Icon name="ChevronDown" size={14} strokeWidth={2} color="#858F8F" />
+          </button>
+          {filterOpen && (
+            <div role="dialog" style={{
+              position: "absolute", top: "100%", right: 0, marginTop: 8,
+              minWidth: 280, padding: 12,
+              background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
+              boxShadow: "0 12px 40px rgba(15,18,20,.12), 0 2px 8px rgba(15,18,20,.06)",
+              zIndex: 30,
+              display: "flex", flexDirection: "column", gap: 10,
+            }}>
+              <FilterSelect label="Window" value={filterWindow} onChange={setFilterWindow} options={["Today", "This Week", "Next 2 Weeks", "This Month"]} />
+              <FilterSelect label="Time" value={filterTime} onChange={setFilterTime} options={["Any Time", "Morning", "Afternoon", "Evening"]} />
+              <FilterSelect label="Location" value={filterLoc} onChange={setFilterLoc} options={["Oakland, CA", "Berkeley, CA", "San Francisco, CA", "St. Augustine, FL"]} />
+            </div>
+          )}
         </div>
       </div>
       {groups.map((g) => (
-        <div key={g.id} style={{ marginBottom: 24 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, letterSpacing: -0.2, color: "#0F1214" }}>{g.label}</span>
+        <div key={g.id} style={{ marginBottom: 28 }}>
+          {/* Subsection title — smaller weight + a subtle muted badge that
+              auto-reflects the row count instead of a hardcoded number. */}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 12, letterSpacing: 0, color: "#4B5052" }}>{g.label}</span>
             <span style={{
-              minWidth: 22, height: 22, padding: "0 6px", borderRadius: 6,
-              background: "#0F1214", color: "#fff",
+              minWidth: 20, height: 20, padding: "0 6px", borderRadius: 6,
+              background: "#F4F5F6", color: "#4B5052",
               fontSize: 11, fontWeight: 700,
-              display: "inline-flex", alignItems: "center", justifyContent: "center"
-            }}>{g.count}</span>
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+            }}>{g.rows.length}</span>
           </div>
           <div>
             {g.rows.map((r, i) => (
-              <div key={i} style={{
-                display: "grid",
-                gridTemplateColumns: "140px 1fr auto auto",
-                gap: 24, alignItems: "center",
-                padding: "18px 0",
-                borderTop: i === 0 ? "1px solid #E9EBEC" : "1px solid #F4F5F6"
-              }}>
-                <div>
-                  <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214" }}>{r.time}</div>
-                  <div style={{ marginTop: 4, fontSize: 12, color: "#858F8F" }}>{r.status}</div>
-                </div>
-                <div>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                    <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214" }}>{r.title}</span>
-                    <span style={{
-                      height: 22, padding: "0 10px", borderRadius: 999,
-                      background: "#FEE2E2", color: "#DC2626",
-                      fontSize: 11, fontWeight: 700,
-                      display: "inline-flex", alignItems: "center"
-                    }}>{r.spotsLeft} Spots Left</span>
-                  </div>
-                  <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 10, fontSize: 13, color: "#4B5052" }}>
-                    <span>{r.meta}</span>
-                    <span style={{ color: "#858F8F" }}>•</span>
-                    <Avatars />
-                  </div>
-                </div>
-                <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", whiteSpace: "nowrap" }}>{r.price}</div>
-                <button onClick={() => onOpenEvent && onOpenEvent()} aria-label="Open event" style={{
-                  width: 40, height: 40, borderRadius: 8,
-                  background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
-                  display: "inline-flex", alignItems: "center", justifyContent: "center"
-                }}>
-                  <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
-                </button>
-              </div>
+              <EventRow key={i} r={r} first={i === 0} onOpenEvent={onOpenEvent} theme={theme} Avatars={Avatars} />
             ))}
           </div>
         </div>
       ))}
+      {/* Show more — neutral pill at the end of the section. Could load a
+          next page of events; for the prototype it's a static affordance. */}
+      <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
+        <button style={{
+          height: 40, padding: "0 18px", borderRadius: 8,
+          border: "1px solid #E9EBEC", background: "#fff",
+          display: "inline-flex", alignItems: "center", gap: 8,
+          fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: "#0F1214",
+          cursor: "pointer",
+          transition: "background 120ms",
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "#fff"; }}>
+          Show more
+          <Icon name="ChevronDown" size={14} strokeWidth={2} color="#0F1214" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---- FilterSelect — labeled select wrapper used inside the combo dropdown
+// on MoreEventsNearYou. Keeps the layout consistent across the three
+// (window / time / location) sub-controls without prop-drilling theme.
+function FilterSelect({ label, value, onChange, options }) {
+  return (
+    <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#858F8F" }}>{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          height: 36, padding: "0 12px", borderRadius: 8,
+          border: "1px solid #E9EBEC", background: "#fff",
+          fontFamily: "inherit", fontSize: 13, color: "#0F1214",
+          cursor: "pointer",
+        }}
+      >
+        {options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+      </select>
+    </label>
+  );
+}
+
+// ---- EventRow — one row in MoreEventsNearYou's date-grouped list.
+// Sub-component so each row can carry its own hover state (subtle background
+// tint) without re-rendering the whole list on hover. Time + spots-left tag
+// top-align with the title/location/meta column.
+function EventRow({ r, first, onOpenEvent, theme, Avatars }) {
+  const [hover, setHover] = React.useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={() => onOpenEvent && onOpenEvent()}
+      style={{
+        display: "grid",
+        gridTemplateColumns: "96px 1fr auto auto",
+        gap: 20,
+        alignItems: "start",
+        padding: "18px 12px",
+        margin: "0 -12px",
+        borderTop: first ? "1px solid #E9EBEC" : "1px solid #F4F5F6",
+        borderRadius: 10,
+        background: hover ? "#F4F5F6" : "transparent",
+        cursor: "pointer",
+        transition: "background 140ms ease",
+      }}
+    >
+      {/* Left — time + spots-left tag. Top-aligned with the title in the
+          middle column so the row reads cleanly even when the title wraps. */}
+      <div>
+        <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", lineHeight: "21px" }}>{r.time}</div>
+        <div style={{ marginTop: 6 }}>
+          <span style={{
+            height: 22, padding: "0 8px", borderRadius: 6,
+            background: "#FEE2E2", color: "#DC2626",
+            fontSize: 11, fontWeight: 700,
+            display: "inline-flex", alignItems: "center",
+          }}>{r.spotsLeft} Spots Left</span>
+        </div>
+      </div>
+      {/* Middle — 3 lines:
+          1) Title + avatars + "+X attending"
+          2) Location: MapPin + club, city, state, distance
+          3) Event metadata (format, DUPR range, instructor) */}
+      <div style={{ minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", lineHeight: "21px" }}>
+          <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.2 }}>{r.title}</span>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <Avatars />
+            <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
+          </div>
+        </div>
+        <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#4B5052" }}>
+          <Icon name="MapPin" size={14} strokeWidth={1.75} color="#858F8F" />
+          <span>{r.club} · {r.city} · {r.distance}</span>
+        </div>
+        <div style={{ marginTop: 4, fontSize: 12.5, color: "#4B5052" }}>
+          {r.meta}
+        </div>
+      </div>
+      <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", whiteSpace: "nowrap", alignSelf: "center" }}>{r.price}</div>
+      {/* CTA button — collapses to a 40px square arrow at rest. On row
+          hover, expands leftward into a "Reserve →" pill which pushes the
+          price column left and makes the action explicit. Width transitions
+          smoothly so the layout shift reads as one cohesive reveal. */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
+        aria-label="Reserve event"
+        style={{
+          height: 40,
+          width: hover ? 112 : 40,
+          padding: hover ? "0 14px 0 16px" : 0,
+          borderRadius: 8,
+          background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
+          display: "inline-flex", alignItems: "center",
+          justifyContent: hover ? "space-between" : "center",
+          gap: hover ? 8 : 0,
+          alignSelf: "center",
+          fontFamily: "inherit", fontWeight: 700, fontSize: 13,
+          whiteSpace: "nowrap", overflow: "hidden",
+          transition: "width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
+        }}
+      >
+        {hover && <span>Reserve</span>}
+        <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
+      </button>
     </div>
   );
 }
@@ -2301,7 +2588,7 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
       "--text-inverted": theme.t.textInverted, "--line": theme.t.line, "--rule": theme.t.rule, "--chip": theme.t.chip
     }}>
       <ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => setQrOpen(true)} onFindClubs={onFindClubs} onOpenProfile={() => {if (window.__navigateProfile) window.__navigateProfile();}} active="Home" onNav={(l) => {if (window.__navigate) window.__navigate(l);}} />
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 32px 64px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 32px 64px" }}>
         {racquetAlertOpen && window.ProShopAlert &&
         <div style={{ marginBottom: 24 }}>
             <window.ProShopAlert theme={theme} desktop={true} onDismiss={() => setRacquetAlertOpen(false)} />
@@ -2332,7 +2619,44 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
             }
           </div>
         </div>
-        {window.BookCourtWidget &&
+        {/* Hero search affordance. On the logged-out CourtReserve surface
+            this is the new north-star SearchBar. The sticky wrapper uses
+            negative horizontal margins to escape the page's maxWidth and
+            extend across the device frame (which has overflow: hidden, so
+            the wrapper safely clips at the frame edges). The background is
+            a top-down gradient — transparent at the very top fading to
+            solid white just above the bar — so content scrolling past
+            dissolves smoothly into the sticky shelf instead of clipping
+            against a hard edge. */}
+        {isCR && window.SearchBar &&
+        <div style={{
+          position: "sticky",
+          top: 64, // matches logged-out ChromeBar height (desktop)
+          zIndex: 40,
+          // Extend exactly to the edges of the device frame's content
+          // column (which is 1440 wide vs the maxWidth: 1200 parent). The
+          // -120 margins land flush against the device frame's
+          // overflow: hidden boundary so nothing protrudes and no
+          // horizontal scrollbar is induced on the scroll container.
+          marginLeft: -120,
+          marginRight: -120,
+          paddingLeft: 120,
+          paddingRight: 120,
+          // Gradient runs top → bottom: completely opaque white from the
+          // top through the bar (so anything scrolling behind it from
+          // above is fully hidden), then fades to transparent in the
+          // 16px bottom padding so content rising up from below dissolves
+          // smoothly into the sticky shelf instead of cutting at a hard
+          // edge. 16px padding on top + bottom flanks the bar evenly.
+          background: "linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 80%, rgba(255,255,255,0) 100%)",
+          marginBottom: 40,
+          paddingTop: 16,
+          paddingBottom: 16,
+        }}>
+            <window.SearchBar theme={theme} viewport="desktop" onSubmit={() => onBookCourt && onBookCourt()} />
+          </div>
+        }
+        {!isCR && window.BookCourtWidget &&
         <div style={{ marginBottom: 40 }}>
             <window.BookCourtWidget onSubmit={() => onBookCourt && onBookCourt()} />
           </div>
@@ -2347,13 +2671,13 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
           </div>
         }
         {isCR &&
-        <PopularEventsNearYou theme={theme} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <PopularEventsNearYou theme={theme} title="Trending events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
         <MoreEventsNearYou theme={theme} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
-        <PopularEventsNearYou theme={theme} title="Recurring events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <PopularEventsNearYou theme={theme} title="Recurring events near you" showLocationFilter={true} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {!isCR && window.MyClubBookingPanel &&
         <window.MyClubBookingPanel

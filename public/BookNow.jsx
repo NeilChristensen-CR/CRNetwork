@@ -197,7 +197,7 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
         alignItems: isMobile ? "stretch" : "center",
         justifyContent: "space-between",
         gap: isMobile ? 12 : 16,
-        paddingTop: 32, paddingBottom: isMobile ? 16 : 28
+        paddingTop: 16, paddingBottom: 4
       }}>
         <h2 style={{
           margin: 0,
@@ -219,27 +219,17 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
           width: isMobile ? "100%" : "auto",
           flexWrap: isMobile ? "wrap" : "nowrap"
         }}>
-          <div style={{
-            display: "inline-flex", alignItems: "center",
-            background: t.surface,
-            border: `1px solid ${t.line}`,
-            borderRadius: 8,
-            padding: 0,
-            minWidth: 0,
-            flexShrink: 0,
-            flexWrap: isMobile ? "wrap" : "nowrap"
-          }}>
-            <FilterPill icon="Calendar" value={day} onChange={setDay} options={["Today", "Tomorrow", "This weekend", "Next 7 days"]} theme={theme} divider />
-            <FilterPill icon="Clock" value={time} onChange={setTime} options={["Any time", "Morning", "Afternoon", "Evening", "Next hour"]} theme={theme} divider />
-            <FilterPill icon="Users" value={players} onChange={setPlayers} options={["1 Player", "2 Players", "3 Players", "4 Players", "Open play group"]} theme={theme} />
-          </div>
+          {/* Day / Time / Players filters were removed — the global hero
+              SearchBar carries the same filter intent (WHERE / ACTIVITY /
+              WHEN / WHO), so this section now stays clean and the carousel
+              arrows sit alone on the right. */}
           {!isMobile &&
-          <div style={{ display: "inline-flex", gap: 6 }}>
-              <button onClick={() => scrollBy(-1)} style={{ width: 36, height: 36, borderRadius: 8, border: `1px solid ${t.line}`, background: t.surface, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                <Icon name="ChevronLeft" size={14} strokeWidth={2.2} />
+          <div style={{ display: "inline-flex", gap: 8 }}>
+              <button onClick={() => scrollBy(-1)} aria-label="Previous" style={{ width: 36, height: 36, borderRadius: 8, border: 0, background: "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <Icon name="ChevronLeft" size={18} strokeWidth={2} />
               </button>
-              <button onClick={() => scrollBy(1)} style={{ width: 36, height: 36, borderRadius: 8, border: `1px solid ${t.line}`, background: t.surface, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                <Icon name="ChevronRight" size={14} strokeWidth={2.2} />
+              <button onClick={() => scrollBy(1)} aria-label="Next" style={{ width: 36, height: 36, borderRadius: 8, border: 0, background: "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <Icon name="ChevronRight" size={18} strokeWidth={2} />
               </button>
             </div>
           }
@@ -292,16 +282,29 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
           </div>;
 
         return (
+          // Carousel wrapper — relative so the right-edge gradient fade can
+          // sit absolutely on top, y padding gives card hover shadows room
+          // so they aren't clipped by the scroll container's overflow box.
+          <div style={{ position: "relative", margin: isMobile ? "-16px -20px -16px" : "-16px -4px -16px" }}>
           <div ref={trackRef} style={{
             display: "flex", gap: 20, overflowX: "auto", scrollSnapType: "x mandatory",
-            paddingBottom: 4, scrollbarWidth: "none",
-            margin: isMobile ? "0 -20px" : "0 -4px",
+            paddingTop: 28, paddingBottom: 32, scrollbarWidth: "none",
             paddingLeft: isMobile ? 20 : 4,
             paddingRight: isMobile ? 20 : 4,
             alignItems: "stretch"
           }}>
             {mine.length > 0 && renderGroup("My clubs", mine)}
             {other.length > 0 && renderGroup("Clubs around me", other)}
+          </div>
+          {/* Right-edge fade — 16px gradient so the last partially visible
+              card dissolves into the page background instead of hard-clipping. */}
+          <div aria-hidden="true" style={{
+            position: "absolute",
+            top: 0, bottom: 0, right: 0,
+            width: 16,
+            background: `linear-gradient(to left, ${t.bg} 0%, rgba(244,245,246,0) 100%)`,
+            pointerEvents: "none",
+          }} />
           </div>);
 
       })()}
@@ -429,6 +432,13 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
     return out;
   })();
 
+  // Deterministic distance + active-players count per venue. These are
+  // prototype demo numbers — stable across renders so the cards don't churn.
+  const hash = (() => { let h = 0; for (let i = 0; i < v.id.length; i++) h = (h * 31 + v.id.charCodeAt(i)) >>> 0; return h; })();
+  const distance = v.distance != null ? v.distance : ((hash % 30) / 10 + 0.5).toFixed(1);
+  const activePlayers = v.activePlayers != null ? v.activePlayers : (30 + hash % 35);
+  const venueForMap = { ...v, distance, activePlayers };
+
   return (
     <div style={{
       width: "100%",
@@ -438,116 +448,97 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
       borderRadius: 8,
       display: "flex", flexDirection: "column",
       overflow: "hidden",
-      transition: "border-color 140ms, box-shadow 140ms"
+      transition: "box-shadow 160ms, transform 160ms"
     }}
-    onMouseEnter={(e) => {e.currentTarget.style.boxShadow = "0 4px 14px rgba(15,18,20,.06)";}}
-    onMouseLeave={(e) => {e.currentTarget.style.boxShadow = "none";}}>
+    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
       
-      {/* Mini map — gives a quick spatial anchor without an actual map
-              tile fetch. 3:1 aspect, abstract roads + pin, with the city/state/zip
-              overlaid as a tag at top-left. */}
-      <MiniMap venue={v} theme={theme} />
+      {/* Mini map — distance pill top-left, "X Active" green pill top-right.
+              Same SVG illustration underneath. */}
+      <MiniMap venue={venueForMap} theme={theme} />
 
-      {/* Card body */}
-      <div style={{ padding: "12px 14px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
-      {/* Title row + my-club tag */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{
-              fontFamily: theme.display, fontWeight: 700, fontSize: 14,
-              color: t.text, letterSpacing: -0.2,
-              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
-            }}>{v.name}</div>
-          <div style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>{stars}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: t.text, fontVariantNumeric: "tabular-nums" }}>{v.rating.toFixed(1)}</span>
-            <span style={{ fontSize: 11, color: t.textSubtle, fontWeight: 500 }}>({v.reviews})</span>
-            <span style={{ color: t.textSubtle, fontSize: 11 }}>·</span>
-            <span style={{ fontSize: 11, color: t.textMuted, fontWeight: 600 }}>{v.price}</span>
-          </div>
+      {/* Card body — equal top and bottom padding so the time slots have
+          breathing room before the gray footer below them. */}
+      <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+        {/* Title */}
+        <div style={{
+          fontFamily: theme.display, fontWeight: 800, fontSize: 17,
+          color: "#0F1214", letterSpacing: -0.3,
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
+        }}>{v.name}</div>
+
+        {/* Rating row — stars + 4.8 (256) • $$$ */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#0F1214" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>{stars}</span>
+          <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{v.rating.toFixed(1)}</span>
+          <span style={{ color: "#858F8F" }}>({v.reviews})</span>
+          <span style={{ color: "#858F8F" }}>•</span>
+          <span style={{ fontWeight: 700, color: "#0F1214" }}>{v.price}</span>
         </div>
-        {v.myClub &&
+
+        {/* Sport tag + booked-today caption. Sport is rendered as a pill
+            tag matching the Popular clubs styling so the metadata reads as
+            a discrete attribute. */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          fontSize: 12, color: "#4B5052", fontWeight: 500,
+        }}>
           <span style={{
-            flexShrink: 0,
-            fontSize: 9, fontWeight: 800, letterSpacing: 0.8, textTransform: "uppercase",
-            color: theme.primary,
-            padding: "3px 6px", borderRadius: 4,
-            background: theme.softTint || "rgba(15,140,90,.08)"
-          }}>My club</span>
-          }
-      </div>
+            display: "inline-flex", alignItems: "center",
+            height: 22, padding: "0 8px", borderRadius: 6,
+            background: "#F4F5F6", color: "#0F1214",
+            fontSize: 11, fontWeight: 600,
+            whiteSpace: "nowrap",
+          }}>{v.sport}</span>
+          <span>Booked {v.booked} × Today</span>
+        </div>
 
-      {/* Sport tag + booked-today signal. Price moved up onto the rating
-                      line so the headline metrics (rating + cost) live together. */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-        <span style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            height: 22, padding: "0 8px", borderRadius: 4,
-            background: theme.softTint || "rgba(15,140,90,.10)",
-            color: theme.primary,
-            fontSize: 10, fontWeight: 800, letterSpacing: 0.8, textTransform: "uppercase",
-            whiteSpace: "nowrap"
-          }}>
-          {v.sport}
-        </span>
-        <span style={{
-            display: "inline-flex", alignItems: "center", gap: 4,
-            fontSize: 11, color: t.textMuted, fontWeight: 500
-          }}>
-          <Icon name="Clock" size={10} strokeWidth={2} color={t.textSubtle} />
-          Booked {v.booked}× today
-        </span>
-      </div>
-
-      {/* Time slot pills — outline style so they read as multiple
-                      peer options to pick from. */}
-      {/* Time slot pills — outline style so they read as multiple
-                      peer options to pick from. Clicking opens the customize modal
-                      pre-filled with this slot. */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 2 }}>
-        {v.times.map((time) =>
-          <button key={time} onClick={() => onPickSlot(time)} style={{
-            height: 32, padding: "0 8px", borderRadius: 8,
-            border: `1px solid ${theme.primary}`,
-            background: "transparent", color: theme.primary,
-            fontFamily: "inherit", fontWeight: 700, fontSize: 12,
-            letterSpacing: 0.2,
-            cursor: "pointer",
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            transition: "background 120ms, color 120ms"
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = theme.primary;
-            e.currentTarget.style.color = "#fff";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = theme.primary;
-          }}>
-            {time}
-          </button>
+        {/* Time slot pills — 2x2 grid, simple gray outlined boxes. Clicking
+            opens the customize modal pre-filled with this slot. */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 4 }}>
+          {v.times.slice(0, 4).map((time) =>
+            <button key={time} onClick={() => onPickSlot(time)} style={{
+              height: 34, padding: "0 8px", borderRadius: 8,
+              border: "1px solid #DEE1E5",
+              background: "#FFFFFF", color: "#0F1214",
+              fontFamily: "inherit", fontWeight: 600, fontSize: 12,
+              cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              transition: "border-color 120ms, background 120ms"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "#0F1214";
+              e.currentTarget.style.background = "#F4F5F6";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "#DEE1E5";
+              e.currentTarget.style.background = "#FFFFFF";
+            }}>
+              {time}
+            </button>
           )}
+        </div>
       </div>
 
-      {/* Secondary text link — leads to the full club detail page so the
-                      card carries a "explore more" path alongside the primary booking
-                      slots above. Quiet styling so it doesn't compete with the green
-                      time-slot CTAs. */}
+      {/* See Events & Info — full-width footer with subtle grey background,
+          matching the Popular clubs / Trending events footers + the
+          SearchBar's selected-state track for cross-section consistency. */}
       <button onClick={(e) => {e.stopPropagation();onOpenClub && onOpenClub(v.id);}} style={{
-          marginTop: 2,
-          height: 28, padding: 0, border: 0, background: "transparent",
-          display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-          fontFamily: "inherit", fontWeight: 600, fontSize: 11,
-          color: t.textMuted,
-          cursor: "pointer",
-          transition: "color 120ms"
-        }}
-        onMouseEnter={(e) => {e.currentTarget.style.color = t.text;}}
-        onMouseLeave={(e) => {e.currentTarget.style.color = t.textMuted;}}>
-        See club details
-        <Icon name="ArrowRight" size={11} strokeWidth={2.2} color="currentColor" />
+        marginTop: "auto",
+        padding: "12px 16px",
+        border: 0,
+        borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: "#E9EBEC",
+        background: "#F4F5F6",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        fontFamily: "inherit", fontSize: 12, fontWeight: 600, color: "#0F1214",
+        cursor: "pointer",
+        transition: "background 120ms",
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = "#E9EBEC"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}>
+        See Events & Info
+        <Icon name="ArrowRight" size={14} strokeWidth={2} color="#0F1214" />
       </button>
-      </div>
     </div>);
 
 }
@@ -829,23 +820,41 @@ function MiniMap({ venue, theme }) {
         </g>
       </svg>
 
-      {/* Overlay location tag — top-left, white pill with city/state/zip */}
+      {/* Top-left distance pill — anchored to where players sit relative to
+          the club. Falls back to city/state/zip if no distance is provided
+          so the legacy callers still render. */}
       <span style={{
-        position: "absolute", top: 8, left: 8,
-        display: "inline-flex", alignItems: "center", gap: 5,
-        height: 22, padding: "0 8px", borderRadius: 4,
-        background: "rgba(255,255,255,.96)",
+        position: "absolute", top: 10, left: 10,
+        display: "inline-flex", alignItems: "center",
+        height: 24, padding: "0 10px", borderRadius: 6,
+        background: "#FFFFFF",
         color: "#0F1214",
-        fontSize: 10, fontWeight: 700, letterSpacing: 0.3,
+        fontSize: 11, fontWeight: 700,
         boxShadow: "0 1px 3px rgba(15,18,20,.12)",
-        maxWidth: "calc(100% - 16px)",
-        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
+        whiteSpace: "nowrap",
       }}>
-        <Icon name="MapPin" size={10} strokeWidth={2.4} color={theme.primary} />
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-          {venue.city}, {venue.state} {venue.zip}
-        </span>
+        {venue.distance != null ? `${venue.distance}mi` : `${venue.city}, ${venue.state} ${venue.zip}`}
       </span>
+      {/* Top-right active-players pill — green badge with a pulse dot, matches
+          the "X Active" pattern from the target. Only renders when the venue
+          carries an `activePlayers` count. */}
+      {venue.activePlayers != null && (
+        <span style={{
+          position: "absolute", top: 10, right: 10,
+          display: "inline-flex", alignItems: "center", gap: 6,
+          height: 24, padding: "0 10px 0 8px", borderRadius: 999,
+          background: "#1F8C5A",
+          color: "#FFFFFF",
+          fontSize: 11, fontWeight: 700,
+          boxShadow: "0 1px 3px rgba(15,18,20,.12)",
+          whiteSpace: "nowrap",
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: 999, background: "#FFFFFF", flexShrink: 0,
+          }} />
+          {venue.activePlayers} Active
+        </span>
+      )}
     </div>);
 
 }
