@@ -456,7 +456,7 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 4 }}>
           {v.times.slice(0, 4).map((time) =>
             <button key={time} onClick={() => onPickSlot(time)} style={{
-              height: 40, padding: "0 8px", borderRadius: 8,
+              height: 44, padding: "0 8px", borderRadius: 8,
               border: "1px solid #DEE1E5",
               background: "#FFFFFF", color: "#0F1214",
               fontFamily: "inherit", fontWeight: 600, fontSize: 12,
