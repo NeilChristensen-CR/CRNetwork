@@ -2506,26 +2506,32 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
         <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           {isMobile ? "More Events" : "More events near you"}
         </h2>
-        <div ref={filterRef} style={{ position: "relative" }}>
+        <div ref={filterRef} style={{ position: "relative", minWidth: 0, maxWidth: "100%" }}>
+          {/* Single-line combo trigger. Caret removed; the three values
+              render as one wrapping-free run with bullet separators, and
+              the whole row truncates with an ellipsis when it can't fit. */}
           <button onClick={() => setFilterOpen((o) => !o)} aria-expanded={filterOpen} style={{
-            height: 40, padding: "0 14px 0 18px", borderRadius: 8,
+            height: 40, padding: "0 14px", borderRadius: 8,
             border: "1px solid #E9EBEC", background: "#fff",
-            display: "inline-flex", alignItems: "center", gap: 18,
+            display: "block",
+            maxWidth: "100%",
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: "#0F1214",
             cursor: "pointer",
+            textAlign: "left",
+            lineHeight: "38px",
           }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}>
               <Icon name="Calendar" size={14} strokeWidth={2} color="#0F1214" />
-              {filterWindow}
             </span>
-            <span style={{ width: 1, height: 18, background: "#E9EBEC", flexShrink: 0 }} />
-            <span>{filterTime}</span>
-            <span style={{ width: 1, height: 18, background: "#E9EBEC", flexShrink: 0 }} />
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            {filterWindow}
+            <span style={{ color: "#C8CDCD", margin: "0 10px" }}>·</span>
+            {filterTime}
+            <span style={{ color: "#C8CDCD", margin: "0 10px" }}>·</span>
+            <span style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}>
               <Icon name="Navigation" size={13} strokeWidth={2.2} color="#5B7CFA" />
-              {filterLoc}
             </span>
-            <Icon name="ChevronDown" size={14} strokeWidth={2} color="#858F8F" />
+            {filterLoc}
           </button>
           {filterOpen && (
             <div role="dialog" style={{
@@ -2663,20 +2669,22 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
           </div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 15, color: "#0F1214", whiteSpace: "nowrap" }}>{r.price}</span>
+            {/* Mobile: arrow-only square button — the row itself is the
+                primary tap target (whole card opens the event), so the
+                trailing pill collapses to an icon affordance instead of
+                competing for label space. */}
             <button
               onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
               aria-label="Reserve event"
               style={{
-                height: 36, padding: "0 12px 0 14px",
+                width: 40, height: 40, padding: 0,
                 borderRadius: 8,
                 background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
-                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-                fontFamily: "inherit", fontWeight: 700, fontSize: 12.5,
-                whiteSpace: "nowrap",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
               }}
             >
-              Reserve
-              <Icon name="ArrowRight" size={14} strokeWidth={2.2} color="#fff" />
+              <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
             </button>
           </div>
         </div>
@@ -2821,7 +2829,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             <window.ProShopAlert theme={theme} desktop={!isMobile} onDismiss={() => setRacquetAlertOpen(false)} />
           </div>
         }
-        <div style={{ marginBottom: isMobile ? 20 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
+        <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
           <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 26 : 56, lineHeight: isMobile ? "32px" : "64px", letterSpacing: isMobile ? -0.4 : -1.4, color: theme.t.text, margin: 0 }}>
             {isCR ?
             <>Welcome to Court Reserve<br /><span style={{ color: "#4B5052" }}>Let's Play.</span></> :
@@ -2870,10 +2878,12 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           paddingRight: isMobile ? 16 : 120,
           background: "linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 80%, rgba(255,255,255,0) 100%)",
           marginBottom: isMobile ? 0 : 8,
-          paddingTop: isMobile ? 32 : 16,
-          // Pulled in tight so the location blurb reads as a caption of the
-          // SearchBar above it (was 32/16 — too much air separated them).
-          paddingBottom: isMobile ? 8 : 4,
+          // Mobile: tighter to the title above (16 vs 32) so H1 → search
+          // reads as a unit. Desktop unchanged.
+          paddingTop: isMobile ? 16 : 16,
+          // Mobile: more breathing room before the location blurb (20 vs 8)
+          // — the previous tight gap made the bar and blurb feel collapsed.
+          paddingBottom: isMobile ? 20 : 4,
         }}>
             {isMobile && window.SearchBarCompact
               ? <window.SearchBarCompact theme={theme} viewport={viewport} onExpand={() => onBookCourt && onBookCourt()} />
