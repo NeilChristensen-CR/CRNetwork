@@ -2236,9 +2236,8 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             </div>
             {/* Content — strict vertical rhythm:
                   24px → title
-                  12px → club name
-                   8px → city • distance
-                   8px → date — duration
+                  12px → location block (pin icon + club / city • distance)
+                   8px → time block (clock icon + date — duration)
                   24px → tag pills */}
             <div style={{ padding: "0 16px" }}>
               <div style={{
@@ -2249,14 +2248,26 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               }}>
                 {ev.title}
               </div>
-              <div style={{ marginTop: 12, fontSize: 13, color: "#0F1214", fontWeight: 600 }}>
-                {ev.club}
+              {/* Location — pin icon anchored to the first line, stacked
+                  club name + "city · distance" to the right. flex-start so
+                  the icon stays at the top if the club name wraps. */}
+              <div style={{ marginTop: 12, display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <span style={{ display: "inline-flex", marginTop: 2, flexShrink: 0 }}>
+                  <Icon name="MapPin" size={13} strokeWidth={2.2} color="#4B5052" />
+                </span>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: 13, color: "#0F1214", fontWeight: 600, lineHeight: 1.3 }}>
+                    {ev.club}
+                  </div>
+                  <div style={{ marginTop: 2, fontSize: 12.5, color: "#4B5052", lineHeight: 1.3 }}>
+                    {ev.city} • {ev.distance}
+                  </div>
+                </div>
               </div>
-              <div style={{ marginTop: 8, fontSize: 12.5, color: "#4B5052" }}>
-                {ev.city} • {ev.distance}
-              </div>
-              <div style={{ marginTop: 8, fontSize: 12.5, color: "#4B5052" }}>
-                {ev.date} — {ev.duration}
+              {/* Time — clock icon + date — duration on a single row. */}
+              <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "#4B5052" }}>
+                <Icon name="Clock" size={13} strokeWidth={2.2} color="#4B5052" />
+                <span>{ev.date} — {ev.duration}</span>
               </div>
               <div style={{ marginTop: 24, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {ev.tags.map((tag, i) => (
@@ -2278,7 +2289,9 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             }}>
               <div>
                 <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214" }}>{ev.price}</div>
-                <div style={{ marginTop: 2, fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: "#4B5052" }}>
+                {/* Spots-remaining caption — unbolded so the price stays
+                    the focal point of the footer. */}
+                <div style={{ marginTop: 2, fontSize: 11.5, fontWeight: 500, color: "#4B5052" }}>
                   {ev.taken} of {ev.totalSpots} spots remaining
                 </div>
               </div>
@@ -2706,7 +2719,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
         <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
           <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 26 : 56, lineHeight: isMobile ? "32px" : "64px", letterSpacing: isMobile ? -0.4 : -1.4, color: theme.t.text, margin: 0 }}>
             {isCR ?
-            <>Welcome to Court Reserve<br /><span style={{ color: "#4B5052" }}>Let's Play.</span></> :
+            <>Welcome to CourtReserve<br /><span style={{ color: "#4B5052" }}>Let's Play.</span></> :
             <>Hi {PLAYER.name}.<br /><span style={{ color: theme.t.textSubtle }}>Welcome back to {theme.logoText}!</span></>}
           </h1>
           <div style={{ paddingBottom: 8, display: "inline-flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>

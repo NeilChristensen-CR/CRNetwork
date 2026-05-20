@@ -3,7 +3,7 @@
 // Minimal logged-out chrome: brandmark on the left, Sign In on the right.
 // The center nav and Sign Up affordances were removed — the bottom action
 // bar covers primary actions and signed-out users can't switch clubs (so
-// the caret next to CourtRESERVE was dropped too). The same layout works
+// the caret next to CourtReserve was dropped too). The same layout works
 // on desktop and mobile; sizes shift slightly to fit narrow viewports.
 // ChromeBar (in Apps.jsx) delegates to this when app === "cr".
 // ----------------------------------------------------------------------------
