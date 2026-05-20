@@ -202,7 +202,7 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
         <h2 style={{
           margin: 0,
           fontFamily: theme.display, fontWeight: 800,
-          fontSize: isMobile ? 22 : 28, lineHeight: 1.15, letterSpacing: -0.6,
+          fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8,
           color: t.text,
           minWidth: 0,
           flex: "0 1 auto",
@@ -243,58 +243,23 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
               can trace what's grouped under it. A vertical line between the
               two groups makes the separation explicit. */}
       {(() => {
-        const mine = ordered.filter((v) => v.myClub);
-        const other = ordered.filter((v) => !v.myClub);
-        const renderGroup = (label, items) =>
-        <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
-            {/* Group header — sticks to the left edge of the visible
-            scroll area while the group's cards scroll behind it, so
-            the cards always carry the group's label as context until
-            the next group's header pushes it out of view. */}
-            <div style={{
-            position: "sticky",
-            left: isMobile ? 20 : 4,
-            // Bound the sticky region so the label doesn't slide past
-            // the end of its own card group.
-            alignSelf: "flex-start",
-            zIndex: 2,
-            maxWidth: "100%",
-            display: "flex", alignItems: "center", gap: 10,
-            fontSize: 10, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase",
-            color: t.textSubtle,
-            paddingRight: 4,
-            // Tiny white pill behind the label so it stays readable
-            // when card content scrolls under it.
-            background: t.surface,
-            boxShadow: `4px 0 6px -2px ${t.surface}`
-          }}>
-              <span style={{ whiteSpace: "nowrap" }}>{label}</span>
-              <span style={{ flex: 1, height: 1, background: t.line }} />
-            </div>
-            {/* Cards row */}
-            <div style={{ display: "flex", gap: 12, margin: "0px" }}>
-              {items.map((v) =>
-            <div key={v.id} style={{ flex: "0 0 280px", scrollSnapAlign: "start", display: "flex" }}>
-                  <BookNowCard v={v} theme={theme} onPickSlot={(timeLabel) => setPendingSlot({ venue: v, time: timeLabel })} />
-                </div>
-            )}
-            </div>
-          </div>;
-
+        // Logged-out network view: one continuous list of venues, no
+        // "My clubs / Clubs around me" subgrouping (signed-out users have
+        // no club affiliation to split by).
         return (
-          // Carousel wrapper — relative so the right-edge gradient fade can
-          // sit absolutely on top, y padding gives card hover shadows room
-          // so they aren't clipped by the scroll container's overflow box.
-          <div style={{ position: "relative", margin: isMobile ? "-16px -20px -16px" : "-16px -4px -16px" }}>
+          <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px" : "-16px -4px -16px" }}>
           <div ref={trackRef} style={{
-            display: "flex", gap: 20, overflowX: "auto", scrollSnapType: "x mandatory",
-            paddingTop: 28, paddingBottom: 32, scrollbarWidth: "none",
+            display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
+            paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
             paddingLeft: isMobile ? 20 : 4,
             paddingRight: isMobile ? 20 : 4,
             alignItems: "stretch"
           }}>
-            {mine.length > 0 && renderGroup("My clubs", mine)}
-            {other.length > 0 && renderGroup("Clubs around me", other)}
+            {ordered.map((v) => (
+              <div key={v.id} style={{ flex: "0 0 280px", scrollSnapAlign: "start", display: "flex" }}>
+                <BookNowCard v={v} theme={theme} onPickSlot={(timeLabel) => setPendingSlot({ venue: v, time: timeLabel })} />
+              </div>
+            ))}
           </div>
           {/* Right-edge fade — 16px gradient so the last partially visible
               card dissolves into the page background instead of hard-clipping. */}

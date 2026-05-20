@@ -1724,7 +1724,12 @@ function Dashboard({ theme, viewport, onOpenEventList, onOpenClub, onFindClubs, 
   const desktop = viewport === "desktop";
   const isCR = mode === "cr";
 
-  if (desktop) return <DashboardDesktop theme={theme} onOpenEventList={onOpenEventList} onOpenClub={onOpenClub} onFindClubs={onFindClubs} onBookCourt={onBookCourt} isCR={isCR} app={app} setApp={setApp} />;
+  // Desktop always uses the network-discovery layout. Logged-out CR also
+  // routes mobile through the same layout (with viewport="mobile" so the
+  // section components adapt) — the goal is for the mobile experience to
+  // mirror the logged-out home end-to-end. Logged-in / branded mobile
+  // surfaces continue to use the legacy mobile dashboard below.
+  if (desktop || isCR) return <DashboardDesktop theme={theme} viewport={viewport} onOpenEventList={onOpenEventList} onOpenClub={onOpenClub} onFindClubs={onFindClubs} onBookCourt={onBookCourt} isCR={isCR} app={app} setApp={setApp} />;
 
   // Track scroll-past of PrimaryRows to reveal the floating CTA bar.
   const primaryRef = React.useRef(null);
@@ -1871,19 +1876,22 @@ function Dashboard({ theme, viewport, onOpenEventList, onOpenClub, onFindClubs, 
 // after the user scrolls past PrimaryActionGrid. Modeled on the EventDetails
 // sticky CTA. Centered, max 720px, dark surface, 4 actions matching the
 // grid above. Hidden when the grid is still in view.
-function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, isCR }) {
+function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, isCR, viewport = "desktop" }) {
+  const isMobile = viewport === "mobile";
+  // Each action carries a long label (desktop) and a short label (mobile) so
+  // the 4-action bar fits inside the 410px device frame without truncating.
   const items = isCR ?
   [
-  { icon: "Calendar", label: "Book a Court", onClick: onOpenEventList, primary: true },
-  { icon: "Lightbulb", label: "Find an Event", onClick: onOpenEventList },
-  { icon: "MapPin", label: "Find a Club", onClick: onFindClubs },
-  { icon: "User", label: "Book a Pro", onClick: null }] :
+  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: onOpenEventList, primary: true },
+  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: onOpenEventList },
+  { icon: "MapPin",    label: "Find a Club",   shortLabel: "Find Club",  onClick: onFindClubs },
+  { icon: "User",      label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }] :
 
   [
-  { icon: "Calendar", label: "Book a Court", onClick: onOpenEventList, primary: true },
-  { icon: "Lightbulb", label: "Find an Event", onClick: onOpenEventList },
-  { icon: "Users", label: "Open Play", onClick: null },
-  { icon: "User", label: "Book a Pro", onClick: null }];
+  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: onOpenEventList, primary: true },
+  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: onOpenEventList },
+  { icon: "Users",     label: "Open Play",     shortLabel: "Open Play",  onClick: null },
+  { icon: "User",      label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }];
 
   // On the logged-out CourtReserve home the floater is persistent — it acts
   // as the primary action selector pinned to the bottom of the viewport
@@ -1900,29 +1908,44 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
   const activeIdx = hovered != null ? hovered : (primaryIdx === -1 ? 0 : primaryIdx);
 
   return (
+    // Sticky positioning differs per viewport:
+    //  - Desktop: bottom: 24 with a compact, content-sized pill centered
+    //    inside the row. Items hug their labels.
+    //  - Mobile: bottom: 0 so the bar attaches to the screen edge; pill
+    //    stretches to fill the row and items distribute evenly (flex: 1).
     <div style={{
-      position: "sticky", bottom: 24, zIndex: 30,
+      position: "sticky",
+      bottom: isMobile ? 0 : 24,
+      zIndex: 30,
       display: "flex", justifyContent: "center", pointerEvents: "none",
-      // Hovers above content inside the dashboard's own scroll area like a
-      // floating action bar. Negative top margin lets it overlap the tail
-      // of the preceding section instead of pushing the page taller.
-      padding: "0 24px",
-      marginTop: -88,
+      // Mobile: 16 top, 12 sides, 8 bottom — pill sits near the bottom of
+      // the viewport with a small cushion. Desktop: floats inset.
+      padding: isMobile ? "16px 12px 8px 12px" : "0 24px",
+      marginTop: isMobile ? -88 : -88,
+      // Gradient on mobile so the page content visibly fades into the
+      // sticky action shelf instead of cutting at a hard edge.
+      background: isMobile
+        ? "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 35%, #FFFFFF 100%)"
+        : "transparent",
       transform: shown ? "translateY(0)" : "translateY(28px)",
       opacity: shown ? 1 : 0,
-      transition: "transform 320ms cubic-bezier(.2,.8,.2,1), opacity 240ms ease"
+      transition: "transform 320ms cubic-bezier(.2,.8,.2,1), opacity 240ms ease",
     }}>
       <div
         onMouseLeave={() => setHovered(null)}
         style={{
-        pointerEvents: "auto",
-        display: "inline-flex", alignItems: "center", gap: 6,
-        background: theme.dark ? "rgba(20,23,27,.92)" : "rgba(15,18,20,.96)",
-        backdropFilter: "blur(14px)",
-        color: "#fff",
-        padding: 6, borderRadius: 999,
-        boxShadow: "0 14px 40px rgba(15,18,20,.28), 0 2px 8px rgba(15,18,20,.18)"
-      }}>
+          pointerEvents: "auto",
+          display: isMobile ? "flex" : "inline-flex",
+          width: isMobile ? "100%" : "auto",
+          alignItems: "center",
+          gap: isMobile ? 4 : 6,
+          background: theme.dark ? "rgba(20,23,27,.92)" : "rgba(15,18,20,.96)",
+          backdropFilter: "blur(14px)",
+          color: "#fff",
+          padding: 6, borderRadius: 999,
+          boxShadow: "0 14px 40px rgba(15,18,20,.28), 0 2px 8px rgba(15,18,20,.18)",
+        }}
+      >
         {items.map((it, idx) => {
           const isActive = idx === activeIdx;
           return (
@@ -1931,17 +1954,29 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
               onClick={it.onClick || undefined}
               onMouseEnter={() => setHovered(idx)}
               style={{
-                height: 44, padding: "0 18px", borderRadius: 999, border: 0,
+                // Desktop hugs content; mobile fills the row evenly.
+                flex: isMobile ? 1 : "0 0 auto",
+                minWidth: 0,
+                height: isMobile ? 36 : 44,
+                padding: isMobile ? "0 8px" : "0 18px",
+                borderRadius: 999, border: 0,
                 background: isActive ? "#fff" : "transparent",
                 color: isActive ? "#0F1214" : "#fff",
-                fontFamily: "inherit", fontWeight: 700, fontSize: 13, cursor: it.onClick ? "pointer" : "default",
-                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+                fontFamily: "inherit", fontWeight: 700,
+                fontSize: isMobile ? 12 : 13,
+                cursor: it.onClick ? "pointer" : "default",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                gap: isMobile ? 0 : 8,
                 whiteSpace: "nowrap",
                 transition: "background 140ms ease, color 140ms ease",
               }}
             >
-              <Icon name={it.icon} size={14} color={isActive ? "#0F1214" : "#fff"} strokeWidth={2.2} />
-              {it.label}
+              {/* Icons appear only on desktop; mobile hides them so labels
+                  fit comfortably across the 4-item row. */}
+              {!isMobile && (
+                <Icon name={it.icon} size={14} color={isActive ? "#0F1214" : "#fff"} strokeWidth={2.2} />
+              )}
+              {it.shortLabel}
             </button>
           );
         })}
@@ -1953,7 +1988,8 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
 // ---- Verified popular clubs near you — horizontal carousel of map-image
 // venue cards. Each card: map preview with distance badge, club name,
 // rating + price, sport tag, and a See Events & Info link.
-function VerifiedPopularClubs({ theme, onOpenClub }) {
+function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
+  const isMobile = viewport === "mobile";
   const trackRef = React.useRef(null);
   // Varied club data per card so the carousel reads as a real list rather
   // than a repeated placeholder. Each club carries multiple sport tags so
@@ -1996,7 +2032,7 @@ function VerifiedPopularClubs({ theme, onOpenClub }) {
   return (
     <div style={{ marginTop: 8 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           Popular clubs near you
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -2020,10 +2056,10 @@ function VerifiedPopularClubs({ theme, onOpenClub }) {
           fade can sit absolutely on top, and y-padding gives card hover
           shadows room to render without getting clipped by the scroll
           container's overflow box. */}
-      <div style={{ position: "relative", margin: "-16px -4px -16px" }}>
+      <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px" : "-16px -4px -16px" }}>
       <div ref={trackRef} style={{
         display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
-        paddingTop: 28, paddingBottom: 32, scrollbarWidth: "none",
+        paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
         paddingLeft: 4, paddingRight: 4
       }}>
         {clubs.map((c) => (
@@ -2127,7 +2163,8 @@ function VerifiedPopularClubs({ theme, onOpenClub }) {
 // ---- Popular events near you — carousel of event cards. Each card:
 // club brand mark, spots-left badge, title, club row, distance, schedule,
 // tag pills, and price + spots-remaining footer.
-function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false }) {
+function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false, viewport = "desktop" }) {
+  const isMobile = viewport === "mobile";
   const trackRef = React.useRef(null);
   // Varied event data — distinct clubs, titles, dates, prices, and tags per
   // card so the carousel reads as a real list rather than a repeated stub.
@@ -2146,9 +2183,9 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
     el.scrollBy({ left: dx, behavior: "smooth" });
   };
   return (
-    <div style={{ marginTop: 16 }}>
+    <div style={{ marginTop: isMobile ? 8 : 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           {title}
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
@@ -2182,10 +2219,10 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
       </div>
       {/* Carousel wrapper — relative for the right-edge fade overlay, y
           padding so card hover shadows aren't clipped. */}
-      <div style={{ position: "relative", margin: "-16px -4px -16px" }}>
+      <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px" : "-16px -4px -16px" }}>
       <div ref={trackRef} style={{
         display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
-        paddingTop: 28, paddingBottom: 32, scrollbarWidth: "none",
+        paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
         paddingLeft: 4, paddingRight: 4,
         alignItems: "stretch"
       }}>
@@ -2302,7 +2339,8 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
 // Each row: time + status on the left, title + spots-left pill + meta + avatars
 // in the middle, price + arrow CTA on the right. Date headers carry a count
 // chip showing how many sessions fall under that day.
-function MoreEventsNearYou({ theme, onOpenEvent }) {
+function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
+  const isMobile = viewport === "mobile";
   // Avatar stack — three overlapping player avatars. The "+X attending"
   // count is rendered separately by the caller so the number can vary per
   // row without re-rendering the avatar stack.
@@ -2356,10 +2394,19 @@ function MoreEventsNearYou({ theme, onOpenEvent }) {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [filterOpen]);
   return (
-    <div style={{ marginTop: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 12 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
-          More events near you
+    <div style={{ marginTop: isMobile ? 8 : 16 }}>
+      <div style={{
+        display: "flex",
+        // Stack title above combo filter on mobile so the filter has full
+        // row width to itself.
+        flexDirection: isMobile ? "column" : "row",
+        alignItems: isMobile ? "stretch" : "center",
+        justifyContent: "space-between",
+        gap: isMobile ? 12 : 16,
+        marginBottom: 12,
+      }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
+          {isMobile ? "More Events" : "More events near you"}
         </h2>
         <div ref={filterRef} style={{ position: "relative" }}>
           <button onClick={() => setFilterOpen((o) => !o)} aria-expanded={filterOpen} style={{
@@ -2413,7 +2460,7 @@ function MoreEventsNearYou({ theme, onOpenEvent }) {
           </div>
           <div>
             {g.rows.map((r, i) => (
-              <EventRow key={i} r={r} first={i === 0} onOpenEvent={onOpenEvent} theme={theme} Avatars={Avatars} />
+              <EventRow key={i} r={r} first={i === 0} onOpenEvent={onOpenEvent} theme={theme} Avatars={Avatars} viewport={viewport} />
             ))}
           </div>
         </div>
@@ -2466,8 +2513,80 @@ function FilterSelect({ label, value, onChange, options }) {
 // Sub-component so each row can carry its own hover state (subtle background
 // tint) without re-rendering the whole list on hover. Time + spots-left tag
 // top-align with the title/location/meta column.
-function EventRow({ r, first, onOpenEvent, theme, Avatars }) {
+function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" }) {
   const [hover, setHover] = React.useState(false);
+  const isMobile = viewport === "mobile";
+
+  // ---- Mobile layout ------------------------------------------------------
+  // Stacks the event content vertically: title → avatars+attending →
+  // location → metadata → bottom row with time + spots-left on the left
+  // and price + Reserve CTA on the right. No two-column grid — better fit
+  // for narrow viewports where the 96px reserved left column would chew
+  // up half the available width.
+  if (isMobile) {
+    return (
+      <div
+        onClick={() => onOpenEvent && onOpenEvent()}
+        style={{
+          display: "flex", flexDirection: "column", gap: 6,
+          padding: "16px 0",
+          borderTop: first ? "1px solid #E9EBEC" : "1px solid #F4F5F6",
+          cursor: "pointer",
+        }}
+      >
+        <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214", letterSpacing: -0.2, lineHeight: 1.25 }}>
+          {r.title}
+        </div>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <Avatars />
+          <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
+        </div>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#4B5052" }}>
+          <Icon name="MapPin" size={13} strokeWidth={1.75} color="#858F8F" />
+          <span>{r.club} · {r.city} · {r.distance}</span>
+        </div>
+        <div style={{ fontSize: 12, color: "#4B5052" }}>
+          {r.meta}
+        </div>
+        {/* Bottom row — time + spots tag on the left, price + Reserve CTA
+            on the right, balanced via space-between. */}
+        <div style={{
+          marginTop: 6,
+          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+        }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, color: "#0F1214" }}>{r.time}</span>
+            <span style={{
+              height: 20, padding: "0 8px", borderRadius: 6,
+              background: "#FEE2E2", color: "#DC2626",
+              fontSize: 11, fontWeight: 700,
+              display: "inline-flex", alignItems: "center",
+            }}>{r.spotsLeft} Spots Left</span>
+          </div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 15, color: "#0F1214", whiteSpace: "nowrap" }}>{r.price}</span>
+            <button
+              onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
+              aria-label="Reserve event"
+              style={{
+                height: 36, padding: "0 12px 0 14px",
+                borderRadius: 8,
+                background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
+                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
+                fontFamily: "inherit", fontWeight: 700, fontSize: 12.5,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Reserve
+              <Icon name="ArrowRight" size={14} strokeWidth={2.2} color="#fff" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Desktop layout (unchanged) -----------------------------------------
   return (
     <div
       onMouseEnter={() => setHover(true)}
@@ -2487,8 +2606,6 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars }) {
         transition: "background 140ms ease",
       }}
     >
-      {/* Left — time + spots-left tag. Top-aligned with the title in the
-          middle column so the row reads cleanly even when the title wraps. */}
       <div>
         <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", lineHeight: "21px" }}>{r.time}</div>
         <div style={{ marginTop: 6 }}>
@@ -2500,10 +2617,6 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars }) {
           }}>{r.spotsLeft} Spots Left</span>
         </div>
       </div>
-      {/* Middle — 3 lines:
-          1) Title + avatars + "+X attending"
-          2) Location: MapPin + club, city, state, distance
-          3) Event metadata (format, DUPR range, instructor) */}
       <div style={{ minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", lineHeight: "21px" }}>
           <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.2 }}>{r.title}</span>
@@ -2521,10 +2634,6 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars }) {
         </div>
       </div>
       <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", whiteSpace: "nowrap", alignSelf: "center" }}>{r.price}</div>
-      {/* CTA button — collapses to a 40px square arrow at rest. On row
-          hover, expands leftward into a "Reserve →" pill which pushes the
-          price column left and makes the action explicit. Width transitions
-          smoothly so the layout shift reads as one cohesive reveal. */}
       <button
         onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
         aria-label="Reserve event"
@@ -2551,7 +2660,10 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars }) {
 }
 
 // ---- Web-optimized dashboard ----
-function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onBookCourt, isCR, app, setApp }) {
+// Now also drives logged-out CR mobile so the experience mirrors desktop.
+// All dimensional tokens swap based on the viewport flag below.
+function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpenClub, onFindClubs, onBookCourt, isCR, app, setApp }) {
+  const isMobile = viewport === "mobile";
   // Reveal the floating CTA once PrimaryActionGrid has scrolled out of view
   // at the top of the scroll container. Same pattern as the mobile floater.
   const actionGridRef = React.useRef(null);
@@ -2581,21 +2693,38 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
   }, []);
   return (
     <div data-dark={theme.dark ? "true" : undefined} style={{
-      background: theme.t.bg, minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif", paddingBottom: 64,
+      background: theme.t.bg,
+      // On mobile the device frame's inner container has overflow: hidden,
+      // so DashboardDesktop has to be its own scroll context for sticky to
+      // function and for the page to actually scroll vertically. On desktop
+      // the parent already provides overflow-y so min-height: 100% suffices.
+      height: isMobile ? "100%" : undefined,
+      minHeight: isMobile ? undefined : "100%",
+      overflowY: isMobile ? "auto" : undefined,
+      // Clip any horizontal overflow on mobile so nothing — extended sticky
+      // shelves, off-screen carousel tails, etc — induces a horizontal
+      // scrollbar inside the device frame.
+      overflowX: isMobile ? "hidden" : undefined,
+      fontFamily: "Inter, system-ui, sans-serif",
+      // paddingBottom on the scroll container shifts sticky-bottom anchors
+      // OFF the visual bottom edge (sticky aligns to the padding box). Drop
+      // it on mobile so the action bar actually pins to the viewport edge;
+      // desktop keeps it for trailing breathing room.
+      paddingBottom: isMobile ? 0 : 64,
       color: theme.t.text,
       "--bg": theme.t.bg, "--surface": theme.t.surface, "--surface-soft": theme.t.surfaceSoft,
       "--text": theme.t.text, "--text-muted": theme.t.textMuted, "--text-subtle": theme.t.textSubtle,
       "--text-inverted": theme.t.textInverted, "--line": theme.t.line, "--rule": theme.t.rule, "--chip": theme.t.chip
     }}>
-      <ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => setQrOpen(true)} onFindClubs={onFindClubs} onOpenProfile={() => {if (window.__navigateProfile) window.__navigateProfile();}} active="Home" onNav={(l) => {if (window.__navigate) window.__navigate(l);}} />
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 32px 64px" }}>
+      <ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => setQrOpen(true)} onFindClubs={onFindClubs} onOpenProfile={() => {if (window.__navigateProfile) window.__navigateProfile();}} active="Home" onNav={(l) => {if (window.__navigate) window.__navigate(l);}} />
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 16px 80px" : "48px 32px 64px" }}>
         {racquetAlertOpen && window.ProShopAlert &&
         <div style={{ marginBottom: 24 }}>
-            <window.ProShopAlert theme={theme} desktop={true} onDismiss={() => setRacquetAlertOpen(false)} />
+            <window.ProShopAlert theme={theme} desktop={!isMobile} onDismiss={() => setRacquetAlertOpen(false)} />
           </div>
         }
-        <div style={{ marginBottom: 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 32, flexWrap: "wrap" }}>
-          <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 64, lineHeight: "68px", letterSpacing: -2, color: theme.t.text, margin: 0 }}>
+        <div style={{ marginBottom: isMobile ? 20 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
+          <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 32 : 64, lineHeight: isMobile ? "36px" : "68px", letterSpacing: isMobile ? -0.8 : -2, color: theme.t.text, margin: 0 }}>
             {isCR ?
             <>Welcome to Court Reserve<br /><span style={{ color: "#858F8F" }}>Let's Play.</span></> :
             <>Hi {PLAYER.name}.<br /><span style={{ color: theme.t.textSubtle }}>Welcome back to {theme.logoText}!</span></>}
@@ -2631,30 +2760,67 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
         {isCR && window.SearchBar &&
         <div style={{
           position: "sticky",
-          top: 64, // matches logged-out ChromeBar height (desktop)
+          // 64 desktop matches the logged-out ChromeBar; 56 on mobile.
+          top: isMobile ? 56 : 64,
           zIndex: 40,
-          // Extend exactly to the edges of the device frame's content
-          // column (which is 1440 wide vs the maxWidth: 1200 parent). The
-          // -120 margins land flush against the device frame's
-          // overflow: hidden boundary so nothing protrudes and no
-          // horizontal scrollbar is induced on the scroll container.
-          marginLeft: -120,
-          marginRight: -120,
-          paddingLeft: 120,
-          paddingRight: 120,
-          // Gradient runs top → bottom: completely opaque white from the
-          // top through the bar (so anything scrolling behind it from
-          // above is fully hidden), then fades to transparent in the
-          // 16px bottom padding so content rising up from below dissolves
-          // smoothly into the sticky shelf instead of cutting at a hard
-          // edge. 16px padding on top + bottom flanks the bar evenly.
+          // Negative margins escape the maxWidth parent so the sticky shelf
+          // spans full device-frame width. Desktop has 120px gutter; mobile
+          // has 16px container padding so we only need -16 there.
+          marginLeft: isMobile ? -16 : -120,
+          marginRight: isMobile ? -16 : -120,
+          paddingLeft: isMobile ? 16 : 120,
+          paddingRight: isMobile ? 16 : 120,
           background: "linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 80%, rgba(255,255,255,0) 100%)",
-          marginBottom: 40,
-          paddingTop: 16,
-          paddingBottom: 16,
+          marginBottom: isMobile ? 0 : 40,
+          paddingTop: isMobile ? 32 : 16,
+          paddingBottom: isMobile ? 32 : 16,
         }}>
-            <window.SearchBar theme={theme} viewport="desktop" onSubmit={() => onBookCourt && onBookCourt()} />
+            {isMobile && window.SearchBarCompact
+              ? <window.SearchBarCompact theme={theme} viewport={viewport} onExpand={() => onBookCourt && onBookCourt()} />
+              : <window.SearchBar theme={theme} viewport={viewport} onSubmit={() => onBookCourt && onBookCourt()} />}
           </div>
+        }
+        {/* Location blurb — sits BELOW the sticky SearchBar shelf (not
+            inside it). Confirms the auto-detected region and offers an
+            emphasized "Get Current Location" link to override. */}
+        {isCR &&
+        <div style={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "flex-start" : "center",
+          justifyContent: "center",
+          gap: isMobile ? 6 : 12,
+          fontSize: 13,
+          color: "#4B5052",
+          marginBottom: isMobile ? 20 : 32,
+          padding: isMobile ? "0 4px" : 0,
+          fontFamily: "Inter, system-ui, sans-serif",
+        }}>
+          <span>
+            It looks like you're in the <b style={{ color: "#0F1214", fontWeight: 700 }}>East Bay</b>. Not Correct?
+          </span>
+          <button
+            type="button"
+            style={{
+              background: "transparent",
+              border: 0,
+              padding: 0,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#1F4ED8",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+            }}
+          >
+            <Icon name="Navigation" size={13} strokeWidth={2.4} color="#1F4ED8" />
+            Get Current Location
+          </button>
+        </div>
         }
         {!isCR && window.BookCourtWidget &&
         <div style={{ marginBottom: 40 }}>
@@ -2663,7 +2829,7 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
         }
         <div ref={actionGridRef} aria-hidden="true" style={{ marginTop: 8 }} />
         {isCR &&
-        <VerifiedPopularClubs theme={theme} onOpenClub={onOpenClub} />
+        <VerifiedPopularClubs theme={theme} viewport={viewport} onOpenClub={onOpenClub} />
         }
         {isCR &&
         <div style={{ marginTop: 32 }}>
@@ -2671,13 +2837,13 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
           </div>
         }
         {isCR &&
-        <PopularEventsNearYou theme={theme} title="Trending events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <PopularEventsNearYou theme={theme} viewport={viewport} title="Trending events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
-        <MoreEventsNearYou theme={theme} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <MoreEventsNearYou theme={theme} viewport={viewport} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
-        <PopularEventsNearYou theme={theme} title="Recurring events near you" showLocationFilter={true} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <PopularEventsNearYou theme={theme} viewport={viewport} title="Recurring Events" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {!isCR && window.MyClubBookingPanel &&
         <window.MyClubBookingPanel
@@ -2701,7 +2867,7 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
         }
         {!isCR && <ClubLeaderboardSegment theme={theme} isCR={isCR} />}
       </div>
-      <DesktopActionFloater theme={theme} visible={pastActions} onOpenEventList={onOpenEventList} onFindClubs={onFindClubs} isCR={isCR} />
+      <DesktopActionFloater theme={theme} viewport={viewport} visible={pastActions} onOpenEventList={onOpenEventList} onFindClubs={onFindClubs} isCR={isCR} />
       {qrOpen && <MemberQRSheet theme={theme} onClose={() => setQrOpen(false)} />}
     </div>);
 
