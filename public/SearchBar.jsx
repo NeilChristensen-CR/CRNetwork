@@ -807,7 +807,6 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   // Type-ahead query (separate from the committed v.where value) +
   // show-all toggle (renders the "5mi radius" expansion).
   const [whereQuery, setWhereQuery] = useStateSB("");
-  const [showAllWhere, setShowAllWhere] = useStateSB(false);
 
   // ---- WHAT / WHEN single-select state -----------------------------------
   // Every facet is single-select now — tapping a row commits and
@@ -835,7 +834,6 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
     if (open) {
       setOpenSection("where");
       setWhereQuery("");
-      setShowAllWhere(false);
       setActivity("Any Sport");
       setWhenDay("Any day");
       setWhenTime("Any time");
@@ -872,10 +870,12 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   };
 
   // ---- Section accordion shell --------------------------------------------
-  // Section title sits one step BELOW the sheet's main heading. No
-  // chevron — the chip on the right doubles as the affordance ("there's
-  // a selection here, tap to change it"). No borderBottom between
-  // sections either; the sheet reads as a flat list.
+  // Section header reads as a full question ("Where would you like to
+  // reserve") so the type carries the intent. Size 16/800 gives clean
+  // hierarchy below the 22px sheet title without crowding row labels at
+  // 15. No chevron — chip on the right shows the current pick when
+  // collapsed, and tapping the header (with min-height: 56 hit area)
+  // toggles. No inter-section borders.
   const SectionAccordion = ({ id, label, chip, children }) => {
     const isOpen = openSection === id;
     return (
@@ -887,7 +887,8 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           style={{
             width: "100%", minHeight: 56,
             display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "14px 0",
+            gap: 12,
+            padding: "12px 0",
             border: 0, background: "transparent",
             fontFamily: "inherit", cursor: "pointer", textAlign: "left",
           }}
@@ -895,9 +896,12 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           <span style={{
             fontFamily: "Axiforma, Inter, system-ui, sans-serif",
             fontWeight: 800,
-            // Section header: one step down from the 24px sheet title.
-            fontSize: 17, lineHeight: 1.2, letterSpacing: -0.3,
+            fontSize: 16, lineHeight: 1.25, letterSpacing: -0.2,
             color: "#0F1214",
+            // Long section labels — keep on one line, ellipsize if the
+            // chip + label combine wider than the row.
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            flex: 1, minWidth: 0,
           }}>{label}</span>
           {chip && !isOpen && (
             <span style={{
@@ -905,8 +909,9 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               background: "#F4F5F6", color: "#0F1214",
               fontSize: 11.5, fontWeight: 600,
               display: "inline-flex", alignItems: "center",
-              maxWidth: 200,
+              maxWidth: 160,
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              flexShrink: 0,
             }}>{chip}</span>
           )}
         </button>
@@ -920,11 +925,17 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   };
 
   // ---- List row ----------------------------------------------------------
-  // Every body row carries a radio indicator on the left so the list
-  // reads as a single-select group at a glance. The selected row also
-  // gets a subtle grey fill so the picked state is visible without
-  // relying solely on the dot. WHERE rows still use a leading list-icon
-  // (MapPin / Building2 / Hash) — the radio sits BEFORE that icon.
+  // Uniform anatomy across every section so the list reads as a single
+  // group regardless of which facet you're looking at:
+  //
+  //   [leading icon, optional]   Label                       (radio)
+  //                              Sub line (optional)
+  //
+  // Radio sits on the RIGHT — primary content reads left-to-right
+  // naturally, the selection state lives at the trailing edge.
+  // min-height: 56 keeps 1-line and 2-line rows visually balanced.
+  // Picked rows get a subtle #F4F5F6 fill so the selection reads even
+  // without looking at the dot.
   const Row = ({ active, icon, label, sub, onClick, accent = "#0F1214" }) => (
     <button
       type="button"
@@ -932,11 +943,10 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
       style={{
         display: "flex", alignItems: "center", gap: 12,
         width: "100%",
+        minHeight: 56,
         padding: "10px 12px",
         margin: "0 -12px",
         border: 0,
-        // Picked rows get a subtle grey fill so the selection reads even
-        // without looking at the radio glyph.
         background: active ? "#F4F5F6" : "transparent",
         borderRadius: 10,
         color: "#0F1214",
@@ -944,22 +954,6 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         transition: "background 120ms ease",
       }}
     >
-      {/* Radio indicator — outline ring with a filled dot when active.
-          `accent` lets WHERE's "Show more" row swap in blue. */}
-      <span style={{
-        width: 18, height: 18, borderRadius: 999,
-        border: `2px solid ${active ? accent : "#C8CDCD"}`,
-        display: "inline-flex", alignItems: "center", justifyContent: "center",
-        flexShrink: 0,
-        transition: "border-color 120ms ease",
-      }}>
-        {active && (
-          <span style={{
-            width: 8, height: 8, borderRadius: 999,
-            background: accent,
-          }} />
-        )}
-      </span>
       {icon && window.Icon && (
         <span style={{ display: "inline-flex", flexShrink: 0 }}>
           <window.Icon name={icon} size={18} strokeWidth={2} color={accent === "#1F4ED8" ? accent : "#4B5052"} />
@@ -975,9 +969,25 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         }}>{label}</span>
         {sub && (
           <span style={{
-            fontSize: 12.5, color: "#4B5052", lineHeight: 1.3,
+            fontSize: 13, color: "#4B5052", lineHeight: 1.3,
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           }}>{sub}</span>
+        )}
+      </span>
+      {/* Trailing radio indicator — outline ring with a filled dot when
+          active. `accent` lets specialty rows (e.g. blue actions) swap in. */}
+      <span style={{
+        width: 20, height: 20, borderRadius: 999,
+        border: `2px solid ${active ? accent : "#C8CDCD"}`,
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        flexShrink: 0,
+        transition: "border-color 120ms ease",
+      }}>
+        {active && (
+          <span style={{
+            width: 8, height: 8, borderRadius: 999,
+            background: accent,
+          }} />
         )}
       </span>
     </button>
@@ -994,18 +1004,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
     : (whenDay || whenTime || null);
   const whoChip = v.who || null;
 
-  // ---- WHERE suggestion ranking ------------------------------------------
-  // For the prototype we treat order in SB_WHERE_SUGGESTIONS as proximity
-  // (clubs are pre-sorted by distance from the user's region). When the
-  // user hasn't searched, show the 3 nearest + a "Show more within 5 mi"
-  // expand trigger that reveals the rest of the corpus.
+  // ---- WHERE suggestions -------------------------------------------------
+  // Single full-list render — order in SB_WHERE_SUGGESTIONS doubles as
+  // proximity (clubs are pre-sorted by distance from the user's region).
+  // Typing in the input filters; otherwise the list scrolls.
   const whereMatches = filterWhereSuggestions(whereQuery, 50);
-  const visibleWhere = whereQuery
-    ? whereMatches
-    : showAllWhere
-    ? whereMatches
-    : whereMatches.slice(0, 3);
-  const hiddenCount = !whereQuery && !showAllWhere ? whereMatches.length - visibleWhere.length : 0;
 
   // Portal target — the device frame's inner container has
   // `position: relative` and `overflow: hidden`, so anchoring the sheet
@@ -1101,7 +1104,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           padding: "0 16px 8px 16px",
         }}>
           {/* ---- WHERE ----------------------------------------------------- */}
-          <SectionAccordion id="where" label="Where" chip={whereChip}>
+          <SectionAccordion id="where" label="Where would you like to reserve" chip={whereChip}>
             {/* Search input with the new copy. */}
             <div style={{
               display: "flex", alignItems: "center", gap: 8,
@@ -1115,7 +1118,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               <input
                 type="text"
                 value={whereQuery}
-                onChange={(e) => { setWhereQuery(e.target.value); setShowAllWhere(false); }}
+                onChange={(e) => setWhereQuery(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -1148,21 +1151,25 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               )}
             </div>
 
-            {/* Borderless stacked list — Current location pinned, then up
-                to 3 nearest, then "Show more within 5 mi" expand. */}
-            <div>
+            {/* Borderless stacked list — Current location at the top
+                (with the user's resolved address as sub line), then the
+                nearby club / city / zip matches. 16px gap between the
+                search input above and the list below. No "Show more"
+                row — typing in the input is the way to surface more. */}
+            <div style={{ paddingTop: 16 }}>
               <Row
                 active={v.where === "Current location"}
                 icon="Navigation"
-                label="Use current location"
+                label="Current location"
+                sub="Oakland, CA, 94619 (my current location)"
                 onClick={() => { set("where", "Current location"); setOpenSection("what"); }}
               />
-              {visibleWhere.length === 0 ? (
+              {whereMatches.length === 0 ? (
                 <div style={{ padding: "16px 0", fontSize: 13, color: "#858F8F" }}>
                   No matches for "{whereQuery}"
                 </div>
               ) : (
-                visibleWhere.map((s) => (
+                whereMatches.map((s) => (
                   <Row
                     key={`${s.kind}-${s.name}`}
                     active={v.where === s.name}
@@ -1173,46 +1180,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                   />
                 ))
               )}
-              {hiddenCount > 0 && (
-                // "Show more" — matches the Row layout exactly so it
-                // aligns with the list items above. Plus icon sits where
-                // the radio would sit (18px round, same -12px hit area),
-                // label uses the blue accent.
-                <button
-                  type="button"
-                  onClick={() => setShowAllWhere(true)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 12,
-                    width: "100%",
-                    padding: "10px 12px",
-                    margin: "0 -12px",
-                    border: 0, background: "transparent",
-                    borderRadius: 10,
-                    fontFamily: "inherit", textAlign: "left", cursor: "pointer",
-                  }}
-                >
-                  <span style={{
-                    width: 18, height: 18, borderRadius: 999,
-                    display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0,
-                  }}>
-                    {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#1F4ED8" />}
-                  </span>
-                  <span style={{
-                    flex: 1, minWidth: 0,
-                    fontSize: 15, fontWeight: 600, color: "#1F4ED8",
-                    lineHeight: 1.3,
-                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                  }}>
-                    Show more within 5 mi ({hiddenCount})
-                  </span>
-                </button>
-              )}
             </div>
           </SectionAccordion>
 
           {/* ---- WHAT — radio single-select, auto-advance to WHEN -------- */}
-          <SectionAccordion id="what" label="What" chip={whatChip}>
+          <SectionAccordion id="what" label="What would you like to reserve" chip={whatChip}>
             <div>
               {SB_SPORTS.map((s) => (
                 <Row
@@ -1235,7 +1207,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               underline). Both lists are rendered at once so the user can
               jump between Day range and Time of day without an extra tap.
               Defaults are seeded to "Any day" / "Any time" on open. */}
-          <SectionAccordion id="when" label="When" chip={whenChip}>
+          <SectionAccordion id="when" label="When would you like to reserve" chip={whenChip}>
             {/* ---- Day range eyebrow ---- */}
             <div style={{
               padding: "12px 0 6px 0",
@@ -1290,7 +1262,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           </SectionAccordion>
 
           {/* ---- WHO — borderless row + contained pill stepper ----------- */}
-          <SectionAccordion id="who" label="Who" chip={whoChip}>
+          <SectionAccordion id="who" label="Who's playing" chip={whoChip}>
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: "12px 0",
