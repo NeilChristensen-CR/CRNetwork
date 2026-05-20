@@ -795,77 +795,48 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   const v = values;
   const set = (k, val) => onChange({ ...v, [k]: val });
 
-  // Type-ahead state for the WHERE section. Same model as the desktop
-  // popover — local query separate from the committed v.where value.
+  // ---- Accordion state ----------------------------------------------------
+  // openSection: which accordion is expanded. null = all closed.
+  // The sheet enters with everything collapsed so the user sees a clean
+  // four-section list; tapping a row opens that section. Selecting a value
+  // auto-advances (where → what → when → who).
+  const [openSection, setOpenSection] = useStateSB(null);
+
+  // ---- WHERE state --------------------------------------------------------
+  // Type-ahead query (separate from the committed v.where value) +
+  // show-all toggle (renders the "5mi radius" expansion).
   const [whereQuery, setWhereQuery] = useStateSB("");
-  // Seed query with the current committed value when the sheet opens so
-  // the user sees what they last picked + can edit; reset on close.
+  const [showAllWhere, setShowAllWhere] = useStateSB(false);
+
+  // ---- WHAT / WHEN multiselect state --------------------------------------
+  // Each is an array of ids. Committed back to v.activity / v.when as a
+  // comma-joined string so the pill subtitle still reads cleanly.
+  const [activities, setActivities] = useStateSB([]);
+  const [whenSelections, setWhenSelections] = useStateSB([]);
+
+  // Reset on open — clean slate every time the sheet appears.
   useEffectSB(() => {
     if (open) {
-      // Skip seeding when the value is still the placeholder.
-      const isPlaceholder = v && (v.where === "Oakland, CA" || !v.where);
-      setWhereQuery(isPlaceholder ? "" : (v && v.where) || "");
-    } else {
+      setOpenSection(null);
       setWhereQuery("");
+      setShowAllWhere(false);
+      setActivities([]);
+      setWhenSelections([]);
     }
   }, [open]);
 
-  // Section heading row — uppercase microlabel + current value, separated
-  // by a hairline. Used for every facet so the four sections read uniformly.
-  const SectionHeader = ({ label, value }) => (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
-      <span style={{
-        fontSize: 11, fontWeight: 800, color: "#858F8F",
-        letterSpacing: 1, textTransform: "uppercase",
-      }}>{label}</span>
-      <span style={{
-        fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-        fontWeight: 700, fontSize: 13, color: "#0F1214",
-        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60%",
-      }}>{value}</span>
-    </div>
-  );
+  // Mirror multiselect arrays back to the committed values so the pill
+  // subtitle reflects what the user picked.
+  useEffectSB(() => {
+    if (activities.length === 0) return;
+    set("activity", activities.length === 1 ? activities[0] : `${activities[0]} +${activities.length - 1}`);
+  }, [activities]);
+  useEffectSB(() => {
+    if (whenSelections.length === 0) return;
+    set("when", whenSelections.length === 1 ? whenSelections[0] : `${whenSelections[0]} +${whenSelections.length - 1}`);
+  }, [whenSelections]);
 
-  // Generic option-row: full-width left-aligned button, leading icon,
-  // active state inverts to dark.
-  const OptionRow = ({ active, icon, label, sub, onClick }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        display: "flex", alignItems: "center", gap: 12,
-        width: "100%",
-        // Rows with a sub line grow to fit two stacked lines + padding;
-        // single-line rows keep the 48px target.
-        minHeight: 48,
-        padding: sub ? "8px 14px" : "0 14px",
-        borderRadius: 10,
-        border: active ? "1px solid #0F1214" : "1px solid #E9EBEC",
-        background: active ? "#0F1214" : "#FFFFFF",
-        color: active ? "#FFFFFF" : "#0F1214",
-        fontFamily: "inherit", fontSize: 14, fontWeight: 600,
-        textAlign: "left", cursor: "pointer",
-        transition: "background 140ms ease, color 140ms ease, border-color 140ms ease",
-      }}
-    >
-      {icon && window.Icon && (
-        <window.Icon name={icon} size={16} strokeWidth={2.2} color={active ? "#fff" : "#0F1214"} />
-      )}
-      <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{label}</span>
-        {sub && (
-          <span style={{
-            fontSize: 12, fontWeight: 500, lineHeight: 1.2,
-            color: active ? "rgba(255,255,255,.7)" : "#4B5052",
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-          }}>{sub}</span>
-        )}
-      </span>
-    </button>
-  );
-
-  // Player stepper — sub-component because we need local count state synced
-  // with the formatted `who` string.
+  // ---- Player stepper -----------------------------------------------------
   const playerCount = (() => {
     const m = /^(\d+)/.exec(v.who || "");
     return m ? Number(m[1]) : 1;
@@ -874,6 +845,139 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
     const next = Math.max(1, Math.min(8, n));
     set("who", `${next} ${next === 1 ? "Player" : "Players"}`);
   };
+
+  // ---- Section accordion shell --------------------------------------------
+  // Title bar reads as the page section header (h2-style: 20/800), with a
+  // chip on the right showing the currently-committed value when the
+  // section is closed and there's something selected.
+  const SectionAccordion = ({ id, label, chip, children }) => {
+    const isOpen = openSection === id;
+    return (
+      <section style={{ borderBottom: "1px solid #F4F5F6" }}>
+        <button
+          type="button"
+          onClick={() => setOpenSection(isOpen ? null : id)}
+          aria-expanded={isOpen}
+          style={{
+            width: "100%", minHeight: 56,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "14px 0",
+            border: 0, background: "transparent",
+            fontFamily: "inherit", cursor: "pointer", textAlign: "left",
+          }}
+        >
+          <span style={{
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+            fontWeight: 800, fontSize: 20, lineHeight: 1.15, letterSpacing: -0.4,
+            color: "#0F1214",
+          }}>{label}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+            {chip && !isOpen && (
+              <span style={{
+                height: 22, padding: "0 10px", borderRadius: 6,
+                background: "#F4F5F6", color: "#0F1214",
+                fontSize: 11.5, fontWeight: 600,
+                display: "inline-flex", alignItems: "center",
+                maxWidth: 200,
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>{chip}</span>
+            )}
+            {window.Icon && (
+              <window.Icon name={isOpen ? "ChevronUp" : "ChevronDown"} size={18} strokeWidth={2} color="#4B5052" />
+            )}
+          </span>
+        </button>
+        {isOpen && (
+          <div style={{ paddingBottom: 16 }}>
+            {children}
+          </div>
+        )}
+      </section>
+    );
+  };
+
+  // ---- Borderless list row -----------------------------------------------
+  // Used by all section bodies. Stacked, no border, tight padding so the
+  // list reads as a vertical list of selectable items. `kind` controls the
+  // leading affordance: "icon" (default), "checkbox" (WHAT/WHEN multiselect),
+  // or "none".
+  const Row = ({ active, icon, label, sub, onClick, kind = "icon", trailing }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        display: "flex", alignItems: "center", gap: 12,
+        width: "100%",
+        padding: "12px 0",
+        border: 0, background: "transparent",
+        color: "#0F1214",
+        fontFamily: "inherit", textAlign: "left", cursor: "pointer",
+      }}
+    >
+      {kind === "checkbox" && (
+        <span style={{
+          width: 22, height: 22, borderRadius: 6,
+          border: `2px solid ${active ? "#0F1214" : "#C8CDCD"}`,
+          background: active ? "#0F1214" : "transparent",
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          flexShrink: 0,
+          transition: "background 120ms ease, border-color 120ms ease",
+        }}>
+          {active && window.Icon && <window.Icon name="Check" size={14} strokeWidth={3} color="#FFFFFF" />}
+        </span>
+      )}
+      {kind === "icon" && icon && window.Icon && (
+        <span style={{ display: "inline-flex", flexShrink: 0, color: "#4B5052" }}>
+          <window.Icon name={icon} size={18} strokeWidth={2} color="#4B5052" />
+        </span>
+      )}
+      <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+        <span style={{
+          fontSize: 15, fontWeight: 500, color: "#0F1214",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          lineHeight: 1.3,
+        }}>{label}</span>
+        {sub && (
+          <span style={{
+            fontSize: 12.5, color: "#4B5052", lineHeight: 1.3,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>{sub}</span>
+        )}
+      </span>
+      {trailing}
+    </button>
+  );
+
+  // ---- Multiselect togglers ----------------------------------------------
+  const toggleActivity = (id) =>
+    setActivities((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  const toggleWhen = (id) =>
+    setWhenSelections((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+
+  // ---- Chip text per section ---------------------------------------------
+  // Show committed value as a chip on the closed accordion. Multiselect
+  // sections show "First +N" when more than one is picked.
+  const whereChip = v.where && v.where !== "Oakland, CA" ? v.where : null;
+  const whatChip = activities.length === 0 ? null
+    : activities.length === 1 ? activities[0]
+    : `${activities[0]} +${activities.length - 1}`;
+  const whenChip = whenSelections.length === 0 ? null
+    : whenSelections.length === 1 ? whenSelections[0]
+    : `${whenSelections[0]} +${whenSelections.length - 1}`;
+  const whoChip = v.who && v.who !== "1 Player" ? v.who : null;
+
+  // ---- WHERE suggestion ranking ------------------------------------------
+  // For the prototype we treat order in SB_WHERE_SUGGESTIONS as proximity
+  // (clubs are pre-sorted by distance from the user's region). When the
+  // user hasn't searched, show the 3 nearest + a "Show more within 5 mi"
+  // expand trigger that reveals the rest of the corpus.
+  const whereMatches = filterWhereSuggestions(whereQuery, 50);
+  const visibleWhere = whereQuery
+    ? whereMatches
+    : showAllWhere
+    ? whereMatches
+    : whereMatches.slice(0, 3);
+  const hiddenCount = !whereQuery && !showAllWhere ? whereMatches.length - visibleWhere.length : 0;
 
   // Portal target — the device frame's inner container has
   // `position: relative` and `overflow: hidden`, so anchoring the sheet
@@ -924,77 +1028,71 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           pointerEvents: open ? "auto" : "none",
         }}
       >
-        {/* Drag handle + header row */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 0 0" }}>
+        {/* Drag handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px 0" }}>
           <div style={{ width: 40, height: 4, borderRadius: 999, background: "#E9EBEC" }} />
         </div>
+        {/* Header row — h2-style "Search for anything" (left), ghost X (right).
+            Matches the page section headers ("Popular clubs near you") so the
+            sheet's title reads as a real heading, not a microlabel. */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "10px 16px 12px 16px",
+          padding: "8px 16px 12px 16px",
         }}>
-          {/* Heading — matches the desktop segment label style (small,
-              uppercase, grey, bold, letter-spaced 1.3) so the sheet reads
-              as "this is the search facet bar, expanded". */}
-          <span style={{
+          <h2 style={{
+            margin: 0,
             fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-            fontWeight: 800,
-            fontSize: 10.5,
-            color: "#858F8F",
-            letterSpacing: 1.3,
-            textTransform: "uppercase",
-            lineHeight: 1,
-          }}>Search for anything</span>
+            fontWeight: 800, fontSize: 20, lineHeight: 1.15, letterSpacing: -0.4,
+            color: "#0F1214",
+          }}>Search for anything</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
             style={{
-              width: 44, height: 44, borderRadius: 999, border: 0,
-              background: "#F4F5F6", color: "#0F1214",
+              width: 44, height: 44, border: 0,
+              background: "transparent",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer",
             }}
           >
-            {window.Icon && <window.Icon name="X" size={18} strokeWidth={2.2} color="#0F1214" />}
+            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="#0F1214" />}
           </button>
         </div>
 
-        {/* Scrollable body — flex: 1 + overflowY makes the four sections
-            scroll while the sticky Search button at the bottom stays
-            pinned. */}
+        {/* Scrollable body — four accordion sections, all start closed.
+            Selecting a value in one auto-advances to the next; multiselect
+            sections (WHAT, WHEN) advance via Continue. */}
         <div style={{
           flex: 1,
           overflowY: "auto",
-          padding: "8px 16px 16px 16px",
-          display: "flex", flexDirection: "column", gap: 20,
+          padding: "0 16px 8px 16px",
         }}>
-          {/* ---- WHERE — type-ahead with club / city / zip matches ---- */}
-          <section>
-            <SectionHeader label="Where" value={v.where} />
-            {/* Search input — typing filters the list below. Free-text
-                Enter commits whatever's typed. */}
+          {/* ---- WHERE ----------------------------------------------------- */}
+          <SectionAccordion id="where" label="Where" chip={whereChip}>
+            {/* Search input with the new copy. */}
             <div style={{
               display: "flex", alignItems: "center", gap: 8,
               padding: "0 14px",
               height: 48, borderRadius: 10,
               border: "1px solid #E9EBEC",
               background: "#FFFFFF",
-              marginBottom: 8,
+              marginBottom: 4,
             }}>
               {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2} color="#4B5052" />}
               <input
                 type="text"
                 value={whereQuery}
-                onChange={(e) => setWhereQuery(e.target.value)}
+                onChange={(e) => { setWhereQuery(e.target.value); setShowAllWhere(false); }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
                     const first = filterWhereSuggestions(whereQuery)[0];
-                    if (first) set("where", first.name);
-                    else if (whereQuery.trim()) set("where", whereQuery.trim());
+                    if (first) { set("where", first.name); setOpenSection("what"); }
+                    else if (whereQuery.trim()) { set("where", whereQuery.trim()); setOpenSection("what"); }
                   }
                 }}
-                placeholder="Club, city, or zip"
+                placeholder="Search for location, club, zip code..."
                 aria-label="Search location"
                 style={{
                   flex: 1, minWidth: 0,
@@ -1018,95 +1116,127 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               )}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {/* Always-visible "Use current location" — sits above filter
-                  results so it's always reachable. */}
-              <OptionRow
+            {/* Borderless stacked list — Current location pinned, then up
+                to 3 nearest, then "Show more within 5 mi" expand. */}
+            <div>
+              <Row
                 active={v.where === "Current location"}
                 icon="Navigation"
                 label="Use current location"
-                onClick={() => set("where", "Current location")}
+                onClick={() => { set("where", "Current location"); setOpenSection("what"); }}
               />
-              {(() => {
-                const matches = filterWhereSuggestions(whereQuery);
-                if (matches.length === 0) {
-                  return (
-                    <div style={{ padding: "16px 14px", fontSize: 13, color: "#858F8F" }}>
-                      No matches for "{whereQuery}"
-                    </div>
-                  );
-                }
-                return matches.map((s) => (
-                  <OptionRow
+              {visibleWhere.length === 0 ? (
+                <div style={{ padding: "16px 0", fontSize: 13, color: "#858F8F" }}>
+                  No matches for "{whereQuery}"
+                </div>
+              ) : (
+                visibleWhere.map((s) => (
+                  <Row
                     key={`${s.kind}-${s.name}`}
                     active={v.where === s.name}
                     icon={SB_WHERE_KIND_ICON[s.kind] || "MapPin"}
                     label={s.name}
                     sub={s.sub}
-                    onClick={() => set("where", s.name)}
+                    onClick={() => { set("where", s.name); setOpenSection("what"); }}
                   />
-                ));
-              })()}
+                ))
+              )}
+              {hiddenCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllWhere(true)}
+                  style={{
+                    width: "100%", padding: "12px 0",
+                    border: 0, background: "transparent",
+                    fontFamily: "inherit", fontSize: 14, fontWeight: 600,
+                    color: "#1F4ED8", textAlign: "left", cursor: "pointer",
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                  }}
+                >
+                  {window.Icon && <window.Icon name="Plus" size={14} strokeWidth={2.4} color="#1F4ED8" />}
+                  Show more within 5 mi ({hiddenCount})
+                </button>
+              )}
             </div>
-          </section>
+          </SectionAccordion>
 
-          {/* ---- ACTIVITY ---- */}
-          <section>
-            <SectionHeader label="Activity" value={v.activity} />
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+          {/* ---- WHAT (renamed from Activity) — multiselect checkboxes --- */}
+          <SectionAccordion id="what" label="What" chip={whatChip}>
+            <div>
               {SB_SPORTS.map((s) => (
-                <OptionRow
+                <Row
                   key={s.id}
-                  active={v.activity === s.id}
-                  icon={s.icon}
+                  kind="checkbox"
+                  active={activities.includes(s.id)}
                   label={s.id}
-                  onClick={() => set("activity", s.id)}
+                  onClick={() => toggleActivity(s.id)}
                 />
               ))}
             </div>
-          </section>
+            <button
+              type="button"
+              onClick={() => setOpenSection("when")}
+              style={{
+                marginTop: 8,
+                width: "100%", height: 44, borderRadius: 10,
+                border: "1px solid #0F1214", background: "#FFFFFF",
+                color: "#0F1214",
+                fontFamily: "inherit", fontSize: 14, fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Continue
+            </button>
+          </SectionAccordion>
 
-          {/* ---- WHEN ---- */}
-          <section>
-            <SectionHeader label="When" value={v.when} />
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {/* ---- WHEN — multiselect checkboxes, vertical list ------------- */}
+          <SectionAccordion id="when" label="When" chip={whenChip}>
+            <div>
               {SB_WHEN_OPTIONS.map((w) => (
-                <OptionRow
+                <Row
                   key={w.id}
-                  active={v.when === w.id}
-                  icon="Calendar"
+                  kind="checkbox"
+                  active={whenSelections.includes(w.id)}
                   label={w.label}
-                  onClick={() => set("when", w.id)}
+                  onClick={() => toggleWhen(w.id)}
                 />
               ))}
-              <div style={{ marginTop: 4, fontSize: 11, fontWeight: 800, color: "#858F8F", letterSpacing: 1, textTransform: "uppercase" }}>Time of day</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
-                {SB_WHEN_TIME_BUCKETS.map((tb) => (
-                  <OptionRow
-                    key={tb.id}
-                    active={v.when === tb.id}
-                    label={tb.id}
-                    sub={tb.sub}
-                    onClick={() => set("when", tb.id)}
-                  />
-                ))}
-              </div>
+              {SB_WHEN_TIME_BUCKETS.map((tb) => (
+                <Row
+                  key={tb.id}
+                  kind="checkbox"
+                  active={whenSelections.includes(tb.id)}
+                  label={tb.id}
+                  sub={tb.sub}
+                  onClick={() => toggleWhen(tb.id)}
+                />
+              ))}
             </div>
-          </section>
+            <button
+              type="button"
+              onClick={() => setOpenSection("who")}
+              style={{
+                marginTop: 8,
+                width: "100%", height: 44, borderRadius: 10,
+                border: "1px solid #0F1214", background: "#FFFFFF",
+                color: "#0F1214",
+                fontFamily: "inherit", fontSize: 14, fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Continue
+            </button>
+          </SectionAccordion>
 
-          {/* ---- WHO ---- */}
-          <section>
-            <SectionHeader label="Who" value={v.who} />
+          {/* ---- WHO — borderless single row with stepper ----------------- */}
+          <SectionAccordion id="who" label="Who" chip={whoChip}>
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "8px 14px", borderRadius: 10,
-              border: "1px solid #E9EBEC", background: "#FFFFFF",
-              height: 56,
+              padding: "12px 0",
             }}>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 14, color: "#0F1214" }}>Players</span>
-                <span style={{ fontSize: 12, color: "#4B5052" }}>1–8</span>
-              </div>
+              <span style={{
+                fontFamily: "inherit", fontSize: 15, fontWeight: 500, color: "#0F1214",
+              }}>Players (1 – 8)</span>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 14 }}>
                 <button
                   type="button"
@@ -1146,7 +1276,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                 </button>
               </div>
             </div>
-          </section>
+          </SectionAccordion>
         </div>
 
         {/* Sticky footer — full-width Search button with safe-area cushion. */}
@@ -1157,7 +1287,22 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         }}>
           <button
             type="button"
-            onClick={() => { onSubmit && onSubmit(v); onClose && onClose(); }}
+            onClick={() => {
+              // Build a normalized prefill payload — the booking flow can
+              // pick up `where / sports / when / players` and pre-populate
+              // its fields. We also stash on window for the prototype's
+              // navigation handoff, since onBookCourt currently calls
+              // setScreen("reserve-court") without a data channel.
+              const prefill = {
+                where: v.where || null,
+                sports: activities.length ? activities : (v.activity ? [v.activity] : []),
+                when: whenSelections.length ? whenSelections : (v.when ? [v.when] : []),
+                players: playerCount,
+              };
+              window.__searchPrefill = prefill;
+              onSubmit && onSubmit(prefill);
+              onClose && onClose();
+            }}
             style={{
               width: "100%", height: 52, borderRadius: 12,
               border: 0, background: "#0F1214", color: "#FFFFFF",
