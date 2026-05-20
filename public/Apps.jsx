@@ -2724,7 +2724,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           </div>
         }
         <div style={{ marginBottom: isMobile ? 20 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
-          <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 32 : 64, lineHeight: isMobile ? "36px" : "68px", letterSpacing: isMobile ? -0.8 : -2, color: theme.t.text, margin: 0 }}>
+          <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 32 : 64, lineHeight: isMobile ? "38px" : "76px", letterSpacing: isMobile ? -0.6 : -1.8, color: theme.t.text, margin: 0 }}>
             {isCR ?
             <>Welcome to Court Reserve<br /><span style={{ color: "#858F8F" }}>Let's Play.</span></> :
             <>Hi {PLAYER.name}.<br /><span style={{ color: theme.t.textSubtle }}>Welcome back to {theme.logoText}!</span></>}
