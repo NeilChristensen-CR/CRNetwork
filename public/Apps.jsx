@@ -2155,7 +2155,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
     el.scrollBy({ left: dx, behavior: "smooth" });
   };
   return (
-    <div style={{ marginTop: isMobile ? 8 : 16 }}>
+    <div style={{ marginTop: isMobile ? 32 : 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
         <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           {title}
@@ -2366,7 +2366,7 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [filterOpen]);
   return (
-    <div style={{ marginTop: isMobile ? 8 : 16 }}>
+    <div style={{ marginTop: isMobile ? 32 : 16 }}>
       <div style={{
         display: "flex",
         // Stack title above combo filter on mobile so the filter has full
@@ -2821,7 +2821,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
         <VerifiedPopularClubs theme={theme} viewport={viewport} onOpenClub={onOpenClub} />
         }
         {isCR &&
-        <div style={{ marginTop: isMobile ? 8 : 16 }}>
+        <div style={{ marginTop: isMobile ? 32 : 16 }}>
             <BookNowSegment theme={theme} viewport={viewport} />
           </div>
         }
