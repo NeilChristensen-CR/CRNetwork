@@ -944,14 +944,12 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         display: "flex", alignItems: "center", gap: 12,
         width: "100%",
         minHeight: 56,
-        // Symmetric horizontal padding so the leading icon and trailing
-        // radio sit at matching offsets from the row edges. No negative
-        // margin escape: with `width: 100%`, the right margin can't
-        // extend the box even when the left can — produces visibly
-        // uneven left/right alignment. Keeping margin at 0 and letting
-        // the row sit inside the body's 16px padding lines the radio
-        // up with the header's close icon at the same right offset.
-        padding: "10px 0",
+        // 12px horizontal padding insets the selected-state fill from
+        // the sheet edges, so picked rows visibly inset while any
+        // section-level strokes (eyebrow border, etc.) sit edge-to-edge.
+        // Radio still aligns with the close X (both at sheet right - 16
+        // - 12 = body content right - 12 from the row's right edge).
+        padding: "10px 12px",
         border: 0,
         background: active ? "#F4F5F6" : "transparent",
         borderRadius: 10,
@@ -1176,7 +1174,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                 active={v.where === "Current location"}
                 icon="Navigation"
                 label="Current location"
-                sub="Oakland, CA, 94619 (my current location)"
+                sub="Oakland, CA (my current location)"
                 onClick={() => { set("where", "Current location"); setOpenSection("what"); }}
               />
               {whereVisible.length === 0 ? (
@@ -1229,7 +1227,12 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           <SectionAccordion id="when" label="When" chip={whenChip}>
             {/* ---- Day range eyebrow ---- */}
             <div style={{
-              padding: "12px 0 6px 0",
+              // Extend the eyebrow's border-bottom edge-to-edge: -16px
+              // margins on each side reach the sheet edges (body has
+              // padding-right: 16). The label keeps its 16px inset via
+              // padding so it lines up vertically with row content.
+              margin: "0 -16px",
+              padding: "12px 16px 6px 16px",
               borderBottom: "1px solid #E9EBEC",
               fontFamily: "Axiforma, Inter, system-ui, sans-serif",
               fontSize: 10.5, fontWeight: 800,
@@ -1255,7 +1258,12 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
 
             {/* ---- Time of day eyebrow ---- */}
             <div style={{
-              padding: "12px 0 6px 0",
+              // Extend the eyebrow's border-bottom edge-to-edge: -16px
+              // margins on each side reach the sheet edges (body has
+              // padding-right: 16). The label keeps its 16px inset via
+              // padding so it lines up vertically with row content.
+              margin: "0 -16px",
+              padding: "12px 16px 6px 16px",
               borderBottom: "1px solid #E9EBEC",
               fontFamily: "Axiforma, Inter, system-ui, sans-serif",
               fontSize: 10.5, fontWeight: 800,
@@ -1427,12 +1435,15 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
       }}
       style={{
         width: "100%",
-        height: 52,
+        // Auto height with 8px vertical padding gives the pill a more
+        // balanced shape — content (label + value) is two stacked lines
+        // ≈ 36px tall, so 36 + 8 + 8 = 52, but the explicit vertical
+        // padding lets the bar grow if a font swap changes line height.
         borderRadius: 999,
         background: "#fff",
         border: 0,
         boxShadow: "0 1px 2px rgba(15,18,20,.06), 0 4px 14px rgba(15,18,20,.08), inset 0 0 0 1px rgba(15,18,20,.06)",
-        padding: "0 8px 0 18px",
+        padding: "8px 8px 8px 18px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",

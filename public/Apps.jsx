@@ -2134,6 +2134,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
               <window.BookNowCard
                 v={c}
                 theme={theme}
+                viewport={viewport}
                 onPickSlot={() => onOpenClub && onOpenClub(c.id)}
                 onOpenClub={onOpenClub}
               />
@@ -2177,6 +2178,33 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
     const el = trackRef.current; if (!el) return;
     el.scrollBy({ left: dx, behavior: "smooth" });
   };
+  // Mobile carousel focus elevation — observe each card and elevate
+  // the one(s) that are ≥70% visible inside the track viewport. Touch
+  // devices have no :hover, so this gives the visible card the same
+  // "in-focus" cue desktop gets from a mouse hover.
+  React.useEffect(() => {
+    if (!isMobile || typeof IntersectionObserver === "undefined") return;
+    const track = trackRef.current;
+    if (!track) return;
+    const cards = Array.from(track.querySelectorAll("[data-card-hover]"));
+    if (cards.length === 0) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.intersectionRatio >= 0.7) {
+            e.target.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)";
+            e.target.style.transform = "translateY(-2px)";
+          } else if (e.intersectionRatio < 0.4) {
+            e.target.style.boxShadow = "none";
+            e.target.style.transform = "translateY(0)";
+          }
+        });
+      },
+      { root: track, threshold: [0, 0.4, 0.7, 1] }
+    );
+    cards.forEach((c) => obs.observe(c));
+    return () => obs.disconnect();
+  }, [isMobile]);
   return (
     <div style={{ marginTop: isMobile ? 32 : 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
@@ -2232,8 +2260,13 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               display: "flex", flexDirection: "column",
               transition: "box-shadow 160ms, transform 160ms",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
+            // Desktop only — mouse hover elevates. On mobile the
+            // elevation is driven by an IntersectionObserver below
+            // (applies to whichever card is most visible in the
+            // carousel viewport) so touch users don't lose the
+            // "in focus" cue.
+            onMouseEnter={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
             {/* Header — brandmark logo on the left, spots tag opposite
                 on the right. align-items: center vertically centers the
