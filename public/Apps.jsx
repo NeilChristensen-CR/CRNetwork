@@ -2752,15 +2752,15 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           paddingRight: isMobile ? 16 : 120,
           background: "linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 80%, rgba(255,255,255,0) 100%)",
           marginBottom: isMobile ? 0 : 8,
-          // Mobile: tighter to the title above (16 vs 32) so H1 → search
-          // reads as a unit. Desktop unchanged.
-          paddingTop: isMobile ? 16 : 16,
-          // Mobile: more breathing room before the location blurb (20 vs 8)
-          // — the previous tight gap made the bar and blurb feel collapsed.
+          // Mobile: 24px shelf top padding + 8px H1 marginBottom = 32px
+          // total gap from title to search bar (per spec). Desktop unchanged.
+          paddingTop: isMobile ? 24 : 16,
+          // Mobile: 20px breathing room before the location blurb so the bar
+          // and blurb don't feel collapsed.
           paddingBottom: isMobile ? 20 : 4,
         }}>
             {isMobile && window.SearchBarCompact
-              ? <window.SearchBarCompact theme={theme} viewport={viewport} onExpand={() => onBookCourt && onBookCourt()} />
+              ? <window.SearchBarCompact theme={theme} viewport={viewport} onSubmit={() => onBookCourt && onBookCourt()} />
               : <window.SearchBar theme={theme} viewport={viewport} onSubmit={() => onBookCourt && onBookCourt()} />}
           </div>
         }

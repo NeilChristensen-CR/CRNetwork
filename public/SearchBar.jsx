@@ -615,18 +615,324 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   );
 }
 
-// ---- Mobile compact variant ----------------------------------------------
-// Single-row pill that taps open the full SearchBar. Used in tight mobile
-// chrome where the full 4-segment bar is too tall.
-function SearchBarCompact({ theme, viewport = "mobile", values, onExpand }) {
-  const v = values || {
-    where: "Oakland, CA", activity: "Any Sport",
-    when: "Any Day • Any Time", who: "1 Player",
-  };
-  return (
+// ---- Mobile bottom sheet --------------------------------------------------
+// Full-height sheet that slides up from the bottom of the viewport. Renders
+// the four facets stacked in segment order (Where → Activity → When → Who)
+// with the option lists from the desktop SearchBar so the discovery model
+// stays consistent.
+//
+// Pure presentational — the parent owns `values` + `onChange`. Selecting
+// an option commits immediately; tapping "Search" runs `onSubmit` (which
+// also dismisses the sheet via the parent setting `open = false`).
+function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme }) {
+  // Locked body scroll while the sheet is open so the underlying page can't
+  // scroll behind the overlay.
+  useEffectSB(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
+  const v = values;
+  const set = (k, val) => onChange({ ...v, [k]: val });
+
+  // Section heading row — uppercase microlabel + current value, separated
+  // by a hairline. Used for every facet so the four sections read uniformly.
+  const SectionHeader = ({ label, value }) => (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+      <span style={{
+        fontSize: 11, fontWeight: 800, color: "#858F8F",
+        letterSpacing: 1, textTransform: "uppercase",
+      }}>{label}</span>
+      <span style={{
+        fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+        fontWeight: 700, fontSize: 13, color: "#0F1214",
+        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60%",
+      }}>{value}</span>
+    </div>
+  );
+
+  // Generic option-row: full-width left-aligned button, leading icon,
+  // active state inverts to dark.
+  const OptionRow = ({ active, icon, label, sub, onClick }) => (
     <button
       type="button"
-      onClick={onExpand}
+      onClick={onClick}
+      style={{
+        display: "flex", alignItems: "center", gap: 12,
+        width: "100%", height: 48,
+        padding: "0 14px",
+        borderRadius: 10,
+        border: active ? "1px solid #0F1214" : "1px solid #E9EBEC",
+        background: active ? "#0F1214" : "#FFFFFF",
+        color: active ? "#FFFFFF" : "#0F1214",
+        fontFamily: "inherit", fontSize: 14, fontWeight: 600,
+        textAlign: "left", cursor: "pointer",
+        transition: "background 140ms ease, color 140ms ease, border-color 140ms ease",
+      }}
+    >
+      {icon && window.Icon && (
+        <window.Icon name={icon} size={16} strokeWidth={2.2} color={active ? "#fff" : "#0F1214"} />
+      )}
+      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+      {sub && <span style={{ fontSize: 12, fontWeight: 500, color: active ? "rgba(255,255,255,.7)" : "#4B5052" }}>{sub}</span>}
+    </button>
+  );
+
+  // Player stepper — sub-component because we need local count state synced
+  // with the formatted `who` string.
+  const playerCount = (() => {
+    const m = /^(\d+)/.exec(v.who || "");
+    return m ? Number(m[1]) : 1;
+  })();
+  const setPlayers = (n) => {
+    const next = Math.max(1, Math.min(8, n));
+    set("who", `${next} ${next === 1 ? "Player" : "Players"}`);
+  };
+
+  return (
+    <>
+      {/* Backdrop — fades in/out. Tapping it dismisses the sheet. */}
+      <div
+        onClick={onClose}
+        aria-hidden={!open}
+        style={{
+          position: "fixed", inset: 0,
+          background: "rgba(15,18,20,.45)",
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 220ms ease",
+          zIndex: 100,
+        }}
+      />
+      {/* Sheet — slides up from the bottom. 92% of viewport height so a
+          peek of the backdrop remains visible at the top, signaling the
+          sheet is modal and dismissible. */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search"
+        style={{
+          position: "fixed", left: 0, right: 0, bottom: 0,
+          height: "92vh",
+          background: "#FFFFFF",
+          borderTopLeftRadius: 20, borderTopRightRadius: 20,
+          boxShadow: "0 -8px 32px rgba(15,18,20,.22)",
+          transform: open ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 320ms cubic-bezier(.2,.8,.2,1)",
+          zIndex: 101,
+          display: "flex", flexDirection: "column",
+          fontFamily: "Inter, system-ui, sans-serif",
+        }}
+      >
+        {/* Drag handle + header row */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 0 0" }}>
+          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#E9EBEC" }} />
+        </div>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "10px 16px 12px 16px",
+        }}>
+          <span style={{
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+            fontWeight: 800, fontSize: 16, color: "#0F1214", letterSpacing: -0.2,
+          }}>Search for anything</span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: 32, height: 32, borderRadius: 999, border: 0,
+              background: "#F4F5F6", color: "#0F1214",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            {window.Icon && <window.Icon name="X" size={16} strokeWidth={2.2} color="#0F1214" />}
+          </button>
+        </div>
+
+        {/* Scrollable body — flex: 1 + overflowY makes the four sections
+            scroll while the sticky Search button at the bottom stays
+            pinned. */}
+        <div style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "8px 16px 16px 16px",
+          display: "flex", flexDirection: "column", gap: 20,
+        }}>
+          {/* ---- WHERE ---- */}
+          <section>
+            <SectionHeader label="Where" value={v.where} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {SB_LOCATIONS.map((loc) => (
+                <OptionRow
+                  key={loc}
+                  active={v.where === loc}
+                  icon={loc === "Current location" ? "Navigation" : "MapPin"}
+                  label={loc}
+                  onClick={() => set("where", loc)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* ---- ACTIVITY ---- */}
+          <section>
+            <SectionHeader label="Activity" value={v.activity} />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+              {SB_SPORTS.map((s) => (
+                <OptionRow
+                  key={s.id}
+                  active={v.activity === s.id}
+                  icon={s.icon}
+                  label={s.id}
+                  onClick={() => set("activity", s.id)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* ---- WHEN ---- */}
+          <section>
+            <SectionHeader label="When" value={v.when} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {SB_WHEN_OPTIONS.map((w) => (
+                <OptionRow
+                  key={w.id}
+                  active={v.when === w.id}
+                  icon="Calendar"
+                  label={w.label}
+                  onClick={() => set("when", w.id)}
+                />
+              ))}
+              <div style={{ marginTop: 4, fontSize: 11, fontWeight: 800, color: "#858F8F", letterSpacing: 1, textTransform: "uppercase" }}>Time of day</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
+                {SB_WHEN_TIME_BUCKETS.map((tb) => (
+                  <OptionRow
+                    key={tb.id}
+                    active={v.when === tb.id}
+                    label={tb.id}
+                    sub={tb.sub}
+                    onClick={() => set("when", tb.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ---- WHO ---- */}
+          <section>
+            <SectionHeader label="Who" value={v.who} />
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "8px 14px", borderRadius: 10,
+              border: "1px solid #E9EBEC", background: "#FFFFFF",
+              height: 56,
+            }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 14, color: "#0F1214" }}>Players</span>
+                <span style={{ fontSize: 12, color: "#4B5052" }}>1–8</span>
+              </div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 14 }}>
+                <button
+                  type="button"
+                  onClick={() => setPlayers(playerCount - 1)}
+                  disabled={playerCount <= 1}
+                  aria-label="Fewer players"
+                  style={{
+                    width: 36, height: 36, borderRadius: 999,
+                    border: "1px solid #E9EBEC", background: "#FFFFFF",
+                    color: "#0F1214", cursor: playerCount <= 1 ? "not-allowed" : "pointer",
+                    opacity: playerCount <= 1 ? 0.4 : 1,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.2} color="#0F1214" />}
+                </button>
+                <span style={{
+                  minWidth: 24, textAlign: "center",
+                  fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+                  fontWeight: 800, fontSize: 18, color: "#0F1214",
+                  fontVariantNumeric: "tabular-nums",
+                }}>{playerCount}</span>
+                <button
+                  type="button"
+                  onClick={() => setPlayers(playerCount + 1)}
+                  disabled={playerCount >= 8}
+                  aria-label="More players"
+                  style={{
+                    width: 36, height: 36, borderRadius: 999,
+                    border: "1px solid #E9EBEC", background: "#FFFFFF",
+                    color: "#0F1214", cursor: playerCount >= 8 ? "not-allowed" : "pointer",
+                    opacity: playerCount >= 8 ? 0.4 : 1,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.2} color="#0F1214" />}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* Sticky footer — full-width Search button with safe-area cushion. */}
+        <div style={{
+          padding: "12px 16px calc(12px + env(safe-area-inset-bottom)) 16px",
+          borderTop: "1px solid #E9EBEC",
+          background: "#FFFFFF",
+        }}>
+          <button
+            type="button"
+            onClick={() => { onSubmit && onSubmit(v); onClose && onClose(); }}
+            style={{
+              width: "100%", height: 52, borderRadius: 12,
+              border: 0, background: "#0F1214", color: "#FFFFFF",
+              fontFamily: "inherit", fontSize: 15, fontWeight: 700,
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+              cursor: "pointer",
+            }}
+          >
+            {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2.2} color="#fff" />}
+            Search
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ---- Mobile compact variant ----------------------------------------------
+// Single-row pill that opens the MobileSearchSheet on tap. The pill shows
+// the title "Search for anything" plus the four current facet values on a
+// single line. Used in tight mobile chrome where the full 4-segment bar is
+// too tall.
+function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubmit }) {
+  // Compact owns its own state by default so the bottom sheet's selections
+  // persist between opens. Callers can hoist by passing `values` + a
+  // matching change handler via `onExpand` (kept for backwards compat).
+  const [internal, setInternal] = useStateSB({
+    where: "Oakland, CA", activity: "Any Sport",
+    when: "Any Day • Any Time", who: "1 Player",
+  });
+  const v = values || internal;
+  const update = (next) => {
+    if (values) {/* controlled — caller handles */ } else setInternal(next);
+  };
+
+  const [open, setOpen] = useStateSB(false);
+  return (
+    <>
+    <button
+      type="button"
+      onClick={() => {
+        // Tap opens the bottom sheet for editing facets. The legacy
+        // `onExpand` prop still fires for callers that want a navigation
+        // side-effect (kept for backwards compat).
+        setOpen(true);
+        onExpand && onExpand();
+      }}
       style={{
         width: "100%",
         height: 52,
@@ -643,21 +949,22 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand }) {
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 3, overflow: "hidden", flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 6, overflow: "hidden", maxWidth: "100%" }}>
-          <span style={{ fontSize: 9, fontWeight: 700, color: "#858F8F", letterSpacing: 0.6, textTransform: "uppercase", flexShrink: 0 }}>Where</span>
-          <span style={{ fontFamily: "Axiforma, Inter", fontWeight: 800, fontSize: 13, color: "#0F1214", letterSpacing: -0.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {v.where}
-          </span>
+        {/* Title — "Search for anything" reads as a prompt the way Google /
+            Airbnb compact bars frame their entry point. */}
+        <div style={{
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+          fontWeight: 800, fontSize: 13, color: "#0F1214", letterSpacing: -0.1,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%",
+        }}>
+          Search for anything
         </div>
-        <div style={{ fontSize: 11, fontWeight: 500, color: "#4B5052", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
-          <span style={{ fontSize: 9, fontWeight: 700, color: "#858F8F", letterSpacing: 0.6, textTransform: "uppercase" }}>Activity</span>
-          <span> {v.activity}</span>
-          <span style={{ color: "#C8CDCD" }}>  ·  </span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: "#858F8F", letterSpacing: 0.6, textTransform: "uppercase" }}>When</span>
-          <span> {v.when}</span>
-          <span style={{ color: "#C8CDCD" }}>  ·  </span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: "#858F8F", letterSpacing: 0.6, textTransform: "uppercase" }}>Who</span>
-          <span> {v.who}</span>
+        {/* Subtitle — all four current values joined on a single line by
+            bullets. Truncates with ellipsis if it can't fit. */}
+        <div style={{
+          fontSize: 11, fontWeight: 500, color: "#4B5052",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%",
+        }}>
+          {v.where} <span style={{ color: "#C8CDCD" }}>•</span> {v.activity} <span style={{ color: "#C8CDCD" }}>•</span> {v.when} <span style={{ color: "#C8CDCD" }}>•</span> {v.who}
         </div>
       </div>
       <span style={{
@@ -667,7 +974,16 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand }) {
         {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2.2} color="#fff" />}
       </span>
     </button>
+    <MobileSearchSheet
+      open={open}
+      onClose={() => setOpen(false)}
+      values={v}
+      onChange={update}
+      onSubmit={(committed) => onSubmit && onSubmit(committed)}
+      theme={theme}
+    />
+    </>
   );
 }
 
-Object.assign(window, { SearchBar, SearchBarCompact });
+Object.assign(window, { SearchBar, SearchBarCompact, MobileSearchSheet });
