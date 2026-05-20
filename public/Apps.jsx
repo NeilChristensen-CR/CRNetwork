@@ -2032,7 +2032,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
   return (
     <div style={{ marginTop: 8 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           Popular clubs near you
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -2185,7 +2185,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
   return (
     <div style={{ marginTop: isMobile ? 8 : 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           {title}
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
@@ -2405,7 +2405,7 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
         gap: isMobile ? 12 : 16,
         marginBottom: 12,
       }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           {isMobile ? "More Events" : "More events near you"}
         </h2>
         <div ref={filterRef} style={{ position: "relative" }}>
