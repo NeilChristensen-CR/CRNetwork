@@ -949,13 +949,13 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             onClick={onClose}
             aria-label="Close"
             style={{
-              width: 32, height: 32, borderRadius: 999, border: 0,
+              width: 44, height: 44, borderRadius: 999, border: 0,
               background: "#F4F5F6", color: "#0F1214",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer",
             }}
           >
-            {window.Icon && <window.Icon name="X" size={16} strokeWidth={2.2} color="#0F1214" />}
+            {window.Icon && <window.Icon name="X" size={18} strokeWidth={2.2} color="#0F1214" />}
           </button>
         </div>
 
