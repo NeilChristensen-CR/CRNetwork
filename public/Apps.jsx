@@ -2254,10 +2254,10 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                 const s = supplyState(ev);
                 return (
                   <span style={{
-                    height: 22, padding: "0 10px", borderRadius: 999,
-                    background: s.urgent ? "#DC2626" : "#F4F5F6",
-                    color: s.urgent ? "#fff" : "#0F1214",
-                    fontSize: 11, fontWeight: s.urgent ? 700 : 600,
+                    height: 22, padding: "0 10px", borderRadius: 6,
+                    background: s.urgent ? "#FEE2E2" : "#F4F5F6",
+                    color: s.urgent ? "#B91C1C" : "#0F1214",
+                    fontSize: 11.5, fontWeight: 600,
                     display: "inline-flex", alignItems: "center",
                     whiteSpace: "nowrap",
                   }}>{s.text}</span>
@@ -2302,7 +2302,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               <div style={{ marginTop: 24, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {ev.tags.map((tag, i) => (
                   <span key={i} style={{
-                    height: 24, padding: "0 10px", borderRadius: 6,
+                    height: 22, padding: "0 10px", borderRadius: 6,
                     background: "#F4F5F6", color: "#0F1214",
                     fontSize: 11.5, fontWeight: 600,
                     display: "inline-flex", alignItems: "center",
@@ -2592,10 +2592,10 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
               const s = supplyState(r);
               return (
                 <span style={{
-                  height: 20, padding: "0 8px", borderRadius: 6,
+                  height: 22, padding: "0 10px", borderRadius: 6,
                   background: s.urgent ? "#FEE2E2" : "#F4F5F6",
-                  color: s.urgent ? "#DC2626" : "#0F1214",
-                  fontSize: 11, fontWeight: s.urgent ? 700 : 600,
+                  color: s.urgent ? "#B91C1C" : "#0F1214",
+                  fontSize: 11.5, fontWeight: 600,
                   display: "inline-flex", alignItems: "center",
                   whiteSpace: "nowrap",
                 }}>{s.text}</span>
@@ -2654,10 +2654,10 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
             const s = supplyState(r);
             return (
               <span style={{
-                height: 22, padding: "0 8px", borderRadius: 6,
+                height: 22, padding: "0 10px", borderRadius: 6,
                 background: s.urgent ? "#FEE2E2" : "#F4F5F6",
-                color: s.urgent ? "#DC2626" : "#0F1214",
-                fontSize: 11, fontWeight: s.urgent ? 700 : 600,
+                color: s.urgent ? "#B91C1C" : "#0F1214",
+                fontSize: 11.5, fontWeight: 600,
                 display: "inline-flex", alignItems: "center",
                 whiteSpace: "nowrap",
               }}>{s.text}</span>

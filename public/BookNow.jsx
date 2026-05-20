@@ -440,9 +440,9 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
         }}>
           <span style={{
             display: "inline-flex", alignItems: "center",
-            height: 22, padding: "0 8px", borderRadius: 6,
+            height: 22, padding: "0 10px", borderRadius: 6,
             background: "#F4F5F6", color: "#0F1214",
-            fontSize: 11, fontWeight: 600,
+            fontSize: 11.5, fontWeight: 600,
             whiteSpace: "nowrap",
           }}>{v.sport}</span>
           <span>Booked {v.booked} × Today</span>
@@ -784,31 +784,31 @@ function MiniMap({ venue, theme }) {
       <span style={{
         position: "absolute", top: 10, left: 10,
         display: "inline-flex", alignItems: "center",
-        height: 24, padding: "0 10px", borderRadius: 6,
+        height: 22, padding: "0 10px", borderRadius: 6,
         background: "#FFFFFF",
         color: "#0F1214",
-        fontSize: 11, fontWeight: 700,
+        fontSize: 11.5, fontWeight: 600,
         boxShadow: "0 1px 3px rgba(15,18,20,.12)",
         whiteSpace: "nowrap",
       }}>
         {venue.distance != null ? `${venue.distance}mi` : `${venue.city}, ${venue.state} ${venue.zip}`}
       </span>
-      {/* Top-right active-players pill — green badge with a pulse dot, matches
-          the "X Active" pattern from the target. Only renders when the venue
-          carries an `activePlayers` count. */}
+      {/* Top-right active-players pill — softened from vibrant green to a
+          pale "positive" tone so it sits in the same subtle palette as the
+          other tags. The little dot stays as a kinetic accent. */}
       {venue.activePlayers != null && (
         <span style={{
           position: "absolute", top: 10, right: 10,
           display: "inline-flex", alignItems: "center", gap: 6,
-          height: 24, padding: "0 10px 0 8px", borderRadius: 999,
-          background: "#1F8C5A",
-          color: "#FFFFFF",
-          fontSize: 11, fontWeight: 700,
-          boxShadow: "0 1px 3px rgba(15,18,20,.12)",
+          height: 22, padding: "0 10px 0 8px", borderRadius: 6,
+          background: "#DCFCE7",
+          color: "#166534",
+          fontSize: 11.5, fontWeight: 600,
+          boxShadow: "0 1px 3px rgba(15,18,20,.08)",
           whiteSpace: "nowrap",
         }}>
           <span style={{
-            width: 6, height: 6, borderRadius: 999, background: "#FFFFFF", flexShrink: 0,
+            width: 6, height: 6, borderRadius: 999, background: "#166534", flexShrink: 0,
           }} />
           {venue.activePlayers} Active
         </span>
