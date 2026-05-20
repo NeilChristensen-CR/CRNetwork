@@ -2235,9 +2235,11 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
-            {/* Header — brandmark logo on the left, spots-left tag opposite
-                on the right. Logo colors vary per club. */}
-            <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+            {/* Header — brandmark logo on the left, spots tag opposite
+                on the right. align-items: center vertically centers the
+                tag's text against the logo lockup (both blocks are 22h)
+                so the baselines read aligned. */}
+            <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <div style={{
                   width: 22, height: 22, borderRadius: 4,
