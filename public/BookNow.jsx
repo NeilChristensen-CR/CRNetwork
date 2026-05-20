@@ -197,7 +197,8 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
         alignItems: isMobile ? "stretch" : "center",
         justifyContent: "space-between",
         gap: isMobile ? 12 : 16,
-        paddingTop: 16, paddingBottom: 4
+        paddingTop: 0, paddingBottom: 4,
+        marginBottom: 4
       }}>
         <h2 style={{
           margin: 0,

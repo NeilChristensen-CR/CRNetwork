@@ -2836,8 +2836,8 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
         <VerifiedPopularClubs theme={theme} viewport={viewport} onOpenClub={onOpenClub} />
         }
         {isCR &&
-        <div style={{ marginTop: 32 }}>
-            <BookNowSegment theme={theme} />
+        <div style={{ marginTop: isMobile ? 8 : 16 }}>
+            <BookNowSegment theme={theme} viewport={viewport} />
           </div>
         }
         {isCR &&
