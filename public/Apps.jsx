@@ -1994,15 +1994,19 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
   // Varied club data per card so the carousel reads as a real list rather
   // than a repeated placeholder. Each club carries multiple sport tags so
   // the multi-sport venues read accurately.
+  // Each club now carries city/state (shown as the meta line in place of
+  // the rating row), a primary `sport` tag (single, matching the BookNow
+  // card's single-sport pill), a `booked` count and 4 upcoming `times` so
+  // Popular Clubs reads with the same affordances as Available to Play Now.
   const clubs = [
-    { id: "old-coast",      name: "Old Coast Pickelball",      rating: 4.8, reviews: 256, price: "$$$", sports: ["Pickleball", "Tennis"],            distance: "2.1mi" },
-    { id: "anastasia",      name: "Anastasia Tennis Club",     rating: 4.6, reviews: 132, price: "$$",  sports: ["Tennis"],                          distance: "2.4mi" },
-    { id: "vilano-beach",   name: "Vilano Beach Racquet",      rating: 4.5, reviews: 96,  price: "$$$", sports: ["Tennis", "Pickleball", "Padel"],   distance: "2.6mi" },
-    { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", rating: 4.7, reviews: 312, price: "$$$", sports: ["Pickleball"],                      distance: "8.4mi" },
-    { id: "treaty-park",    name: "Treaty Park Tennis",        rating: 4.3, reviews: 41,  price: "$",   sports: ["Tennis"],                          distance: "3.2mi" },
-    { id: "south-st-aug",   name: "South St. Augustine",       rating: 4.4, reviews: 87,  price: "$$",  sports: ["Tennis", "Pickleball"],            distance: "3.6mi" },
-    { id: "the-hub-padel",  name: "The Hub Padel",             rating: 4.7, reviews: 134, price: "$$$", sports: ["Padel"],                           distance: "5.1mi" },
-    { id: "world-golf",     name: "World Golf Village Tennis", rating: 4.7, reviews: 287, price: "$$$", sports: ["Tennis", "Pickleball"],            distance: "6.8mi" },
+    { id: "old-coast",      name: "Old Coast Pickelball",      city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 23, distance: "2.1mi", times: ["9:00 AM", "9:30 AM", "10:00 AM", "11:30 AM"] },
+    { id: "anastasia",      name: "Anastasia Tennis Club",     city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 14, distance: "2.4mi", times: ["8:00 AM", "8:30 AM", "12:00 PM",  "2:00 PM"] },
+    { id: "vilano-beach",   name: "Vilano Beach Racquet",      city: "Vilano Beach",       state: "FL", sport: "Tennis",     booked: 41, distance: "2.6mi", times: ["10:00 AM", "10:30 AM", "11:00 AM", "12:30 PM"] },
+    { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", city: "Jacksonville",       state: "FL", sport: "Pickleball", booked: 18, distance: "8.4mi", times: ["8:00 AM", "12:00 PM", "2:30 PM", "4:00 PM"] },
+    { id: "treaty-park",    name: "Treaty Park Tennis",        city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 9,  distance: "3.2mi", times: ["7:00 AM", "9:00 AM", "3:00 PM", "5:30 PM"] },
+    { id: "south-st-aug",   name: "South St. Augustine",       city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 27, distance: "3.6mi", times: ["8:30 AM", "11:00 AM", "1:30 PM", "4:30 PM"] },
+    { id: "the-hub-padel",  name: "The Hub Padel",             city: "Jacksonville Beach", state: "FL", sport: "Padel",      booked: 12, distance: "5.1mi", times: ["9:00 AM", "10:30 AM", "1:00 PM", "6:00 PM"] },
+    { id: "world-golf",     name: "World Golf Village Tennis", city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 31, distance: "6.8mi", times: ["7:30 AM", "9:00 AM", "2:00 PM", "6:30 PM"] },
   ];
   const scrollBy = (dx) => {
     const el = trackRef.current; if (!el) return;
@@ -2063,16 +2067,25 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
         paddingLeft: 4, paddingRight: 4
       }}>
         {clubs.map((c) => (
-          <button key={c.id} onClick={() => onOpenClub && onOpenClub(c.id)} style={{
-            flex: "0 0 280px", scrollSnapAlign: "start",
-            background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
-            overflow: "hidden", textAlign: "left", padding: 0,
-            cursor: "pointer", fontFamily: "inherit", color: "inherit",
-            display: "flex", flexDirection: "column",
-            transition: "box-shadow 160ms, transform 160ms"
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
+          // Outer is a div, not a button, because the card now contains
+          // interactive time-slot buttons (nested <button>s are invalid HTML).
+          // role="button" + tabIndex + onKeyDown keeps it keyboard-reachable.
+          <div
+            key={c.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpenClub && onOpenClub(c.id)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpenClub && onOpenClub(c.id); } }}
+            style={{
+              flex: "0 0 280px", scrollSnapAlign: "start",
+              background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
+              overflow: "hidden", textAlign: "left",
+              cursor: "pointer", fontFamily: "inherit", color: "inherit",
+              display: "flex", flexDirection: "column",
+              transition: "box-shadow 160ms, transform 160ms"
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
             <div style={{
               position: "relative", height: 140,
               backgroundImage: `linear-gradient(135deg, rgba(232,240,229,0.92) 0%, rgba(223,233,219,0.92) 40%, rgba(241,235,217,0.92) 100%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 140'><g fill='none' stroke='%23B6C2A8' stroke-width='1.2'><path d='M-20 30 Q60 20 140 50 T300 40'/><path d='M-20 90 Q60 80 140 110 T300 100'/><path d='M40 -10 Q60 60 100 80 T140 160'/><path d='M180 -10 Q200 50 220 90 T240 160'/></g><circle cx='140' cy='70' r='8' fill='%231F4ED8' stroke='%23fff' stroke-width='3'/></svg>")`,
@@ -2088,44 +2101,76 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
                 boxShadow: "0 1px 2px rgba(15,18,20,0.08)"
               }}>{c.distance}</div>
             </div>
-            {/* Card content — 12px padding all around, vertical stack
-                of title / rating / sport tag, all left-aligned. The
-                "See Events & Info" CTA is intentionally OUTSIDE this
-                container so it can sit on the card's blue footer. */}
+            {/* Card content — mirrors the BookNowCard layout: title,
+                location meta (City, State with pin icon), sport tag +
+                booked-today caption, and a 2x2 time slot grid. The CTA
+                lives below this block on the grey footer. */}
             <div style={{
-              padding: 12,
-              display: "flex", flexDirection: "column", alignItems: "flex-start",
+              padding: "14px 16px",
+              display: "flex", flexDirection: "column",
               gap: 8,
             }}>
-              <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3 }}>
+              <div style={{
+                fontFamily: theme.display, fontWeight: 800, fontSize: 17,
+                color: "#0F1214", letterSpacing: -0.3,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
+              }}>
                 {c.name}
               </div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#0F1214" }}>
-                <Stars rating={c.rating} />
-                <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{c.rating}</span>
-                <span style={{ color: "#4B5052" }}>({c.reviews})</span>
-                <span style={{ color: "#4B5052" }}>•</span>
-                <span style={{ fontWeight: 700, color: "#0F1214" }}>{c.price}</span>
-              </div>
-              {/* Sport tag row — multiple tags can render but the row is
-                  capped at one line via flex nowrap + overflow hidden, so
-                  cards with many sports clip rather than break the layout. */}
+
+              {/* Location meta — pin icon + "City, State". Replaces the
+                  previous rating/price row. */}
               <div style={{
-                display: "flex",
-                gap: 6,
-                flexWrap: "nowrap",
-                overflow: "hidden",
-                width: "100%",
+                display: "inline-flex", alignItems: "center", gap: 6,
+                fontSize: 13, color: "#4B5052", fontWeight: 500,
               }}>
-                {c.sports.map((s) => (
-                  <span key={s} style={{
-                    display: "inline-flex", alignItems: "center",
-                    height: 24, padding: "0 10px", borderRadius: 6,
-                    background: "#F4F5F6", color: "#0F1214",
-                    fontSize: 11, fontWeight: 600,
-                    whiteSpace: "nowrap",
-                    flexShrink: 0,
-                  }}>{s}</span>
+                <Icon name="MapPin" size={13} strokeWidth={2.2} color="#4B5052" />
+                <span>{c.city}, {c.state}</span>
+              </div>
+
+              {/* Sport tag + booked-today caption — matches BookNowCard. */}
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                fontSize: 13, color: "#4B5052", fontWeight: 500,
+              }}>
+                <span style={{
+                  display: "inline-flex", alignItems: "center",
+                  height: 22, padding: "0 8px", borderRadius: 6,
+                  background: "#F4F5F6", color: "#0F1214",
+                  fontSize: 11, fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}>{c.sport}</span>
+                <span>Booked {c.booked} × Today</span>
+              </div>
+
+              {/* Time slot pills — 2x2 grid identical to BookNowCard. Clicks
+                  bubble up to the parent card's onOpenClub via stopPropagation
+                  on the slot button (the click still opens the club). */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 4 }}>
+                {c.times.slice(0, 4).map((time) => (
+                  <button
+                    key={time}
+                    onClick={(e) => { e.stopPropagation(); onOpenClub && onOpenClub(c.id); }}
+                    style={{
+                      height: 40, padding: "0 8px", borderRadius: 8,
+                      border: "1px solid #DEE1E5",
+                      background: "#FFFFFF", color: "#0F1214",
+                      fontFamily: "inherit", fontWeight: 600, fontSize: 12,
+                      cursor: "pointer",
+                      display: "inline-flex", alignItems: "center", justifyContent: "center",
+                      transition: "border-color 120ms, background 120ms"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "#0F1214";
+                      e.currentTarget.style.background = "#F4F5F6";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "#DEE1E5";
+                      e.currentTarget.style.background = "#FFFFFF";
+                    }}
+                  >
+                    {time}
+                  </button>
                 ))}
               </div>
             </div>
@@ -2143,7 +2188,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
               See Events & Info
               <Icon name="ArrowRight" size={14} strokeWidth={2} color="#0F1214" />
             </div>
-          </button>
+          </div>
         ))}
       </div>
       {/* Right-edge fade — 16px gradient hides the hard clip of the last
