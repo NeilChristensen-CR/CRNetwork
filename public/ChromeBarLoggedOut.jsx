@@ -97,20 +97,21 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
 
         {/* Right — Sign In dark pill with person icon. Sign Up text link
             removed; Sign In carries both "register" and "log in" entry
-            intents to keep chrome tight. */}
+            intents to keep chrome tight. 44px tall so it meets the
+            primary-auth touch-target floor on mobile. */}
         <button
           type="button"
           onClick={() => onNav && onNav("Sign In")}
           style={{
-            height: 32,
-            padding: "0 14px 0 12px",
-            borderRadius: 8,
+            height: 44,
+            padding: "0 18px 0 14px",
+            borderRadius: 999,
             background: C.pillBg,
             color: C.pillFg,
             border: 0,
             display: "inline-flex",
             alignItems: "center",
-            gap: 6,
+            gap: 8,
             cursor: "pointer",
             fontFamily: "Inter, system-ui, sans-serif",
             fontWeight: 600,
@@ -119,7 +120,7 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
           }}
         >
           {window.Icon && (
-            <window.Icon name="User" size={14} strokeWidth={2} color={C.pillFg} />
+            <window.Icon name="User" size={16} strokeWidth={2} color={C.pillFg} />
           )}
           Sign In
         </button>
