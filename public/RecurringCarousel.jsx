@@ -38,7 +38,7 @@ function RecurringCard({ ev, onClick, viewport = "desktop" }) {
       {/* Eyebrow: cadence + type pill */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
         <span style={{
-          fontFamily: "Axiforma", fontWeight: 800, fontSize: 10, letterSpacing: 1.4,
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 10, letterSpacing: 1.4,
           textTransform: "uppercase", color: hover ? "rgba(255,255,255,.65)" : "#858F8F",
           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         }}>{ev.cadence}</span>
@@ -46,7 +46,7 @@ function RecurringCard({ ev, onClick, viewport = "desktop" }) {
           display: "inline-flex", alignItems: "center", height: 20, padding: "0 8px",
           background: hover ? "#fff" : "#0F1214", color: hover ? "#0F1214" : "#fff",
           borderRadius: 8,
-          fontFamily: "Axiforma", fontSize: 9, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase",
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontSize: 9, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase",
           flexShrink: 0,
         }}>{typeLabel}</span>
       </div>
@@ -54,7 +54,7 @@ function RecurringCard({ ev, onClick, viewport = "desktop" }) {
       {/* Title */}
       <div style={{
         marginTop: 14,
-        fontFamily: "Axiforma", fontWeight: 700,
+        fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700,
         fontSize: compact ? 18 : 20, lineHeight: compact ? "22px" : "24px",
         letterSpacing: -0.3,
         // 2-line clamp
@@ -77,7 +77,7 @@ function RecurringCard({ ev, onClick, viewport = "desktop" }) {
       {/* Bottom row: price + urgency / next session count */}
       <div style={{ marginTop: "auto", paddingTop: 18, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
         <div>
-          <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: compact ? 22 : 24, letterSpacing: -0.4, lineHeight: 1 }}>
+          <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: compact ? 22 : 24, letterSpacing: -0.4, lineHeight: 1 }}>
             {ev.priceLabel}
           </div>
           <div style={{ marginTop: 4, fontSize: 11, color: hover ? "rgba(255,255,255,.6)" : "#858F8F", fontWeight: 500 }}>
@@ -151,7 +151,7 @@ function RecurringCarousel({ items, onSelect, viewport = "desktop", first = fals
         flexWrap: desktop ? "nowrap" : "nowrap",
       }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: desktop ? 12 : 8, minWidth: 0 }}>
-          <h2 style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: desktop ? 14 : 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", margin: 0, whiteSpace: "nowrap" }}>
+          <h2 style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: desktop ? 14 : 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", margin: 0, whiteSpace: "nowrap" }}>
             Ongoing & recurring
           </h2>
           <span style={{ fontSize: desktop ? 12 : 11, color: "#4B5052", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>

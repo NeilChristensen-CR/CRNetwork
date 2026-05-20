@@ -584,14 +584,14 @@ function ScoreRow({ label, value, delta, style }) {
       <span style={{ fontSize: 11, color: "rgba(255,255,255,.55)", fontWeight: 600 }}>{label}</span>
       <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
         <span style={{
-          fontFamily: "Axiforma", fontWeight: 700, fontSize: 12,
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 12,
           color: "rgba(255,255,255,.85)", fontVariantNumeric: "tabular-nums"
         }}>{value}</span>
         <span style={{
           display: "inline-flex", alignItems: "center", gap: 3,
           height: 18, padding: "0 6px", borderRadius: 999,
           background: "rgba(255,255,255,.08)", color: style.color,
-          fontFamily: "Axiforma", fontWeight: 800, fontSize: 10, letterSpacing: 0.3,
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 10, letterSpacing: 0.3,
           whiteSpace: "nowrap"
         }}>
           <Icon name={style.icon} size={9} strokeWidth={2.6} color={style.color} />
@@ -691,7 +691,7 @@ function EngageActionBar({ theme, desktop = false }) {
           }}>
             {[...ticker, ...ticker].map((t, i) =>
             <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 9, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,.55)" }}>{t.label}</span>
+                <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 9, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,.55)" }}>{t.label}</span>
                 <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 12, color: t.bWin ? "rgba(255,255,255,.5)" : "#fff" }}>{t.a}</span>
                 <Icon name="ArrowLeftRight" size={10} strokeWidth={2.2} color="rgba(255,255,255,.3)" />
                 <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 12, color: t.bWin ? "#7CE0B5" : "rgba(255,255,255,.5)" }}>{t.b}</span>
@@ -766,7 +766,7 @@ function PCard({ children, label, action }) {
     }}>
       {label &&
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 10, letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F" }}>{label}</span>
+          <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 10, letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F" }}>{label}</span>
           {action}
         </div>
       }
@@ -1227,7 +1227,7 @@ function StatCell({ label, value, sub }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
       <span style={{ fontSize: 11, color: "#858F8F", fontWeight: 600, letterSpacing: 0.2 }}>{label}</span>
-      <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 22, letterSpacing: -0.6, color: "#0F1214", lineHeight: "26px" }}>{value}</span>
+      <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 22, letterSpacing: -0.6, color: "#0F1214", lineHeight: "26px" }}>{value}</span>
       {sub && <span style={{ fontSize: 11, color: "#858F8F", fontWeight: 500 }}>{sub}</span>}
     </div>);
 
@@ -1785,7 +1785,7 @@ function StatsCard({ theme, desktop = false }) {
       padding: 18,
       display: "flex", flexDirection: "column", gap: 14
     }}>
-      <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 10, letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F" }}>Stats</span>
+      <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 10, letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F" }}>Stats</span>
       <div style={{ margin: "0 -18px" }}>{grid}</div>
     </div>);
 
@@ -1841,7 +1841,7 @@ function EquipmentCard({ theme, desktop = false }) {
                     a subtle underline-link CTA at the bottom. */}
             <div style={{ padding: "14px 14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
               <div style={{
-                fontFamily: "Axiforma", fontWeight: 800, fontSize: 10,
+                fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 10,
                 letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F"
               }}>{eq.sport}</div>
               <div style={{
@@ -1932,7 +1932,7 @@ function ActivityHeatmapCard({ theme, desktop = false }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 28, fontFamily: "inherit" }}>
       <div>
         <div style={{
-          fontFamily: "Axiforma", fontWeight: 800, fontSize: 11,
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
           letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F",
           marginBottom: 14,
         }}>Activity (12 months)</div>
@@ -1996,7 +1996,7 @@ function ActivityHeatmapCard({ theme, desktop = false }) {
       {/* ── Typical availability grid ─────────────────────────────── */}
       <div>
         <div style={{
-          fontFamily: "Axiforma", fontWeight: 800, fontSize: 11,
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
           letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F",
           marginBottom: 14,
         }}>Typical availability</div>
@@ -2629,7 +2629,7 @@ function EquipmentLockerPage({ theme, viewport = "desktop", onBack }) {
                 {/* Identity */}
                 <div style={{ minWidth: 0, padding: desktop ? "16px 0" : "12px 0" }}>
                   <div style={{
-                  fontFamily: "Axiforma", fontWeight: 800, fontSize: 10,
+                  fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 10,
                   letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F",
                   marginBottom: 4
                 }}>{eq.sport}</div>
@@ -2669,7 +2669,7 @@ function EquipmentLockerPage({ theme, viewport = "desktop", onBack }) {
             }}>
                   {/* Specs */}
                   <div>
-                    <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 10, letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F", marginBottom: 8 }}>Specs</div>
+                    <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 10, letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F", marginBottom: 8 }}>Specs</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                       {[
                   { l: "Brand", v: eq.brand },
@@ -2689,7 +2689,7 @@ function EquipmentLockerPage({ theme, viewport = "desktop", onBack }) {
                   {/* Service history */}
                   <div>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                      <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 10, letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F" }}>Service history</div>
+                      <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 10, letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F" }}>Service history</div>
                       {meta.nextService &&
                   <span style={{ fontSize: 11, fontWeight: 700, color: tone.color }}>{meta.nextService}</span>
                   }
@@ -3181,7 +3181,7 @@ function PrivacySection({ title, sub, options, value, onChange, theme }) {
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div style={{
-        fontFamily: "Axiforma", fontWeight: 800, fontSize: 11,
+        fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
         letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F",
         marginBottom: sub ? 8 : 12
       }}>{title}</div>
@@ -3637,7 +3637,7 @@ function TwoFactorPage({ theme, viewport = "desktop", onBack }) {
       {/* Method picker — only meaningful when enabled. */}
       <div style={{ display: "flex", flexDirection: "column", opacity: enabled ? 1 : 0.55 }}>
         <div style={{
-          fontFamily: "Axiforma", fontWeight: 800, fontSize: 11,
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
           letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F",
           marginBottom: 8,
         }}>Verification method</div>
@@ -3770,7 +3770,7 @@ function EditProfileSheet({ theme, onClose }) {
           {/* PHOTO */}
           <div style={{ marginBottom: 24 }}>
             <div style={{
-              fontFamily: "Axiforma", fontWeight: 800, fontSize: 11,
+              fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
               letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F", marginBottom: 10
             }}>Photo</div>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -3788,7 +3788,7 @@ function EditProfileSheet({ theme, onClose }) {
           </div>
           {/* BASICS */}
           <div style={{
-            fontFamily: "Axiforma", fontWeight: 800, fontSize: 11,
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
             letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F", marginBottom: 12
           }}>Basics</div>
           <EpField label="Display name" value={displayName} onChange={setDisplayName} />
@@ -3813,7 +3813,7 @@ function EditProfileSheet({ theme, onClose }) {
           </div>
           {/* BIO */}
           <div style={{
-            fontFamily: "Axiforma", fontWeight: 800, fontSize: 11,
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
             letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F", marginBottom: 8
           }}>Bio</div>
           <textarea value={bio} onChange={(e) => setBio(e.target.value)} style={{
@@ -3825,7 +3825,7 @@ function EditProfileSheet({ theme, onClose }) {
           }} />
           {/* PRIVACY */}
           <div style={{
-            fontFamily: "Axiforma", fontWeight: 800, fontSize: 11,
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
             letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F", marginBottom: 8
           }}>Privacy</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

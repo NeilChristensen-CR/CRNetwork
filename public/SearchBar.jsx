@@ -32,6 +32,60 @@ const SB_LOCATIONS = [
   "Vilano Beach, FL",
   "Ponte Vedra, FL",
 ];
+
+// Type-ahead corpus for the WHERE segment. Each entry has a `kind` that
+// drives the row icon + label, a primary `name` (what becomes the value
+// when picked), and a secondary `sub` line for disambiguation. The filter
+// matches against name + sub so a user can type "32084" to find any club
+// or city that resolves to that zip.
+const SB_WHERE_SUGGESTIONS = [
+  // Clubs
+  { kind: "club", name: "Old Coast Pickleball",       sub: "St. Augustine, FL · 32084" },
+  { kind: "club", name: "Anastasia Tennis Club",      sub: "St. Augustine, FL · 32080" },
+  { kind: "club", name: "Vilano Beach Racquet",       sub: "Vilano Beach, FL · 32084" },
+  { kind: "club", name: "Dill Dinkers Jacksonville",  sub: "Jacksonville, FL · 32256" },
+  { kind: "club", name: "Treaty Park Tennis",         sub: "St. Augustine, FL · 32084" },
+  { kind: "club", name: "South St. Augustine",        sub: "St. Augustine, FL · 32086" },
+  { kind: "club", name: "The Hub Padel",              sub: "Jacksonville Beach, FL · 32250" },
+  { kind: "club", name: "World Golf Village Tennis",  sub: "St. Augustine, FL · 32092" },
+  // Cities
+  { kind: "city", name: "Oakland, CA",                sub: "Alameda County" },
+  { kind: "city", name: "San Francisco, CA",          sub: "Bay Area" },
+  { kind: "city", name: "Berkeley, CA",               sub: "Alameda County" },
+  { kind: "city", name: "St. Augustine, FL",          sub: "St. Johns County" },
+  { kind: "city", name: "Jacksonville, FL",           sub: "Duval County" },
+  { kind: "city", name: "Vilano Beach, FL",           sub: "St. Johns County" },
+  { kind: "city", name: "Ponte Vedra, FL",            sub: "St. Johns County" },
+  { kind: "city", name: "Jacksonville Beach, FL",     sub: "Duval County" },
+  // Zip codes
+  { kind: "zip", name: "94609",                       sub: "Oakland, CA" },
+  { kind: "zip", name: "94110",                       sub: "San Francisco, CA" },
+  { kind: "zip", name: "94704",                       sub: "Berkeley, CA" },
+  { kind: "zip", name: "32084",                       sub: "St. Augustine, FL" },
+  { kind: "zip", name: "32080",                       sub: "St. Augustine, FL" },
+  { kind: "zip", name: "32086",                       sub: "St. Augustine, FL" },
+  { kind: "zip", name: "32092",                       sub: "St. Augustine, FL" },
+  { kind: "zip", name: "32250",                       sub: "Jacksonville Beach, FL" },
+  { kind: "zip", name: "32256",                       sub: "Jacksonville, FL" },
+];
+
+// Icon name + label noun for each suggestion kind.
+const SB_WHERE_KIND_ICON = { club: "Building2", city: "MapPin", zip: "Hash" };
+
+// Case-insensitive filter — query matches if it appears in name OR sub.
+// Returns up to `limit` results so the popover doesn't balloon.
+function filterWhereSuggestions(query, limit = 8) {
+  const q = (query || "").trim().toLowerCase();
+  if (!q) return SB_WHERE_SUGGESTIONS.slice(0, limit);
+  const out = [];
+  for (const s of SB_WHERE_SUGGESTIONS) {
+    if (s.name.toLowerCase().includes(q) || s.sub.toLowerCase().includes(q)) {
+      out.push(s);
+      if (out.length >= limit) break;
+    }
+  }
+  return out;
+}
 const SB_SPORTS = [
   { id: "Any Sport",   icon: "LayoutGrid" },
   { id: "Pickleball",  icon: "Hexagon" },
@@ -164,7 +218,7 @@ function SBRow({ icon, label, sub, selected, onClick }) {
           {label}
         </span>
         {sub && (
-          <span style={{ fontSize: 11, color: "#858F8F", lineHeight: 1.2 }}>{sub}</span>
+          <span style={{ fontSize: 11, color: "#4B5052", lineHeight: 1.2 }}>{sub}</span>
         )}
       </span>
       {selected && (
@@ -187,7 +241,7 @@ function SBStepper({ value, min = 1, max = 8, onChange, label }) {
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: "#0F1214" }}>{label}</span>
-        <span style={{ fontSize: 11, color: "#858F8F" }}>Including you</span>
+        <span style={{ fontSize: 11, color: "#4B5052" }}>Including you</span>
       </div>
       <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
         <button
@@ -239,14 +293,46 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     whoCount: 1,
   });
   const v = values || internal;
+  // Per-segment "touched" tracker. Until a user picks a value the segment
+  // renders its placeholder text in grey (watermark style). Once selected,
+  // the value renders in normal dark text.
+  const [touched, setTouched] = useStateSB({ where: false, activity: false, when: false, who: false });
   const setValue = (key, val) => {
+    setTouched((prev) => ({ ...prev, [key]: true }));
     if (values && onChange) onChange({ ...values, [key]: val });
     else setInternal((prev) => ({ ...prev, [key]: val }));
+  };
+
+  // Placeholder copy per segment — shown until the user selects something.
+  // Where placeholder is "Location, City, Zip Code" per spec; the others
+  // double as their natural defaults so the prompt reads as a guide.
+  const PLACEHOLDERS = {
+    where: "Location, City, Zip Code",
+    activity: "Any Sport",
+    when: "Any Day • Any Time",
+    who: "1 Player",
   };
 
   // Which segment is currently focused. `null` = default state.
   const [active, setActive] = useStateSB(null);
   const containerRef = useRefSB(null);
+
+  // Type-ahead state for the WHERE segment. The query is the user's
+  // in-progress text; the committed value lives in v.where.
+  const [whereQuery, setWhereQuery] = useStateSB("");
+  const whereInputRef = useRefSB(null);
+  // When the WHERE popover opens, seed the query with the current value
+  // (so the user sees what they last picked + can edit) and focus the
+  // input. Reset on close.
+  useEffectSB(() => {
+    if (active === "where") {
+      setWhereQuery(touched.where ? v.where : "");
+      // Defer focus until the popover has actually rendered.
+      const t = setTimeout(() => { whereInputRef.current && whereInputRef.current.focus(); }, 50);
+      return () => clearTimeout(t);
+    }
+    setWhereQuery("");
+  }, [active]);
 
   // Refs for each segment so popovers can anchor + position to them.
   const whereRef    = useRefSB(null);
@@ -316,11 +402,13 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   const pillH = SIZES.pillH;
 
   // ---- Segments ----------------------------------------------------------
+  // `display` resolves to the placeholder when the segment hasn't been
+  // touched yet; the watermark color is applied at render time.
   const segments = [
-    { key: "where",    label: "WHERE",    value: v.where,    icon: "Navigation", anchorRef: whereRef },
-    { key: "activity", label: "ACTIVITY", value: v.activity, icon: null,         anchorRef: activityRef },
-    { key: "when",     label: "WHEN",     value: v.when,     icon: null,         anchorRef: whenRef },
-    { key: "who",      label: "WHO",      value: v.who,      icon: null,         anchorRef: whoRef },
+    { key: "where",    label: "WHERE",    value: v.where,    display: touched.where    ? v.where    : PLACEHOLDERS.where,    icon: "Navigation", anchorRef: whereRef },
+    { key: "activity", label: "ACTIVITY", value: v.activity, display: touched.activity ? v.activity : PLACEHOLDERS.activity, icon: null,         anchorRef: activityRef },
+    { key: "when",     label: "WHEN",     value: v.when,     display: touched.when     ? v.when     : PLACEHOLDERS.when,     icon: null,         anchorRef: whenRef },
+    { key: "who",      label: "WHO",      value: v.who,      display: touched.who      ? v.who      : PLACEHOLDERS.who,      icon: null,         anchorRef: whoRef },
   ];
 
   // Track background flips to gray once any segment is focused.
@@ -455,16 +543,19 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   alignItems: "center",
                   gap: 8,
                   fontFamily: "Inter, system-ui, sans-serif",
-                  fontWeight: 600,
+                  // Untouched segments render with a lighter weight + grey
+                  // watermark color; once touched they jump to the
+                  // selected-value style.
+                  fontWeight: touched[seg.key] ? 600 : 500,
                   fontSize: SIZES.valueFs,
-                  color: COLORS.value,
+                  color: touched[seg.key] ? COLORS.value : COLORS.label,
                   lineHeight: 1.2,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                 }}
               >
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{seg.value}</span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{seg.display}</span>
                 {seg.icon && window.Icon && (
                   <span style={{ display: "inline-flex", color: COLORS.arrowAccent }}>
                     <window.Icon name={seg.icon} size={13} strokeWidth={2.2} color={COLORS.arrowAccent} />
@@ -492,20 +583,87 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     if (!active) return null;
     const anchorRef = refByKey[active];
     if (active === "where") {
+      const matches = filterWhereSuggestions(whereQuery);
+      const commit = (val) => { setValue("where", val); setActive(null); };
       return (
-        <SBPopover anchorRef={anchorRef}>
-          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>
-            Search by location
+        <SBPopover anchorRef={anchorRef} minWidth={320}>
+          {/* Type-ahead input — anchored at the top of the popover, gets
+              focus on open. Free-text Enter commits whatever's typed; an
+              arrow key flow / explicit picks come from the rows below. */}
+          <div style={{ padding: "6px 10px 8px" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "0 12px",
+              height: 40, borderRadius: 10,
+              border: "1px solid #E9EBEC",
+              background: "#FFFFFF",
+            }}>
+              <window.Icon name="Search" size={14} strokeWidth={2} color="#4B5052" />
+              <input
+                ref={whereInputRef}
+                type="text"
+                value={whereQuery}
+                onChange={(e) => setWhereQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (matches[0]) commit(matches[0].name);
+                    else if (whereQuery.trim()) commit(whereQuery.trim());
+                  }
+                  if (e.key === "Escape") { setActive(null); }
+                }}
+                placeholder="Club, city, or zip"
+                aria-label="Search location"
+                style={{
+                  flex: 1, minWidth: 0,
+                  border: 0, outline: "none", background: "transparent",
+                  fontFamily: "inherit", fontSize: 14, color: "#0F1214",
+                }}
+              />
+              {whereQuery && (
+                <button
+                  type="button"
+                  onClick={() => { setWhereQuery(""); whereInputRef.current && whereInputRef.current.focus(); }}
+                  aria-label="Clear"
+                  style={{
+                    width: 20, height: 20, borderRadius: 999, border: 0,
+                    background: "#F4F5F6", cursor: "pointer",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  <window.Icon name="X" size={12} strokeWidth={2.4} color="#4B5052" />
+                </button>
+              )}
+            </div>
           </div>
-          {SB_LOCATIONS.map((loc) => (
-            <SBRow
-              key={loc}
-              icon={loc === "Current location" ? "Navigation" : "MapPin"}
-              label={loc}
-              selected={v.where === loc}
-              onClick={() => { setValue("where", loc); setActive(null); }}
-            />
-          ))}
+
+          {/* Always-on "Use current location" affordance, sits above results. */}
+          <SBRow
+            icon="Navigation"
+            label="Use current location"
+            selected={v.where === "Current location"}
+            onClick={() => commit("Current location")}
+          />
+
+          {/* Section divider */}
+          <div style={{ height: 1, background: "#F4F5F6", margin: "4px 12px" }} />
+
+          {matches.length === 0 ? (
+            <div style={{ padding: "12px 14px", fontSize: 12.5, color: "#858F8F" }}>
+              No matches for "{whereQuery}"
+            </div>
+          ) : (
+            matches.map((s) => (
+              <SBRow
+                key={`${s.kind}-${s.name}`}
+                icon={SB_WHERE_KIND_ICON[s.kind] || "MapPin"}
+                label={s.name}
+                sub={s.sub}
+                selected={touched.where && v.where === s.name}
+                onClick={() => commit(s.name)}
+              />
+            ))
+          )}
         </SBPopover>
       );
     }
@@ -527,7 +685,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     if (active === "when") {
       return (
         <SBPopover anchorRef={anchorRef}>
-          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>
+          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
             When
           </div>
           {SB_WHEN_OPTIONS.map((opt) => (
@@ -540,7 +698,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
             />
           ))}
           <div style={{ height: 1, background: "#F0F0F0", margin: "6px 4px" }} />
-          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>
+          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
             Time of day
           </div>
           {SB_WHEN_TIME_BUCKETS.map((b) => (
@@ -615,18 +773,443 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   );
 }
 
-// ---- Mobile compact variant ----------------------------------------------
-// Single-row pill that taps open the full SearchBar. Used in tight mobile
-// chrome where the full 4-segment bar is too tall.
-function SearchBarCompact({ theme, viewport = "mobile", values, onExpand }) {
-  const v = values || {
-    where: "Oakland, CA", activity: "Any Sport",
-    when: "Any Day • Any Time", who: "1 Player",
-  };
-  return (
+// ---- Mobile bottom sheet --------------------------------------------------
+// Full-height sheet that slides up from the bottom of the viewport. Renders
+// the four facets stacked in segment order (Where → Activity → When → Who)
+// with the option lists from the desktop SearchBar so the discovery model
+// stays consistent.
+//
+// Pure presentational — the parent owns `values` + `onChange`. Selecting
+// an option commits immediately; tapping "Search" runs `onSubmit` (which
+// also dismisses the sheet via the parent setting `open = false`).
+function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme }) {
+  // Locked body scroll while the sheet is open so the underlying page can't
+  // scroll behind the overlay.
+  useEffectSB(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
+  const v = values;
+  const set = (k, val) => onChange({ ...v, [k]: val });
+
+  // Type-ahead state for the WHERE section. Same model as the desktop
+  // popover — local query separate from the committed v.where value.
+  const [whereQuery, setWhereQuery] = useStateSB("");
+  // Seed query with the current committed value when the sheet opens so
+  // the user sees what they last picked + can edit; reset on close.
+  useEffectSB(() => {
+    if (open) {
+      // Skip seeding when the value is still the placeholder.
+      const isPlaceholder = v && (v.where === "Oakland, CA" || !v.where);
+      setWhereQuery(isPlaceholder ? "" : (v && v.where) || "");
+    } else {
+      setWhereQuery("");
+    }
+  }, [open]);
+
+  // Section heading row — uppercase microlabel + current value, separated
+  // by a hairline. Used for every facet so the four sections read uniformly.
+  const SectionHeader = ({ label, value }) => (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+      <span style={{
+        fontSize: 11, fontWeight: 800, color: "#858F8F",
+        letterSpacing: 1, textTransform: "uppercase",
+      }}>{label}</span>
+      <span style={{
+        fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+        fontWeight: 700, fontSize: 13, color: "#0F1214",
+        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60%",
+      }}>{value}</span>
+    </div>
+  );
+
+  // Generic option-row: full-width left-aligned button, leading icon,
+  // active state inverts to dark.
+  const OptionRow = ({ active, icon, label, sub, onClick }) => (
     <button
       type="button"
-      onClick={onExpand}
+      onClick={onClick}
+      style={{
+        display: "flex", alignItems: "center", gap: 12,
+        width: "100%",
+        // Rows with a sub line grow to fit two stacked lines + padding;
+        // single-line rows keep the 48px target.
+        minHeight: 48,
+        padding: sub ? "8px 14px" : "0 14px",
+        borderRadius: 10,
+        border: active ? "1px solid #0F1214" : "1px solid #E9EBEC",
+        background: active ? "#0F1214" : "#FFFFFF",
+        color: active ? "#FFFFFF" : "#0F1214",
+        fontFamily: "inherit", fontSize: 14, fontWeight: 600,
+        textAlign: "left", cursor: "pointer",
+        transition: "background 140ms ease, color 140ms ease, border-color 140ms ease",
+      }}
+    >
+      {icon && window.Icon && (
+        <window.Icon name={icon} size={16} strokeWidth={2.2} color={active ? "#fff" : "#0F1214"} />
+      )}
+      <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{label}</span>
+        {sub && (
+          <span style={{
+            fontSize: 12, fontWeight: 500, lineHeight: 1.2,
+            color: active ? "rgba(255,255,255,.7)" : "#4B5052",
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>{sub}</span>
+        )}
+      </span>
+    </button>
+  );
+
+  // Player stepper — sub-component because we need local count state synced
+  // with the formatted `who` string.
+  const playerCount = (() => {
+    const m = /^(\d+)/.exec(v.who || "");
+    return m ? Number(m[1]) : 1;
+  })();
+  const setPlayers = (n) => {
+    const next = Math.max(1, Math.min(8, n));
+    set("who", `${next} ${next === 1 ? "Player" : "Players"}`);
+  };
+
+  // Portal target — the device frame's inner container has
+  // `position: relative` and `overflow: hidden`, so anchoring the sheet
+  // there gives us a clean modal overlay scoped to the mobile frame.
+  // Without the portal the sheet inherits the sticky-shelf's containing
+  // block and leaks through as a sliver under the search bar.
+  const portalTarget = typeof document !== "undefined"
+    ? document.getElementById("device-frame-inner")
+    : null;
+  if (!portalTarget) return null;
+
+  const sheet = (
+    <>
+      {/* Backdrop — fades in/out. Tapping it dismisses the sheet. */}
+      <div
+        onClick={onClose}
+        aria-hidden={!open}
+        style={{
+          position: "absolute", inset: 0,
+          background: "rgba(15,18,20,.45)",
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 220ms ease",
+          zIndex: 100,
+        }}
+      />
+      {/* Sheet — slides up from the bottom of the device frame. 92% of the
+          frame height so a peek of the backdrop remains visible at the top,
+          signaling the sheet is modal and dismissible. */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search"
+        style={{
+          position: "absolute", left: 0, right: 0, bottom: 0,
+          height: "92%",
+          background: "#FFFFFF",
+          borderTopLeftRadius: 20, borderTopRightRadius: 20,
+          boxShadow: "0 -8px 32px rgba(15,18,20,.22)",
+          transform: open ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 320ms cubic-bezier(.2,.8,.2,1)",
+          zIndex: 101,
+          display: "flex", flexDirection: "column",
+          fontFamily: "Inter, system-ui, sans-serif",
+          // Disable pointer events when closed so the backdrop's
+          // pointerEvents: none is honored — otherwise the off-screen
+          // sheet still intercepts taps in some browsers.
+          pointerEvents: open ? "auto" : "none",
+        }}
+      >
+        {/* Drag handle + header row */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 0 0" }}>
+          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#E9EBEC" }} />
+        </div>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "10px 16px 12px 16px",
+        }}>
+          {/* Heading — matches the desktop segment label style (small,
+              uppercase, grey, bold, letter-spaced 1.3) so the sheet reads
+              as "this is the search facet bar, expanded". */}
+          <span style={{
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+            fontWeight: 800,
+            fontSize: 10.5,
+            color: "#858F8F",
+            letterSpacing: 1.3,
+            textTransform: "uppercase",
+            lineHeight: 1,
+          }}>Search for anything</span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: 44, height: 44, borderRadius: 999, border: 0,
+              background: "#F4F5F6", color: "#0F1214",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            {window.Icon && <window.Icon name="X" size={18} strokeWidth={2.2} color="#0F1214" />}
+          </button>
+        </div>
+
+        {/* Scrollable body — flex: 1 + overflowY makes the four sections
+            scroll while the sticky Search button at the bottom stays
+            pinned. */}
+        <div style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "8px 16px 16px 16px",
+          display: "flex", flexDirection: "column", gap: 20,
+        }}>
+          {/* ---- WHERE — type-ahead with club / city / zip matches ---- */}
+          <section>
+            <SectionHeader label="Where" value={v.where} />
+            {/* Search input — typing filters the list below. Free-text
+                Enter commits whatever's typed. */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "0 14px",
+              height: 48, borderRadius: 10,
+              border: "1px solid #E9EBEC",
+              background: "#FFFFFF",
+              marginBottom: 8,
+            }}>
+              {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2} color="#4B5052" />}
+              <input
+                type="text"
+                value={whereQuery}
+                onChange={(e) => setWhereQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const first = filterWhereSuggestions(whereQuery)[0];
+                    if (first) set("where", first.name);
+                    else if (whereQuery.trim()) set("where", whereQuery.trim());
+                  }
+                }}
+                placeholder="Club, city, or zip"
+                aria-label="Search location"
+                style={{
+                  flex: 1, minWidth: 0,
+                  border: 0, outline: "none", background: "transparent",
+                  fontFamily: "inherit", fontSize: 14, color: "#0F1214",
+                }}
+              />
+              {whereQuery && (
+                <button
+                  type="button"
+                  onClick={() => setWhereQuery("")}
+                  aria-label="Clear"
+                  style={{
+                    width: 24, height: 24, borderRadius: 999, border: 0,
+                    background: "#F4F5F6", cursor: "pointer",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  {window.Icon && <window.Icon name="X" size={14} strokeWidth={2.4} color="#4B5052" />}
+                </button>
+              )}
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {/* Always-visible "Use current location" — sits above filter
+                  results so it's always reachable. */}
+              <OptionRow
+                active={v.where === "Current location"}
+                icon="Navigation"
+                label="Use current location"
+                onClick={() => set("where", "Current location")}
+              />
+              {(() => {
+                const matches = filterWhereSuggestions(whereQuery);
+                if (matches.length === 0) {
+                  return (
+                    <div style={{ padding: "16px 14px", fontSize: 13, color: "#858F8F" }}>
+                      No matches for "{whereQuery}"
+                    </div>
+                  );
+                }
+                return matches.map((s) => (
+                  <OptionRow
+                    key={`${s.kind}-${s.name}`}
+                    active={v.where === s.name}
+                    icon={SB_WHERE_KIND_ICON[s.kind] || "MapPin"}
+                    label={s.name}
+                    sub={s.sub}
+                    onClick={() => set("where", s.name)}
+                  />
+                ));
+              })()}
+            </div>
+          </section>
+
+          {/* ---- ACTIVITY ---- */}
+          <section>
+            <SectionHeader label="Activity" value={v.activity} />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+              {SB_SPORTS.map((s) => (
+                <OptionRow
+                  key={s.id}
+                  active={v.activity === s.id}
+                  icon={s.icon}
+                  label={s.id}
+                  onClick={() => set("activity", s.id)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* ---- WHEN ---- */}
+          <section>
+            <SectionHeader label="When" value={v.when} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {SB_WHEN_OPTIONS.map((w) => (
+                <OptionRow
+                  key={w.id}
+                  active={v.when === w.id}
+                  icon="Calendar"
+                  label={w.label}
+                  onClick={() => set("when", w.id)}
+                />
+              ))}
+              <div style={{ marginTop: 4, fontSize: 11, fontWeight: 800, color: "#858F8F", letterSpacing: 1, textTransform: "uppercase" }}>Time of day</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
+                {SB_WHEN_TIME_BUCKETS.map((tb) => (
+                  <OptionRow
+                    key={tb.id}
+                    active={v.when === tb.id}
+                    label={tb.id}
+                    sub={tb.sub}
+                    onClick={() => set("when", tb.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ---- WHO ---- */}
+          <section>
+            <SectionHeader label="Who" value={v.who} />
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "8px 14px", borderRadius: 10,
+              border: "1px solid #E9EBEC", background: "#FFFFFF",
+              height: 56,
+            }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 14, color: "#0F1214" }}>Players</span>
+                <span style={{ fontSize: 12, color: "#4B5052" }}>1–8</span>
+              </div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 14 }}>
+                <button
+                  type="button"
+                  onClick={() => setPlayers(playerCount - 1)}
+                  disabled={playerCount <= 1}
+                  aria-label="Fewer players"
+                  style={{
+                    width: 44, height: 44, borderRadius: 999,
+                    border: "1px solid #E9EBEC", background: "#FFFFFF",
+                    color: "#0F1214", cursor: playerCount <= 1 ? "not-allowed" : "pointer",
+                    opacity: playerCount <= 1 ? 0.4 : 1,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.2} color="#0F1214" />}
+                </button>
+                <span style={{
+                  minWidth: 24, textAlign: "center",
+                  fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+                  fontWeight: 800, fontSize: 18, color: "#0F1214",
+                  fontVariantNumeric: "tabular-nums",
+                }}>{playerCount}</span>
+                <button
+                  type="button"
+                  onClick={() => setPlayers(playerCount + 1)}
+                  disabled={playerCount >= 8}
+                  aria-label="More players"
+                  style={{
+                    width: 44, height: 44, borderRadius: 999,
+                    border: "1px solid #E9EBEC", background: "#FFFFFF",
+                    color: "#0F1214", cursor: playerCount >= 8 ? "not-allowed" : "pointer",
+                    opacity: playerCount >= 8 ? 0.4 : 1,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.2} color="#0F1214" />}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* Sticky footer — full-width Search button with safe-area cushion. */}
+        <div style={{
+          padding: "12px 16px calc(12px + env(safe-area-inset-bottom)) 16px",
+          borderTop: "1px solid #E9EBEC",
+          background: "#FFFFFF",
+        }}>
+          <button
+            type="button"
+            onClick={() => { onSubmit && onSubmit(v); onClose && onClose(); }}
+            style={{
+              width: "100%", height: 52, borderRadius: 12,
+              border: 0, background: "#0F1214", color: "#FFFFFF",
+              fontFamily: "inherit", fontSize: 15, fontWeight: 700,
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+              cursor: "pointer",
+            }}
+          >
+            {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2.2} color="#fff" />}
+            Search
+          </button>
+        </div>
+      </div>
+    </>
+  );
+  // Render the sheet into the device-frame portal target so it escapes the
+  // sticky search shelf's containing block and overlays the full mobile
+  // viewport. ReactDOM.createPortal is exposed globally by the React UMD
+  // bundle loaded in networkPOC.html.
+  return ReactDOM.createPortal(sheet, portalTarget);
+}
+
+// ---- Mobile compact variant ----------------------------------------------
+// Single-row pill that opens the MobileSearchSheet on tap. The pill shows
+// the title "Search for anything" plus the four current facet values on a
+// single line. Used in tight mobile chrome where the full 4-segment bar is
+// too tall.
+function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubmit }) {
+  // Compact owns its own state by default so the bottom sheet's selections
+  // persist between opens. Callers can hoist by passing `values` + a
+  // matching change handler via `onExpand` (kept for backwards compat).
+  const [internal, setInternal] = useStateSB({
+    where: "Oakland, CA", activity: "Any Sport",
+    when: "Any Day • Any Time", who: "1 Player",
+  });
+  const v = values || internal;
+  const update = (next) => {
+    if (values) {/* controlled — caller handles */ } else setInternal(next);
+  };
+
+  const [open, setOpen] = useStateSB(false);
+  return (
+    <>
+    <button
+      type="button"
+      onClick={() => {
+        // Tap opens the bottom sheet for editing facets. The legacy
+        // `onExpand` prop still fires for callers that want a navigation
+        // side-effect (kept for backwards compat).
+        setOpen(true);
+        onExpand && onExpand();
+      }}
       style={{
         width: "100%",
         height: 52,
@@ -642,12 +1225,27 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand }) {
         fontFamily: "Inter, system-ui, sans-serif",
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2, overflow: "hidden", flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: "Axiforma, Inter", fontWeight: 800, fontSize: 13, color: "#0F1214", letterSpacing: -0.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
-          {v.where}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 3, overflow: "hidden", flex: 1, minWidth: 0 }}>
+        {/* Title — uppercase micro-label matching the desktop SearchBar's
+            segment headers (WHERE / ACTIVITY / etc) so the pill reads as
+            "this is the search facet bar, compacted". */}
+        <div style={{
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+          fontWeight: 800,
+          fontSize: 9.5, color: "#858F8F",
+          letterSpacing: 1.2, textTransform: "uppercase",
+          lineHeight: 1,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%",
+        }}>
+          Search for anything
         </div>
-        <div style={{ fontSize: 11, fontWeight: 500, color: "#858F8F", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
-          {v.activity} · {v.when} · {v.who}
+        {/* Subtitle — all four current values joined on a single line by
+            bullets. Truncates with ellipsis if it can't fit. */}
+        <div style={{
+          fontSize: 11, fontWeight: 500, color: "#4B5052",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%",
+        }}>
+          {v.where} <span style={{ color: "#C8CDCD" }}>•</span> {v.activity} <span style={{ color: "#C8CDCD" }}>•</span> {v.when} <span style={{ color: "#C8CDCD" }}>•</span> {v.who}
         </div>
       </div>
       <span style={{
@@ -657,7 +1255,16 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand }) {
         {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2.2} color="#fff" />}
       </span>
     </button>
+    <MobileSearchSheet
+      open={open}
+      onClose={() => setOpen(false)}
+      values={v}
+      onChange={update}
+      onSubmit={(committed) => onSubmit && onSubmit(committed)}
+      theme={theme}
+    />
+    </>
   );
 }
 
-Object.assign(window, { SearchBar, SearchBarCompact });
+Object.assign(window, { SearchBar, SearchBarCompact, MobileSearchSheet });

@@ -16,7 +16,7 @@ function SectionLabel({ children, count, action }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 8, paddingBottom: 14 }}>
       <span style={{
-        fontFamily: "Axiforma", fontWeight: 800, fontSize: 11,
+        fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
         letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214",
         whiteSpace: "nowrap",
       }}>{children}</span>
@@ -30,7 +30,7 @@ function SectionLabel({ children, count, action }) {
 function StatBlock({ k, v, sub }) {
   return (
     <div>
-      <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 28, color: "#0F1214", letterSpacing: -0.6, lineHeight: 1 }}>{k}</div>
+      <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 28, color: "#0F1214", letterSpacing: -0.6, lineHeight: 1 }}>{k}</div>
       <div style={{ marginTop: 8, fontSize: 12, color: "#4B5052", fontWeight: 500, letterSpacing: 0.4, textTransform: "uppercase" }}>{v}</div>
       {sub && <div style={{ marginTop: 2, fontSize: 11, color: "#858F8F", fontWeight: 500 }}>{sub}</div>}
     </div>
@@ -42,7 +42,7 @@ function TypePill({ children }) {
     <span style={{
       display: "inline-flex", alignItems: "center", height: 22, padding: "0 10px",
       background: "#0F1214", color: "#fff", borderRadius: 8,
-      fontFamily: "Axiforma", fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase",
+      fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase",
     }}>{children}</span>
   );
 }
@@ -54,7 +54,7 @@ function SingleDateBlock({ ev }) {
     <div>
       <SectionLabel>Date</SectionLabel>
       <div style={{ marginTop: 14, display: "flex", alignItems: "baseline", gap: 16, flexWrap: "wrap" }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 32, color: "#0F1214", letterSpacing: -0.7 }}>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 32, color: "#0F1214", letterSpacing: -0.7 }}>
           {ev.single.date}
         </div>
         <div style={{ fontSize: 15, color: "#4B5052", fontWeight: 500 }}>{ev.single.time}</div>
@@ -85,7 +85,7 @@ function DropInBlock({ ev, selected, setSelected }) {
             }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase",
                 color: on ? "rgba(255,255,255,.6)" : "#858F8F" }}>{d.label}</div>
-              <div style={{ marginTop: 6, fontFamily: "Axiforma", fontWeight: 700, fontSize: 15, letterSpacing: -0.2 }}>{d.sub}</div>
+              <div style={{ marginTop: 6, fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 15, letterSpacing: -0.2 }}>{d.sub}</div>
             </button>
           );
         })}
@@ -113,10 +113,10 @@ function SeriesBlock({ ev }) {
             borderTop: i === 0 ? "1px solid #0F1214" : "1px solid #E9EBEC",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <span style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 12, color: "#858F8F", width: 24, letterSpacing: 0.6 }}>
+              <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 12, color: "#858F8F", width: 24, letterSpacing: 0.6 }}>
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <span style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 16, color: "#0F1214", letterSpacing: -0.2 }}>
+              <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 16, color: "#0F1214", letterSpacing: -0.2 }}>
                 {s.label}
               </span>
             </div>
@@ -193,7 +193,7 @@ function HybridBlock({ ev, mode, setMode, selectedSet, toggleHybrid, selectAll }
               position: "relative",
             }}>
               <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, color: on ? "rgba(255,255,255,.6)" : "#858F8F" }}>{d.weekday}</div>
-              <div style={{ marginTop: 4, fontFamily: "Axiforma", fontWeight: 800, fontSize: 16, letterSpacing: -0.3 }}>{d.date}</div>
+              <div style={{ marginTop: 4, fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 16, letterSpacing: -0.3 }}>{d.date}</div>
               {on && (
                 <span style={{
                   position: "absolute", top: 8, right: 8,
@@ -257,7 +257,7 @@ function EventDetailBody({ ev, type, viewport, selectedDropIn, setSelectedDropIn
       {/* Title */}
       <h1 style={{
         margin: "20px 0 0",
-        fontFamily: "Axiforma", fontWeight: 800,
+        fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800,
         fontSize: desktop ? 64 : 30,
         lineHeight: desktop ? "64px" : "34px",
         letterSpacing: desktop ? -2 : -0.8,
@@ -285,7 +285,7 @@ function EventDetailBody({ ev, type, viewport, selectedDropIn, setSelectedDropIn
           <div style={{ marginTop: 16 }}>
             {ev.schedule.map((s, i) => (
               <div key={i} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 16, padding: "12px 0", borderTop: i === 0 ? "1px solid #E9EBEC" : "1px solid #F4F5F6" }}>
-                <span style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 12, color: "#0F1214", letterSpacing: 0.6, paddingTop: 2 }}>{s.days}</span>
+                <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 12, color: "#0F1214", letterSpacing: 0.6, paddingTop: 2 }}>{s.days}</span>
                 <span style={{ fontSize: 14, color: "#0F1214", fontWeight: 500 }}>{s.time}</span>
               </div>
             ))}
@@ -353,10 +353,10 @@ function EventDetailBody({ ev, type, viewport, selectedDropIn, setSelectedDropIn
         <div style={{
           width: 56, height: 56, borderRadius: 999, background: "#0F1214", color: "#fff",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
-          fontFamily: "Axiforma", fontWeight: 800, fontSize: 16,
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 16,
         }}>{ev.instructor.avatar}</div>
         <div>
-          <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 18, color: "#0F1214", letterSpacing: -0.3 }}>{ev.instructor.name}</div>
+          <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 18, color: "#0F1214", letterSpacing: -0.3 }}>{ev.instructor.name}</div>
           <div style={{ marginTop: 4, fontSize: 13, color: "#4B5052", fontWeight: 500, display: "flex", gap: 10, alignItems: "center" }}>
             <span>{ev.instructor.rating}</span>
             <span style={{ width: 3, height: 3, borderRadius: 999, background: "#BBBFC1" }} />
@@ -380,7 +380,7 @@ function EventDetailBody({ ev, type, viewport, selectedDropIn, setSelectedDropIn
             padding: "12px 0", borderTop: i === 0 ? "1px solid #E9EBEC" : "1px solid #F4F5F6",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 999, background: i % 2 === 0 ? "#0F1214" : "#4B5052", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "Axiforma", fontWeight: 700, fontSize: 11 }}>{p.avatar}</div>
+              <div style={{ width: 32, height: 32, borderRadius: 999, background: i % 2 === 0 ? "#0F1214" : "#4B5052", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 11 }}>{p.avatar}</div>
               <span style={{ fontSize: 14, color: "#0F1214", fontWeight: 500 }}>{p.name}</span>
             </div>
             <span style={{ fontSize: 13, color: "#4B5052", fontWeight: 500 }}>{p.rating}</span>
@@ -396,7 +396,7 @@ function EventDetailBody({ ev, type, viewport, selectedDropIn, setSelectedDropIn
       }}>
         <div style={{ marginTop: 2 }}><Icon name="Info" size={16} color="#0F1214" strokeWidth={2.2} /></div>
         <div>
-          <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 12, color: "#0F1214", letterSpacing: 0.6, textTransform: "uppercase", marginBottom: 6 }}>Note from the club</div>
+          <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 12, color: "#0F1214", letterSpacing: 0.6, textTransform: "uppercase", marginBottom: 6 }}>Note from the club</div>
           <div style={{ fontSize: 14, color: "#0F1214", lineHeight: "22px", fontWeight: 500 }}>{ev.note}</div>
         </div>
       </div>
@@ -405,7 +405,7 @@ function EventDetailBody({ ev, type, viewport, selectedDropIn, setSelectedDropIn
       {false && desktop && (
         <div style={{ marginTop: 56, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "28px 0", borderTop: "1px solid #0F1214", borderBottom: "1px solid #0F1214" }}>
           <div>
-            <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 36, color: "#0F1214", letterSpacing: -0.8, lineHeight: 1 }}>{cta.price}</div>
+            <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 36, color: "#0F1214", letterSpacing: -0.8, lineHeight: 1 }}>{cta.price}</div>
             <div style={{ marginTop: 6, fontSize: 12, color: "#4B5052", fontWeight: 500 }}>
               {type === "series" ? `For all ${ev.series.totalSessions} sessions` : type === "hybrid" && hybridMode === "bundle" ? "Bundle price" : type === "hybrid" ? `${hybridSelected.size} session${hybridSelected.size !== 1 ? "s" : ""} selected` : "Cancel up to 4 hours before start time"}
             </div>
@@ -485,7 +485,7 @@ function EventDetailsDesktop({ ev, type, onBack, ...detailState }) {
           maxWidth: 720, width: "100%", justifyContent: "space-between",
         }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, minWidth: 0 }}>
-            <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 16, letterSpacing: -0.2 }}>{cta.price}</span>
+            <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 16, letterSpacing: -0.2 }}>{cta.price}</span>
             <span style={{ fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,.7)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{subline}</span>
           </div>
           <button disabled={cta.disabled} onClick={() => !cta.disabled && detailState.onRegister && detailState.onRegister()} style={{
@@ -529,7 +529,7 @@ function EventDetailsMobile({ ev, type, onBack, ...detailState }) {
         <button onClick={onBack} style={{ background: "transparent", border: 0, padding: 8, marginLeft: -8, cursor: "pointer", display: "inline-flex" }}>
           <Icon name="ArrowLeft" size={20} />
         </button>
-        <div style={{ flex: 1, textAlign: "center", fontFamily: "Axiforma", fontWeight: 800, fontSize: 14, letterSpacing: 0.4 }}>Event</div>
+        <div style={{ flex: 1, textAlign: "center", fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: 0.4 }}>Event</div>
         <button style={{ background: "transparent", border: 0, padding: 8, marginRight: -8, cursor: "pointer", display: "inline-flex" }}>
           <Icon name="Share" size={18} />
         </button>
@@ -613,7 +613,7 @@ function EventDetailsShowcase() {
       {/* Switcher bar */}
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.4, textTransform: "uppercase", color: "#4B5052", marginRight: 4 }}>Type</span>
+          <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.4, textTransform: "uppercase", color: "#4B5052", marginRight: 4 }}>Type</span>
           <div style={{ display: "inline-flex", padding: 4, background: "#fff", borderRadius: 8, border: "1px solid #E9EBEC" }}>
             {types.map(t => {
               const on = type === t.id;
@@ -630,7 +630,7 @@ function EventDetailsShowcase() {
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.4, textTransform: "uppercase", color: "#4B5052", marginRight: 4 }}>Device</span>
+          <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.4, textTransform: "uppercase", color: "#4B5052", marginRight: 4 }}>Device</span>
           <div style={{ display: "inline-flex", padding: 4, background: "#fff", borderRadius: 8, border: "1px solid #E9EBEC" }}>
             {viewports.map(v => {
               const on = viewport === v.id;

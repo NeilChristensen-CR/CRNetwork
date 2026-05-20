@@ -197,12 +197,13 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
         alignItems: isMobile ? "stretch" : "center",
         justifyContent: "space-between",
         gap: isMobile ? 12 : 16,
-        paddingTop: 16, paddingBottom: 4
+        paddingTop: 0, paddingBottom: 4,
+        marginBottom: 4
       }}>
         <h2 style={{
           margin: 0,
           fontFamily: theme.display, fontWeight: 800,
-          fontSize: isMobile ? 22 : 28, lineHeight: 1.15, letterSpacing: -0.6,
+          fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8,
           color: t.text,
           minWidth: 0,
           flex: "0 1 auto",
@@ -225,10 +226,10 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
               arrows sit alone on the right. */}
           {!isMobile &&
           <div style={{ display: "inline-flex", gap: 8 }}>
-              <button onClick={() => scrollBy(-1)} aria-label="Previous" style={{ width: 36, height: 36, borderRadius: 8, border: 0, background: "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <button onClick={() => scrollBy(-1)} aria-label="Previous" style={{ width: 44, height: 44, borderRadius: 8, border: 0, background: "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                 <Icon name="ChevronLeft" size={18} strokeWidth={2} />
               </button>
-              <button onClick={() => scrollBy(1)} aria-label="Next" style={{ width: 36, height: 36, borderRadius: 8, border: 0, background: "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <button onClick={() => scrollBy(1)} aria-label="Next" style={{ width: 44, height: 44, borderRadius: 8, border: 0, background: "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                 <Icon name="ChevronRight" size={18} strokeWidth={2} />
               </button>
             </div>
@@ -243,58 +244,27 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
               can trace what's grouped under it. A vertical line between the
               two groups makes the separation explicit. */}
       {(() => {
-        const mine = ordered.filter((v) => v.myClub);
-        const other = ordered.filter((v) => !v.myClub);
-        const renderGroup = (label, items) =>
-        <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
-            {/* Group header — sticks to the left edge of the visible
-            scroll area while the group's cards scroll behind it, so
-            the cards always carry the group's label as context until
-            the next group's header pushes it out of view. */}
-            <div style={{
-            position: "sticky",
-            left: isMobile ? 20 : 4,
-            // Bound the sticky region so the label doesn't slide past
-            // the end of its own card group.
-            alignSelf: "flex-start",
-            zIndex: 2,
-            maxWidth: "100%",
-            display: "flex", alignItems: "center", gap: 10,
-            fontSize: 10, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase",
-            color: t.textSubtle,
-            paddingRight: 4,
-            // Tiny white pill behind the label so it stays readable
-            // when card content scrolls under it.
-            background: t.surface,
-            boxShadow: `4px 0 6px -2px ${t.surface}`
-          }}>
-              <span style={{ whiteSpace: "nowrap" }}>{label}</span>
-              <span style={{ flex: 1, height: 1, background: t.line }} />
-            </div>
-            {/* Cards row */}
-            <div style={{ display: "flex", gap: 12, margin: "0px" }}>
-              {items.map((v) =>
-            <div key={v.id} style={{ flex: "0 0 280px", scrollSnapAlign: "start", display: "flex" }}>
-                  <BookNowCard v={v} theme={theme} onPickSlot={(timeLabel) => setPendingSlot({ venue: v, time: timeLabel })} />
-                </div>
-            )}
-            </div>
-          </div>;
-
+        // Logged-out network view: one continuous list of venues, no
+        // "My clubs / Clubs around me" subgrouping (signed-out users have
+        // no club affiliation to split by).
         return (
-          // Carousel wrapper — relative so the right-edge gradient fade can
-          // sit absolutely on top, y padding gives card hover shadows room
-          // so they aren't clipped by the scroll container's overflow box.
-          <div style={{ position: "relative", margin: isMobile ? "-16px -20px -16px" : "-16px -4px -16px" }}>
+          <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px 0" : "-16px -4px -16px" }}>
           <div ref={trackRef} style={{
-            display: "flex", gap: 20, overflowX: "auto", scrollSnapType: "x mandatory",
-            paddingTop: 28, paddingBottom: 32, scrollbarWidth: "none",
-            paddingLeft: isMobile ? 20 : 4,
+            display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
+            paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
+            // Mobile: paddingLeft 4 so the leftmost card aligns with the
+            // 16px page gutter (carousel's marginLeft is 0 → outer aligns,
+            // 4px inner padding gives the card a slight breath from the
+            // card-shadow clip). Right side still bleeds via marginRight: -16.
+            paddingLeft: isMobile ? 4 : 4,
             paddingRight: isMobile ? 20 : 4,
             alignItems: "stretch"
           }}>
-            {mine.length > 0 && renderGroup("My clubs", mine)}
-            {other.length > 0 && renderGroup("Clubs around me", other)}
+            {ordered.map((v) => (
+              <div key={v.id} style={{ flex: "0 0 280px", scrollSnapAlign: "start", display: "flex" }}>
+                <BookNowCard v={v} theme={theme} onPickSlot={(timeLabel) => setPendingSlot({ venue: v, time: timeLabel })} />
+              </div>
+            ))}
           </div>
           {/* Right-edge fade — 16px gradient so the last partially visible
               card dissolves into the page background instead of hard-clipping. */}
@@ -411,26 +381,12 @@ function SearchPill({ placeholder, value, onChange, theme }) {
 
 }
 
-// ---- BookNowCard — compact venue card, no imagery ----
+// ---- BookNowCard — shared venue card used by "Available to play now"
+// AND by "Popular clubs near you". MiniMap header on top, pin + stacked
+// name/city block, sport + booked caption, 2x2 time-slot grid, and a
+// grey footer CTA. Pure presentational — parents own the slot/CTA wiring.
 function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
   const t = theme.t || {};
-  // Star icon row sized to read as metadata, not as a focal point.
-  const stars = (() => {
-    const full = Math.floor(v.rating);
-    const half = v.rating - full >= 0.4 && v.rating - full < 0.9;
-    const out = [];
-    for (let i = 0; i < 5; i++) {
-      let fill = "#E9EBEC";
-      if (i < full) fill = "#FFB400";else
-      if (i === full && half) fill = "url(#half-grad)";
-      out.push(
-        <svg key={i} width="11" height="11" viewBox="0 0 24 24" fill={fill} style={{ flexShrink: 0 }}>
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 6.91-1.01z" />
-        </svg>
-      );
-    }
-    return out;
-  })();
 
   // Deterministic distance + active-players count per venue. These are
   // prototype demo numbers — stable across renders so the cards don't churn.
@@ -440,18 +396,21 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
   const venueForMap = { ...v, distance, activePlayers };
 
   return (
-    <div style={{
-      width: "100%",
-      padding: 0,
-      background: t.surface,
-      border: `1px solid ${t.line}`,
-      borderRadius: 8,
-      display: "flex", flexDirection: "column",
-      overflow: "hidden",
-      transition: "box-shadow 160ms, transform 160ms"
-    }}
-    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
+    <div
+      data-card-hover
+      style={{
+        width: "100%",
+        padding: 0,
+        background: t.surface,
+        border: `1px solid ${t.line}`,
+        borderRadius: 8,
+        display: "flex", flexDirection: "column",
+        overflow: "hidden",
+        transition: "box-shadow 160ms, transform 160ms"
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
+    >
       
       {/* Mini map — distance pill top-left, "X Active" green pill top-right.
               Same SVG illustration underneath. */}
@@ -460,20 +419,19 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
       {/* Card body — equal top and bottom padding so the time slots have
           breathing room before the gray footer below them. */}
       <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-        {/* Title */}
+        {/* Title — own row, full width. */}
         <div style={{
           fontFamily: theme.display, fontWeight: 800, fontSize: 17,
-          color: "#0F1214", letterSpacing: -0.3,
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
+          color: "#0F1214", letterSpacing: -0.3, lineHeight: 1.2,
         }}>{v.name}</div>
 
-        {/* Rating row — stars + 4.8 (256) • $$$ */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#0F1214" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>{stars}</span>
-          <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{v.rating.toFixed(1)}</span>
-          <span style={{ color: "#858F8F" }}>({v.reviews})</span>
-          <span style={{ color: "#858F8F" }}>•</span>
-          <span style={{ fontWeight: 700, color: "#0F1214" }}>{v.price}</span>
+        {/* Location row — pin icon + "City, State" sitting beneath the title. */}
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 6,
+          fontSize: 13, fontWeight: 500, color: "#4B5052",
+        }}>
+          <Icon name="MapPin" size={13} strokeWidth={2.2} color="#4B5052" />
+          <span>{v.city}{v.state ? `, ${v.state}` : ""}</span>
         </div>
 
         {/* Sport tag + booked-today caption. Sport is rendered as a pill
@@ -481,13 +439,13 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
             a discrete attribute. */}
         <div style={{
           display: "flex", alignItems: "center", gap: 8,
-          fontSize: 12, color: "#4B5052", fontWeight: 500,
+          fontSize: 13, color: "#4B5052", fontWeight: 500,
         }}>
-          <span style={{
+          <span data-tag="default" style={{
             display: "inline-flex", alignItems: "center",
-            height: 22, padding: "0 8px", borderRadius: 6,
+            height: 22, padding: "0 10px", borderRadius: 6,
             background: "#F4F5F6", color: "#0F1214",
-            fontSize: 11, fontWeight: 600,
+            fontSize: 11.5, fontWeight: 600,
             whiteSpace: "nowrap",
           }}>{v.sport}</span>
           <span>Booked {v.booked} × Today</span>
@@ -498,7 +456,7 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 4 }}>
           {v.times.slice(0, 4).map((time) =>
             <button key={time} onClick={() => onPickSlot(time)} style={{
-              height: 34, padding: "0 8px", borderRadius: 8,
+              height: 44, padding: "0 8px", borderRadius: 8,
               border: "1px solid #DEE1E5",
               background: "#FFFFFF", color: "#0F1214",
               fontFamily: "inherit", fontWeight: 600, fontSize: 12,
@@ -530,7 +488,7 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
         borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: "#E9EBEC",
         background: "#F4F5F6",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        fontFamily: "inherit", fontSize: 12, fontWeight: 600, color: "#0F1214",
+        fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: "#0F1214",
         cursor: "pointer",
         transition: "background 120ms",
       }}
@@ -796,8 +754,11 @@ function MiniMap({ venue, theme }) {
   const xDiag = 80 + r(22) * 100;
 
   return (
-    <div style={{ position: "relative", width: "100%" }}>
-      <svg viewBox="0 0 280 90" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: 90, background: land }}>
+    // 3:1 aspect ratio — width follows the parent card, height auto-scales.
+    // SVG inside uses preserveAspectRatio="none" so the painted shapes stretch
+    // edge-to-edge with no letter-boxing.
+    <div style={{ position: "relative", width: "100%", aspectRatio: "3 / 1" }}>
+      <svg viewBox="0 0 280 90" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "100%", background: land }}>
         {/* a subtle "water" wedge on one edge so the map reads as a real
                 place rather than a uniform plate */}
         <path d={`M 0 ${60 + r(30) * 20} Q 60 ${50 + r(31) * 30} 140 ${70 + r(32) * 15} T 280 ${75 + r(33) * 10} L 280 90 L 0 90 Z`} fill={water} opacity="0.65" />
@@ -823,34 +784,34 @@ function MiniMap({ venue, theme }) {
       {/* Top-left distance pill — anchored to where players sit relative to
           the club. Falls back to city/state/zip if no distance is provided
           so the legacy callers still render. */}
-      <span style={{
+      <span data-tag="default" style={{
         position: "absolute", top: 10, left: 10,
         display: "inline-flex", alignItems: "center",
-        height: 24, padding: "0 10px", borderRadius: 6,
+        height: 22, padding: "0 10px", borderRadius: 6,
         background: "#FFFFFF",
         color: "#0F1214",
-        fontSize: 11, fontWeight: 700,
+        fontSize: 11.5, fontWeight: 600,
         boxShadow: "0 1px 3px rgba(15,18,20,.12)",
         whiteSpace: "nowrap",
       }}>
         {venue.distance != null ? `${venue.distance}mi` : `${venue.city}, ${venue.state} ${venue.zip}`}
       </span>
-      {/* Top-right active-players pill — green badge with a pulse dot, matches
-          the "X Active" pattern from the target. Only renders when the venue
-          carries an `activePlayers` count. */}
+      {/* Top-right active-players pill — pale "positive" tone at rest,
+          flips to the vibrant solid green via the [data-card-hover]:hover
+          rule when the parent card is hovered. */}
       {venue.activePlayers != null && (
-        <span style={{
+        <span data-tag="positive" style={{
           position: "absolute", top: 10, right: 10,
           display: "inline-flex", alignItems: "center", gap: 6,
-          height: 24, padding: "0 10px 0 8px", borderRadius: 999,
-          background: "#1F8C5A",
-          color: "#FFFFFF",
-          fontSize: 11, fontWeight: 700,
-          boxShadow: "0 1px 3px rgba(15,18,20,.12)",
+          height: 22, padding: "0 10px 0 8px", borderRadius: 6,
+          background: "#DCFCE7",
+          color: "#166534",
+          fontSize: 11.5, fontWeight: 600,
+          boxShadow: "0 1px 3px rgba(15,18,20,.08)",
           whiteSpace: "nowrap",
         }}>
-          <span style={{
-            width: 6, height: 6, borderRadius: 999, background: "#FFFFFF", flexShrink: 0,
+          <span data-tag-dot style={{
+            width: 6, height: 6, borderRadius: 999, background: "#166534", flexShrink: 0,
           }} />
           {venue.activePlayers} Active
         </span>

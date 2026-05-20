@@ -16,9 +16,9 @@ function FacetGroup({ title, count, children }) {
   return (
     <div style={{ paddingBottom: 18, marginBottom: 18, borderBottom: "1px solid #E9EBEC" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{title}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{title}</div>
         {count > 0 &&
-        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma" }}>{count}</span>
+        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma, Inter, system-ui, sans-serif" }}>{count}</span>
         }
       </div>
       {children}
@@ -69,11 +69,11 @@ function MobileEventRow({ ev, onClick }) {
         {/* Tabular-nums + nowrap so every time field reserves the same
              width as the longest time string (e.g. "11:30 AM"), keeping the
              title column on adjacent rows perfectly aligned. */}
-        <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 15, color: "#0F1214", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{ev.timeShort}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 15, color: "#0F1214", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{ev.timeShort}</div>
         <div style={{ fontSize: 10, color: "#4B5052", marginTop: 2, whiteSpace: "nowrap" }}>{ev.dateShort}</div>
       </div>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ev.name}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ev.name}</div>
         <div style={{ fontSize: 11, color: "#4B5052", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ev.format} · {ev.skill}</div>
         {(urg || ev.going > 0) &&
         <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8 }}>
@@ -90,7 +90,7 @@ function MobileEventRow({ ev, onClick }) {
           </div>
         }
       </div>
-      <div style={{ fontFamily: "Axiforma", fontWeight: 700, fontSize: 14, color: "#0F1214" }}>{ev.priceLabel}</div>
+      <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 14, color: "#0F1214" }}>{ev.priceLabel}</div>
     </div>);
 
 }
@@ -102,13 +102,13 @@ function MobileHero({ ev }) {
         <LiveDot tone="alert" />
         <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase" }}>Tonight · 1 left</span>
       </div>
-      <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 26, lineHeight: "28px", letterSpacing: -0.7 }}>{ev.name}.</div>
+      <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 26, lineHeight: "28px", letterSpacing: -0.7 }}>{ev.name}.</div>
       <div style={{ marginTop: 6, fontSize: 11, color: "#BBBFC1", fontWeight: 500 }}>{ev.timeShort} · {ev.skill} · {ev.coach}</div>
       <div style={{ marginTop: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <div style={{ display: "inline-flex" }}>
             {ev.friends.slice(0, 3).map((init, i) =>
-            <div key={i} style={{ width: 22, height: 22, borderRadius: 999, background: i % 2 === 0 ? "#fff" : "#BBBFC1", color: "#0F1214", fontSize: 9, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center", border: "2px solid #0F1214", marginLeft: i === 0 ? 0 : -8, fontFamily: "Axiforma" }}>{init}</div>
+            <div key={i} style={{ width: 22, height: 22, borderRadius: 999, background: i % 2 === 0 ? "#fff" : "#BBBFC1", color: "#0F1214", fontSize: 9, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center", border: "2px solid #0F1214", marginLeft: i === 0 ? 0 : -8, fontFamily: "Axiforma, Inter, system-ui, sans-serif" }}>{init}</div>
             )}
           </div>
           <span style={{ fontSize: 11, color: "#fff", fontWeight: 500 }}>{ev.going} going</span>
@@ -171,9 +171,9 @@ function PillChip({ label, active, onClick }) {
 function SectionHead({ title, count }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, marginTop: 4 }}>
-      <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{title}</div>
+      <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214" }}>{title}</div>
       {count > 0 &&
-      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma" }}>{count}</span>
+      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 18, height: 18, padding: "0 6px", borderRadius: 8, background: "#0F1214", color: "#fff", fontSize: 10, fontWeight: 700, fontFamily: "Axiforma, Inter, system-ui, sans-serif" }}>{count}</span>
       }
     </div>);
 
@@ -217,7 +217,7 @@ function RangeSlider({ value, onChange, min, max, step, format }) {
     <div style={{ paddingTop: 4 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
         <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 500 }}>{format(min)}</span>
-        <span style={{ fontFamily: "Axiforma", fontSize: 13, fontWeight: 700, color: "#0F1214" }}>{format(lo)} – {format(hi)}</span>
+        <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontSize: 13, fontWeight: 700, color: "#0F1214" }}>{format(lo)} – {format(hi)}</span>
         <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 500 }}>{format(max)}</span>
       </div>
       <div style={{ position: "relative", height: 24, display: "flex", alignItems: "center" }}>
@@ -312,7 +312,7 @@ function MobileFilterSheet({ open, onClose, query, setQuery, facets, setFacets, 
         transition: "transform 320ms cubic-bezier(.2,.8,.2,1)", zIndex: 51
       }}>
         <div style={{ padding: "12px 24px 4px", display: "flex", alignItems: "baseline", justifyContent: "space-between", flexShrink: 0 }}>
-          <h2 style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 26, letterSpacing: -0.7, color: "#0F1214", margin: 0 }}>{tab === "filter" ? "Filter." : "Sort."}</h2>
+          <h2 style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 26, letterSpacing: -0.7, color: "#0F1214", margin: 0 }}>{tab === "filter" ? "Filter." : "Sort."}</h2>
           <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: 999, border: 0, background: "#F4F5F6", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
             <Icon name="X" size={16} />
           </button>
@@ -610,7 +610,7 @@ function BrowseMobile({ bare = false, onBack }) {
       flexShrink: 0
     }}>
           <div style={{ width: 36 }} aria-hidden />
-          <div style={{ fontFamily: "Axiforma", fontWeight: 800, letterSpacing: 0.4, textTransform: "uppercase", color: "#0F1214", fontSize: "15px" }}>Find an event</div>
+          <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, letterSpacing: 0.4, textTransform: "uppercase", color: "#0F1214", fontSize: "15px" }}>Find an event</div>
           <button onClick={onBack} aria-label="Close" style={{
         width: 36, height: 36, borderRadius: 999, border: 0,
         background: "#F4F5F6", color: "#0F1214",
@@ -636,7 +636,7 @@ function BrowseMobile({ bare = false, onBack }) {
         <div style={{ padding: "0 24px 96px" }}>
           {filtered.length === 0 ?
         <div style={{ padding: "60px 0", textAlign: "center" }}>
-              <div style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 22, color: "#0F1214", letterSpacing: -0.5 }}>No matches.</div>
+              <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 22, color: "#0F1214", letterSpacing: -0.5 }}>No matches.</div>
               <div style={{ marginTop: 6, fontSize: 12, color: "#4B5052" }}>Try a different filter or search term.</div>
             </div> :
 
@@ -644,7 +644,7 @@ function BrowseMobile({ bare = false, onBack }) {
               {today.length > 0 &&
           <React.Fragment>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 28, paddingBottom: 12 }}>
-                    <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>{isFiltering ? "Today" : "Also today"}</span>
+                    <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>{isFiltering ? "Today" : "Also today"}</span>
                     <span style={{ flex: 1, height: 1, background: "#E9EBEC" }} aria-hidden="true" />
                     <span style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, whiteSpace: "nowrap" }}>{today.length}</span>
                   </div>
@@ -654,7 +654,7 @@ function BrowseMobile({ bare = false, onBack }) {
               {week.length > 0 &&
           <React.Fragment>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 28, paddingBottom: 12 }}>
-                    <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>This week</span>
+                    <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>This week</span>
                     <span style={{ flex: 1, height: 1, background: "#E9EBEC" }} aria-hidden="true" />
                     <span style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, whiteSpace: "nowrap" }}>{week.length}</span>
                   </div>
@@ -664,7 +664,7 @@ function BrowseMobile({ bare = false, onBack }) {
               {next.length > 0 &&
           <React.Fragment>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 28, paddingBottom: 12 }}>
-                    <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>Next week</span>
+                    <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>Next week</span>
                     <span style={{ flex: 1, height: 1, background: "#E9EBEC" }} aria-hidden="true" />
                     <span style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, whiteSpace: "nowrap" }}>{next.length}</span>
                   </div>
@@ -685,7 +685,7 @@ function BrowseMobile({ bare = false, onBack }) {
               {showMonth && (window.NEXT_MONTH_EVENTS || []).length > 0 &&
           <React.Fragment>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 28, paddingBottom: 12 }}>
-                    <span style={{ fontFamily: "Axiforma", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>Next month</span>
+                    <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", whiteSpace: "nowrap" }}>Next month</span>
                     <span style={{ flex: 1, height: 1, background: "#E9EBEC" }} aria-hidden="true" />
                     <span style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, whiteSpace: "nowrap" }}>{window.NEXT_MONTH_EVENTS.length}</span>
                   </div>
@@ -720,7 +720,7 @@ function BrowseMobile({ bare = false, onBack }) {
           <Icon name="Search" size={16} color="#fff" />
           Search & filter
           {totalActive > 0 &&
-        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 20, height: 20, padding: "0 6px", borderRadius: 8, background: "#fff", color: "#0F1214", fontSize: 11, fontWeight: 700, fontFamily: "Axiforma", marginLeft: 2 }}>{totalActive}</span>
+        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 20, height: 20, padding: "0 6px", borderRadius: 8, background: "#fff", color: "#0F1214", fontSize: 11, fontWeight: 700, fontFamily: "Axiforma, Inter, system-ui, sans-serif", marginLeft: 2 }}>{totalActive}</span>
         }
         </button>
       </div>

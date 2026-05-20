@@ -160,7 +160,7 @@ function Modal({ open, onClose, title, children, footer, width = 520 }) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 12, width, maxWidth: "90vw", maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 16px 48px rgba(0,0,0,.16), 0 2px 8px rgba(0,0,0,.08)", overflow: "hidden" }}>
         <div style={{ padding: "20px 24px", borderBottom: "0.5px solid #E9EBEC", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <h3 style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#0F1214", fontFamily: "Inter" }}>{title}</h3>
+          <h3 style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#0F1214", fontFamily: "Inter, system-ui, sans-serif" }}>{title}</h3>
           <IconButton icon="X" onClick={onClose} label="Close" size="sm" />
         </div>
         <div style={{ padding: "20px 24px", overflow: "auto", flex: 1 }}>{children}</div>

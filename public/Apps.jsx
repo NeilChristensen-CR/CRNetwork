@@ -333,7 +333,7 @@ function ClubSwitcher({ theme, app, setApp, onFindClubs }) {
         boxShadow: "0 18px 50px rgba(15,18,20,.16), 0 2px 8px rgba(15,18,20,.06)",
         padding: 6
       }}>
-          <div style={{ padding: "8px 12px 6px", fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>Switch view</div>
+          <div style={{ padding: "8px 12px 6px", fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>Switch view</div>
           {options.map((o) => {
           const on = app === o.id;
           return (
@@ -355,7 +355,7 @@ function ClubSwitcher({ theme, app, setApp, onFindClubs }) {
               }}>{o.id === "cr" ? <CRVerifiedMark size={26} /> : o.logoMark}</span>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "#0F1214", letterSpacing: -0.1 }}>{o.name}</div>
-                  <div style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, marginTop: 1 }}>{o.sub}</div>
+                  <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 1 }}>{o.sub}</div>
                 </div>
                 {on && <Icon name="Check" size={14} strokeWidth={2.5} color="#0F1214" />}
               </button>);
@@ -1724,7 +1724,12 @@ function Dashboard({ theme, viewport, onOpenEventList, onOpenClub, onFindClubs, 
   const desktop = viewport === "desktop";
   const isCR = mode === "cr";
 
-  if (desktop) return <DashboardDesktop theme={theme} onOpenEventList={onOpenEventList} onOpenClub={onOpenClub} onFindClubs={onFindClubs} onBookCourt={onBookCourt} isCR={isCR} app={app} setApp={setApp} />;
+  // Desktop always uses the network-discovery layout. Logged-out CR also
+  // routes mobile through the same layout (with viewport="mobile" so the
+  // section components adapt) — the goal is for the mobile experience to
+  // mirror the logged-out home end-to-end. Logged-in / branded mobile
+  // surfaces continue to use the legacy mobile dashboard below.
+  if (desktop || isCR) return <DashboardDesktop theme={theme} viewport={viewport} onOpenEventList={onOpenEventList} onOpenClub={onOpenClub} onFindClubs={onFindClubs} onBookCourt={onBookCourt} isCR={isCR} app={app} setApp={setApp} />;
 
   // Track scroll-past of PrimaryRows to reveal the floating CTA bar.
   const primaryRef = React.useRef(null);
@@ -1871,19 +1876,22 @@ function Dashboard({ theme, viewport, onOpenEventList, onOpenClub, onFindClubs, 
 // after the user scrolls past PrimaryActionGrid. Modeled on the EventDetails
 // sticky CTA. Centered, max 720px, dark surface, 4 actions matching the
 // grid above. Hidden when the grid is still in view.
-function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, isCR }) {
+function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, isCR, viewport = "desktop" }) {
+  const isMobile = viewport === "mobile";
+  // Each action carries a long label (desktop) and a short label (mobile) so
+  // the 4-action bar fits inside the 410px device frame without truncating.
   const items = isCR ?
   [
-  { icon: "Calendar", label: "Book a Court", onClick: onOpenEventList, primary: true },
-  { icon: "Lightbulb", label: "Find an Event", onClick: onOpenEventList },
-  { icon: "MapPin", label: "Find a Club", onClick: onFindClubs },
-  { icon: "User", label: "Book a Pro", onClick: null }] :
+  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: onOpenEventList, primary: true },
+  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: onOpenEventList },
+  { icon: "MapPin",    label: "Find a Club",   shortLabel: "Find Club",  onClick: onFindClubs },
+  { icon: "User",      label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }] :
 
   [
-  { icon: "Calendar", label: "Book a Court", onClick: onOpenEventList, primary: true },
-  { icon: "Lightbulb", label: "Find an Event", onClick: onOpenEventList },
-  { icon: "Users", label: "Open Play", onClick: null },
-  { icon: "User", label: "Book a Pro", onClick: null }];
+  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: onOpenEventList, primary: true },
+  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: onOpenEventList },
+  { icon: "Users",     label: "Open Play",     shortLabel: "Open Play",  onClick: null },
+  { icon: "User",      label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }];
 
   // On the logged-out CourtReserve home the floater is persistent — it acts
   // as the primary action selector pinned to the bottom of the viewport
@@ -1891,57 +1899,146 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
   // original scroll-revealed behavior.
   const persistent = isCR;
   const shown = persistent || visible;
-  // Hover-driven selection — when nothing is hovered the white "active"
-  // pill stays on whichever item is marked primary. As the cursor moves
-  // across items the pill snaps to the hovered one and that item's text /
+  // Hover-driven selection — when nothing is hovered the white pill rests
+  // on the primary item ("Book a Court"). As the cursor moves across items
+  // the pill SLIDES (not snaps) to the hovered one, and that item's text /
   // icon invert to black so they read against the new white background.
   const [hovered, setHovered] = React.useState(null);
   const primaryIdx = items.findIndex((it) => it.primary);
   const activeIdx = hovered != null ? hovered : (primaryIdx === -1 ? 0 : primaryIdx);
 
+  // Sliding pill geometry — measured from the DOM after layout so the
+  // moving capsule lands exactly under the active item, regardless of
+  // label length. Re-measures on hover changes, on resize, and via a
+  // ResizeObserver so late layout shifts (font loading, etc.) don't
+  // leave the pill misaligned.
+  const trackRef = React.useRef(null);
+  const itemRefs = React.useRef([]);
+  const [pillRect, setPillRect] = React.useState({ left: 0, width: 0 });
+  const measure = React.useCallback(() => {
+    const el = itemRefs.current[activeIdx];
+    if (!el) return;
+    // offsetLeft/offsetWidth return integer pixels relative to the
+    // offsetParent (the position: relative track), which matches the
+    // pill's left: 0 anchor exactly — no sub-pixel drift like
+    // getBoundingClientRect produces.
+    setPillRect({ left: el.offsetLeft, width: el.offsetWidth });
+  }, [activeIdx]);
+  React.useLayoutEffect(() => {
+    measure();
+    // Re-measure on the next animation frame so any post-mount layout
+    // shifts (icon glyph loading, font swap) get picked up.
+    const raf = requestAnimationFrame(measure);
+    return () => cancelAnimationFrame(raf);
+  }, [measure, items.length, isMobile]);
+  React.useEffect(() => {
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    itemRefs.current.forEach((el) => el && ro.observe(el));
+    trackRef.current && ro.observe(trackRef.current);
+    return () => ro.disconnect();
+  }, [measure, items.length]);
+  React.useEffect(() => {
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [measure]);
+
   return (
+    // Sticky positioning differs per viewport:
+    //  - Desktop: bottom: 24 with a compact, content-sized pill centered
+    //    inside the row. Items hug their labels.
+    //  - Mobile: bottom: 0 so the bar attaches to the screen edge; pill
+    //    stretches to fill the row and items distribute evenly (flex: 1).
     <div style={{
-      position: "sticky", bottom: 24, zIndex: 30,
+      position: "sticky",
+      bottom: isMobile ? 0 : 24,
+      zIndex: 30,
       display: "flex", justifyContent: "center", pointerEvents: "none",
-      // Hovers above content inside the dashboard's own scroll area like a
-      // floating action bar. Negative top margin lets it overlap the tail
-      // of the preceding section instead of pushing the page taller.
-      padding: "0 24px",
-      marginTop: -88,
+      // Mobile: 16 top, 12 sides, 24 bottom — bottom cushion bumped from
+      // 8 → 24 so the pill doesn't disappear into the bottom of the device
+      // frame as the page scrolls. Desktop: floats inset.
+      padding: isMobile ? "16px 12px 24px 12px" : "0 24px",
+      marginTop: isMobile ? -88 : -88,
+      // Gradient on mobile so the page content visibly fades into the
+      // sticky action shelf instead of cutting at a hard edge.
+      background: isMobile
+        ? "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 35%, #FFFFFF 100%)"
+        : "transparent",
       transform: shown ? "translateY(0)" : "translateY(28px)",
       opacity: shown ? 1 : 0,
-      transition: "transform 320ms cubic-bezier(.2,.8,.2,1), opacity 240ms ease"
+      transition: "transform 320ms cubic-bezier(.2,.8,.2,1), opacity 240ms ease",
     }}>
       <div
+        ref={trackRef}
         onMouseLeave={() => setHovered(null)}
         style={{
-        pointerEvents: "auto",
-        display: "inline-flex", alignItems: "center", gap: 6,
-        background: theme.dark ? "rgba(20,23,27,.92)" : "rgba(15,18,20,.96)",
-        backdropFilter: "blur(14px)",
-        color: "#fff",
-        padding: 6, borderRadius: 999,
-        boxShadow: "0 14px 40px rgba(15,18,20,.28), 0 2px 8px rgba(15,18,20,.18)"
-      }}>
+          pointerEvents: "auto",
+          position: "relative",
+          display: isMobile ? "flex" : "inline-flex",
+          width: isMobile ? "100%" : "auto",
+          alignItems: "center",
+          gap: isMobile ? 4 : 6,
+          background: theme.dark ? "rgba(20,23,27,.92)" : "rgba(15,18,20,.96)",
+          backdropFilter: "blur(14px)",
+          color: "#fff",
+          padding: 6, borderRadius: 999,
+          boxShadow: "0 14px 40px rgba(15,18,20,.28), 0 2px 8px rgba(15,18,20,.18)",
+        }}
+      >
+        {/* Sliding pill — single absolutely-positioned capsule that tracks
+            the active item via transform + width. Sits BEHIND the buttons
+            (zIndex: 0) so the button text stays interactive on top. */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top: 6, bottom: 6,
+            left: 0,
+            width: pillRect.width,
+            transform: `translateX(${pillRect.left}px)`,
+            background: "#fff",
+            borderRadius: 999,
+            transition: "transform 280ms cubic-bezier(.2,.8,.2,1), width 280ms cubic-bezier(.2,.8,.2,1)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
         {items.map((it, idx) => {
           const isActive = idx === activeIdx;
           return (
             <button
               key={it.label}
+              ref={(el) => { itemRefs.current[idx] = el; }}
               onClick={it.onClick || undefined}
               onMouseEnter={() => setHovered(idx)}
               style={{
-                height: 44, padding: "0 18px", borderRadius: 999, border: 0,
-                background: isActive ? "#fff" : "transparent",
+                // Desktop hugs content; mobile fills the row evenly.
+                position: "relative",
+                zIndex: 1,
+                flex: isMobile ? 1 : "0 0 auto",
+                minWidth: 0,
+                height: 44,
+                padding: isMobile ? "0 8px" : "0 18px",
+                borderRadius: 999, border: 0,
+                background: "transparent",
                 color: isActive ? "#0F1214" : "#fff",
-                fontFamily: "inherit", fontWeight: 700, fontSize: 13, cursor: it.onClick ? "pointer" : "default",
-                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+                fontFamily: "inherit", fontWeight: 700,
+                fontSize: isMobile ? 12 : 13,
+                cursor: it.onClick ? "pointer" : "default",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                gap: isMobile ? 0 : 8,
                 whiteSpace: "nowrap",
-                transition: "background 140ms ease, color 140ms ease",
+                // Only color animates per-button; the white background is
+                // owned by the sliding pill above.
+                transition: "color 200ms ease",
               }}
             >
-              <Icon name={it.icon} size={14} color={isActive ? "#0F1214" : "#fff"} strokeWidth={2.2} />
-              {it.label}
+              {/* Icons appear only on desktop; mobile hides them so labels
+                  fit comfortably across the 4-item row. */}
+              {!isMobile && (
+                <Icon name={it.icon} size={14} color={isActive ? "#0F1214" : "#fff"} strokeWidth={2.2} />
+              )}
+              {it.shortLabel}
             </button>
           );
         })}
@@ -1950,65 +2047,66 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
 
 }
 
+// ---- supplyState ---------------------------------------------------------
+// Decides how to render an event's "spots remaining" tag. Text is always
+// "X of Y spots" so the count reads the same across the page; the URGENCY
+// is communicated by the pill color — red when ≤30% of seats remain,
+// neutral grey otherwise. Falls back to urgent when totalSpots is missing
+// (so legacy data without a denominator still pops as scarce).
+function supplyState({ spotsLeft, totalSpots }) {
+  if (typeof totalSpots !== "number" || totalSpots <= 0) {
+    return { urgent: true, text: `${spotsLeft} spots` };
+  }
+  const urgent = spotsLeft / totalSpots <= 0.3;
+  return { urgent, text: `${spotsLeft} of ${totalSpots} spots` };
+}
+
 // ---- Verified popular clubs near you — horizontal carousel of map-image
 // venue cards. Each card: map preview with distance badge, club name,
 // rating + price, sport tag, and a See Events & Info link.
-function VerifiedPopularClubs({ theme, onOpenClub }) {
+function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
+  const isMobile = viewport === "mobile";
   const trackRef = React.useRef(null);
   // Varied club data per card so the carousel reads as a real list rather
   // than a repeated placeholder. Each club carries multiple sport tags so
   // the multi-sport venues read accurately.
+  // Each club now carries city/state (shown as the meta line in place of
+  // the rating row), a primary `sport` tag (single, matching the BookNow
+  // card's single-sport pill), a `booked` count and 4 upcoming `times` so
+  // Popular Clubs reads with the same affordances as Available to Play Now.
   const clubs = [
-    { id: "old-coast",      name: "Old Coast Pickelball",      rating: 4.8, reviews: 256, price: "$$$", sports: ["Pickleball", "Tennis"],            distance: "2.1mi" },
-    { id: "anastasia",      name: "Anastasia Tennis Club",     rating: 4.6, reviews: 132, price: "$$",  sports: ["Tennis"],                          distance: "2.4mi" },
-    { id: "vilano-beach",   name: "Vilano Beach Racquet",      rating: 4.5, reviews: 96,  price: "$$$", sports: ["Tennis", "Pickleball", "Padel"],   distance: "2.6mi" },
-    { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", rating: 4.7, reviews: 312, price: "$$$", sports: ["Pickleball"],                      distance: "8.4mi" },
-    { id: "treaty-park",    name: "Treaty Park Tennis",        rating: 4.3, reviews: 41,  price: "$",   sports: ["Tennis"],                          distance: "3.2mi" },
-    { id: "south-st-aug",   name: "South St. Augustine",       rating: 4.4, reviews: 87,  price: "$$",  sports: ["Tennis", "Pickleball"],            distance: "3.6mi" },
-    { id: "the-hub-padel",  name: "The Hub Padel",             rating: 4.7, reviews: 134, price: "$$$", sports: ["Padel"],                           distance: "5.1mi" },
-    { id: "world-golf",     name: "World Golf Village Tennis", rating: 4.7, reviews: 287, price: "$$$", sports: ["Tennis", "Pickleball"],            distance: "6.8mi" },
+    // `distance` is numeric-string so MiniMap can append "mi" to render
+    // "2.1mi" in its top-left pill — matches the BookNow data shape so
+    // both sections feed the shared <BookNowCard>.
+    { id: "old-coast",      name: "Old Coast Pickleball",      city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 23, distance: "2.1", times: ["9:00 AM", "9:30 AM", "10:00 AM", "11:30 AM"] },
+    { id: "anastasia",      name: "Anastasia Tennis Club",     city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 14, distance: "2.4", times: ["8:00 AM", "8:30 AM", "12:00 PM",  "2:00 PM"] },
+    { id: "vilano-beach",   name: "Vilano Beach Racquet",      city: "Vilano Beach",       state: "FL", sport: "Tennis",     booked: 41, distance: "2.6", times: ["10:00 AM", "10:30 AM", "11:00 AM", "12:30 PM"] },
+    { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", city: "Jacksonville",       state: "FL", sport: "Pickleball", booked: 18, distance: "8.4", times: ["8:00 AM", "12:00 PM", "2:30 PM", "4:00 PM"] },
+    { id: "treaty-park",    name: "Treaty Park Tennis",        city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 9,  distance: "3.2", times: ["7:00 AM", "9:00 AM", "3:00 PM", "5:30 PM"] },
+    { id: "south-st-aug",   name: "South St. Augustine",       city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 27, distance: "3.6", times: ["8:30 AM", "11:00 AM", "1:30 PM", "4:30 PM"] },
+    { id: "the-hub-padel",  name: "The Hub Padel",             city: "Jacksonville Beach", state: "FL", sport: "Padel",      booked: 12, distance: "5.1", times: ["9:00 AM", "10:30 AM", "1:00 PM", "6:00 PM"] },
+    { id: "world-golf",     name: "World Golf Village Tennis", city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 31, distance: "6.8", times: ["7:30 AM", "9:00 AM", "2:00 PM", "6:30 PM"] },
   ];
   const scrollBy = (dx) => {
     const el = trackRef.current; if (!el) return;
     el.scrollBy({ left: dx, behavior: "smooth" });
   };
-  // Inline-SVG stars (Lucide can't render a fill via the Icon component, so
-  // we draw the star path ourselves). Matches the BookNowCard layout so the
-  // ratings read the same across Popular clubs and Available to play now.
-  const Stars = ({ rating }) => {
-    const full = Math.floor(rating);
-    const half = rating - full >= 0.4 && rating - full < 0.9;
-    return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
-        {[0, 1, 2, 3, 4].map((i) => {
-          let fill = "#E9EBEC";
-          if (i < full) fill = "#FFB400";
-          else if (i === full && half) fill = "#FFB400";
-          return (
-            <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill={fill} style={{ flexShrink: 0 }}>
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 6.91-1.01z" />
-            </svg>
-          );
-        })}
-      </span>
-    );
-  };
   return (
     <div style={{ marginTop: 8 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           Popular clubs near you
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
-            width: 36, height: 36, borderRadius: 8, border: 0,
+            width: 44, height: 44, borderRadius: 8, border: 0,
             background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
             <Icon name="ChevronLeft" size={18} strokeWidth={2} color="#0F1214" />
           </button>
           <button onClick={() => scrollBy(340)} aria-label="Next" style={{
-            width: 36, height: 36, borderRadius: 8, border: 0,
+            width: 44, height: 44, borderRadius: 8, border: 0,
             background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
@@ -2020,94 +2118,27 @@ function VerifiedPopularClubs({ theme, onOpenClub }) {
           fade can sit absolutely on top, and y-padding gives card hover
           shadows room to render without getting clipped by the scroll
           container's overflow box. */}
-      <div style={{ position: "relative", margin: "-16px -4px -16px" }}>
+      <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px 0" : "-16px -4px -16px" }}>
       <div ref={trackRef} style={{
         display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
-        paddingTop: 28, paddingBottom: 32, scrollbarWidth: "none",
+        paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
         paddingLeft: 4, paddingRight: 4
       }}>
         {clubs.map((c) => (
-          <button key={c.id} onClick={() => onOpenClub && onOpenClub(c.id)} style={{
-            flex: "0 0 280px", scrollSnapAlign: "start",
-            background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
-            overflow: "hidden", textAlign: "left", padding: 0,
-            cursor: "pointer", fontFamily: "inherit", color: "inherit",
-            display: "flex", flexDirection: "column",
-            transition: "box-shadow 160ms, transform 160ms"
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
-            <div style={{
-              position: "relative", height: 140,
-              backgroundImage: `linear-gradient(135deg, rgba(232,240,229,0.92) 0%, rgba(223,233,219,0.92) 40%, rgba(241,235,217,0.92) 100%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 140'><g fill='none' stroke='%23B6C2A8' stroke-width='1.2'><path d='M-20 30 Q60 20 140 50 T300 40'/><path d='M-20 90 Q60 80 140 110 T300 100'/><path d='M40 -10 Q60 60 100 80 T140 160'/><path d='M180 -10 Q200 50 220 90 T240 160'/></g><circle cx='140' cy='70' r='8' fill='%231F4ED8' stroke='%23fff' stroke-width='3'/></svg>")`,
-              backgroundSize: "cover",
-              backgroundPosition: "center"
-            }}>
-              <div style={{
-                position: "absolute", top: 12, left: 12,
-                height: 24, padding: "0 10px", borderRadius: 6,
-                background: "#fff", color: "#0F1214",
-                fontSize: 11, fontWeight: 700,
-                display: "inline-flex", alignItems: "center",
-                boxShadow: "0 1px 2px rgba(15,18,20,0.08)"
-              }}>{c.distance}</div>
-            </div>
-            {/* Card content — 12px padding all around, vertical stack
-                of title / rating / sport tag, all left-aligned. The
-                "See Events & Info" CTA is intentionally OUTSIDE this
-                container so it can sit on the card's blue footer. */}
-            <div style={{
-              padding: 12,
-              display: "flex", flexDirection: "column", alignItems: "flex-start",
-              gap: 8,
-            }}>
-              <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.3 }}>
-                {c.name}
-              </div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#0F1214" }}>
-                <Stars rating={c.rating} />
-                <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{c.rating}</span>
-                <span style={{ color: "#858F8F" }}>({c.reviews})</span>
-                <span style={{ color: "#858F8F" }}>•</span>
-                <span style={{ fontWeight: 700, color: "#0F1214" }}>{c.price}</span>
-              </div>
-              {/* Sport tag row — multiple tags can render but the row is
-                  capped at one line via flex nowrap + overflow hidden, so
-                  cards with many sports clip rather than break the layout. */}
-              <div style={{
-                display: "flex",
-                gap: 6,
-                flexWrap: "nowrap",
-                overflow: "hidden",
-                width: "100%",
-              }}>
-                {c.sports.map((s) => (
-                  <span key={s} style={{
-                    display: "inline-flex", alignItems: "center",
-                    height: 24, padding: "0 10px", borderRadius: 6,
-                    background: "#F4F5F6", color: "#0F1214",
-                    fontSize: 11, fontWeight: 600,
-                    whiteSpace: "nowrap",
-                    flexShrink: 0,
-                  }}>{s}</span>
-                ))}
-              </div>
-            </div>
-            {/* Card footer — sits at the bottom edge of the card, full-width,
-                subtle grey background matching the SearchBar's selected-state
-                track so the design system reads consistently. */}
-            <div style={{
-              marginTop: "auto",
-              padding: "12px 16px",
-              borderTop: "1px solid #E9EBEC",
-              background: "#F4F5F6",
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              fontSize: 12, fontWeight: 600, color: "#0F1214",
-            }}>
-              See Events & Info
-              <Icon name="ArrowRight" size={14} strokeWidth={2} color="#0F1214" />
-            </div>
-          </button>
+          // Carousel slot — fixed width + scroll-snap so the card sizing
+          // stays consistent across viewports. The shared <BookNowCard>
+          // fills the slot via its own width:100% and handles the entire
+          // card body, header (MiniMap), time pills, and footer.
+          <div key={c.id} style={{ flex: "0 0 280px", scrollSnapAlign: "start", display: "flex" }}>
+            {window.BookNowCard && (
+              <window.BookNowCard
+                v={c}
+                theme={theme}
+                onPickSlot={() => onOpenClub && onOpenClub(c.id)}
+                onOpenClub={onOpenClub}
+              />
+            )}
+          </div>
         ))}
       </div>
       {/* Right-edge fade — 16px gradient hides the hard clip of the last
@@ -2127,7 +2158,8 @@ function VerifiedPopularClubs({ theme, onOpenClub }) {
 // ---- Popular events near you — carousel of event cards. Each card:
 // club brand mark, spots-left badge, title, club row, distance, schedule,
 // tag pills, and price + spots-remaining footer.
-function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false }) {
+function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false, viewport = "desktop" }) {
+  const isMobile = viewport === "mobile";
   const trackRef = React.useRef(null);
   // Varied event data — distinct clubs, titles, dates, prices, and tags per
   // card so the carousel reads as a real list rather than a repeated stub.
@@ -2146,9 +2178,9 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
     el.scrollBy({ left: dx, behavior: "smooth" });
   };
   return (
-    <div style={{ marginTop: 16 }}>
+    <div style={{ marginTop: isMobile ? 32 : 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           {title}
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
@@ -2165,14 +2197,14 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             </button>
           )}
           <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
-            width: 36, height: 36, borderRadius: 8, border: 0,
+            width: 44, height: 44, borderRadius: 8, border: 0,
             background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
             <Icon name="ChevronLeft" size={18} strokeWidth={2} color="#0F1214" />
           </button>
           <button onClick={() => scrollBy(340)} aria-label="Next" style={{
-            width: 36, height: 36, borderRadius: 8, border: 0,
+            width: 44, height: 44, borderRadius: 8, border: 0,
             background: "transparent", cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}>
@@ -2182,16 +2214,17 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
       </div>
       {/* Carousel wrapper — relative for the right-edge fade overlay, y
           padding so card hover shadows aren't clipped. */}
-      <div style={{ position: "relative", margin: "-16px -4px -16px" }}>
+      <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px 0" : "-16px -4px -16px" }}>
       <div ref={trackRef} style={{
         display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
-        paddingTop: 28, paddingBottom: 32, scrollbarWidth: "none",
+        paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
         paddingLeft: 4, paddingRight: 4,
         alignItems: "stretch"
       }}>
         {events.map((ev) => (
           <div
             key={ev.id}
+            data-card-hover
             style={{
               flex: "0 0 320px", scrollSnapAlign: "start",
               background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
@@ -2202,9 +2235,11 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
-            {/* Header — brandmark logo on the left, spots-left tag opposite
-                on the right. Logo colors vary per club. */}
-            <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+            {/* Header — brandmark logo on the left, spots tag opposite
+                on the right. align-items: center vertically centers the
+                tag's text against the logo lockup (both blocks are 22h)
+                so the baselines read aligned. */}
+            <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <div style={{
                   width: 22, height: 22, borderRadius: 4,
@@ -2218,18 +2253,24 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                   <span style={{ fontFamily: theme.display, fontSize: 9, fontWeight: 700, color: ev.logoBg, letterSpacing: 1.4, marginTop: 2 }}>{ev.logoLine2}</span>
                 </div>
               </div>
-              <span style={{
-                height: 22, padding: "0 10px", borderRadius: 999,
-                background: "#DC2626", color: "#fff",
-                fontSize: 11, fontWeight: 700,
-                display: "inline-flex", alignItems: "center",
-              }}>{ev.spotsLeft} Spots Left</span>
+              {(() => {
+                const s = supplyState(ev);
+                return (
+                  <span data-tag={s.urgent ? "warning" : "default"} style={{
+                    height: 22, padding: "0 10px", borderRadius: 6,
+                    background: s.urgent ? "#FEE2E2" : "#F4F5F6",
+                    color: s.urgent ? "#B91C1C" : "#0F1214",
+                    fontSize: 11.5, fontWeight: 600,
+                    display: "inline-flex", alignItems: "center",
+                    whiteSpace: "nowrap",
+                  }}>{s.text}</span>
+                );
+              })()}
             </div>
             {/* Content — strict vertical rhythm:
                   24px → title
-                  12px → club name
-                   8px → city • distance
-                   8px → date — duration
+                  12px → location block (pin icon + club / city • distance)
+                   8px → time block (clock icon + date — duration)
                   24px → tag pills */}
             <div style={{ padding: "0 16px" }}>
               <div style={{
@@ -2240,19 +2281,31 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               }}>
                 {ev.title}
               </div>
-              <div style={{ marginTop: 12, fontSize: 13, color: "#0F1214", fontWeight: 600 }}>
-                {ev.club}
+              {/* Location — pin icon anchored to the first line, stacked
+                  club name + "city · distance" to the right. flex-start so
+                  the icon stays at the top if the club name wraps. */}
+              <div style={{ marginTop: 12, display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <span style={{ display: "inline-flex", marginTop: 2, flexShrink: 0 }}>
+                  <Icon name="MapPin" size={13} strokeWidth={2.2} color="#4B5052" />
+                </span>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: 13, color: "#0F1214", fontWeight: 500, lineHeight: 1.3 }}>
+                    {ev.club}
+                  </div>
+                  <div style={{ marginTop: 2, fontSize: 12.5, color: "#4B5052", lineHeight: 1.3 }}>
+                    {ev.city} • {ev.distance}
+                  </div>
+                </div>
               </div>
-              <div style={{ marginTop: 8, fontSize: 12.5, color: "#4B5052" }}>
-                {ev.city} • {ev.distance}
-              </div>
-              <div style={{ marginTop: 8, fontSize: 12.5, color: "#4B5052" }}>
-                {ev.date} — {ev.duration}
+              {/* Time — clock icon + date — duration on a single row. */}
+              <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "#4B5052" }}>
+                <Icon name="Clock" size={13} strokeWidth={2.2} color="#4B5052" />
+                <span>{ev.date} — {ev.duration}</span>
               </div>
               <div style={{ marginTop: 24, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {ev.tags.map((tag, i) => (
-                  <span key={i} style={{
-                    height: 24, padding: "0 10px", borderRadius: 6,
+                  <span key={i} data-tag="default" style={{
+                    height: 22, padding: "0 10px", borderRadius: 6,
                     background: "#F4F5F6", color: "#0F1214",
                     fontSize: 11.5, fontWeight: 600,
                     display: "inline-flex", alignItems: "center",
@@ -2269,7 +2322,9 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             }}>
               <div>
                 <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214" }}>{ev.price}</div>
-                <div style={{ marginTop: 2, fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: "#858F8F" }}>
+                {/* Spots-remaining caption — unbolded so the price stays
+                    the focal point of the footer. */}
+                <div style={{ marginTop: 2, fontSize: 11.5, fontWeight: 500, color: "#4B5052" }}>
                   {ev.taken} of {ev.totalSpots} spots remaining
                 </div>
               </div>
@@ -2302,7 +2357,8 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
 // Each row: time + status on the left, title + spots-left pill + meta + avatars
 // in the middle, price + arrow CTA on the right. Date headers carry a count
 // chip showing how many sessions fall under that day.
-function MoreEventsNearYou({ theme, onOpenEvent }) {
+function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
+  const isMobile = viewport === "mobile";
   // Avatar stack — three overlapping player avatars. The "+X attending"
   // count is rendered separately by the caller so the number can vary per
   // row without re-rendering the avatar stack.
@@ -2328,14 +2384,17 @@ function MoreEventsNearYou({ theme, onOpenEvent }) {
   // doesn't repeat the same placeholder over and over.
   const allRows = [
     // ---- Today ----------------------------------------------------------
-    { time: "6:00 AM",  spotsLeft: 2, title: "Open Play: All Levels Welcome",   attending: 8,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • 3.0 - 3.5 DUPR • Coach Mike Alvarado", price: "$15 - $25" },
-    { time: "9:00 AM",  spotsLeft: 4, title: "Intermediate Skills Clinic",      attending: 6,  club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", meta: "Doubles • 3.5 - 4.0 DUPR • Coach Priya Shah",    price: "$30" },
-    { time: "12:00 PM", spotsLeft: 1, title: "Round Robin Doubles",             attending: 11, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 3.0+ DUPR • All Levels",               price: "$20" },
-    { time: "5:30 PM",  spotsLeft: 6, title: "Drill & Play Session",            attending: 4,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • 3.0 - 4.0 DUPR • Coach Reid Anders",   price: "$25 - $40" },
+    // totalSpots added so the spots-left tag can decide between the
+    // urgent red pill (low remaining) and the neutral count pill
+    // (plenty of room). Threshold lives in supplyState() below.
+    { time: "6:00 AM",  spotsLeft: 2,  totalSpots: 12, title: "Open Play: All Levels Welcome",   attending: 8,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • 3.0 - 3.5 DUPR • Coach Mike Alvarado", price: "$15 - $25" },
+    { time: "9:00 AM",  spotsLeft: 4,  totalSpots: 16, title: "Intermediate Skills Clinic",      attending: 6,  club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", meta: "Doubles • 3.5 - 4.0 DUPR • Coach Priya Shah",    price: "$30" },
+    { time: "12:00 PM", spotsLeft: 1,  totalSpots: 8,  title: "Round Robin Doubles",             attending: 11, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 3.0+ DUPR • All Levels",               price: "$20" },
+    { time: "5:30 PM",  spotsLeft: 6,  totalSpots: 16, title: "Drill & Play Session",            attending: 4,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • 3.0 - 4.0 DUPR • Coach Reid Anders",   price: "$25 - $40" },
     // ---- Tomorrow -------------------------------------------------------
-    { time: "6:30 AM",  spotsLeft: 3, title: "Sunrise Pickleball",              attending: 9,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • All Levels • Coach Mike Alvarado",     price: "$15" },
-    { time: "10:00 AM", spotsLeft: 8, title: "Beginner Bootcamp",               attending: 2,  club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", meta: "Singles & Doubles • 2.5 - 3.0 DUPR • Coach Jana Ellis", price: "$45" },
-    { time: "6:00 PM",  spotsLeft: 2, title: "Open Play: All Levels Welcome",   attending: 12, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 2.5 - 4.5 DUPR • League Director Sam B.", price: "$15 - $35" },
+    { time: "6:30 AM",  spotsLeft: 3,  totalSpots: 12, title: "Sunrise Pickleball",              attending: 9,  club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", meta: "Doubles • All Levels • Coach Mike Alvarado",     price: "$15" },
+    { time: "10:00 AM", spotsLeft: 8,  totalSpots: 16, title: "Beginner Bootcamp",               attending: 2,  club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", meta: "Singles & Doubles • 2.5 - 3.0 DUPR • Coach Jana Ellis", price: "$45" },
+    { time: "6:00 PM",  spotsLeft: 2,  totalSpots: 16, title: "Open Play: All Levels Welcome",   attending: 12, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 2.5 - 4.5 DUPR • League Director Sam B.", price: "$15 - $35" },
   ];
   const groups = [
     { id: "today",    label: "Today, Monday, May 11, 2026",     rows: allRows.slice(0, 4) },
@@ -2356,31 +2415,60 @@ function MoreEventsNearYou({ theme, onOpenEvent }) {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [filterOpen]);
   return (
-    <div style={{ marginTop: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 12 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, letterSpacing: -0.8, color: theme.t.text, margin: 0 }}>
-          More events near you
+    <div style={{ marginTop: isMobile ? 32 : 16 }}>
+      <div style={{
+        display: "flex",
+        // Stack title above combo filter on mobile so the filter has full
+        // row width to itself.
+        flexDirection: isMobile ? "column" : "row",
+        alignItems: isMobile ? "stretch" : "center",
+        justifyContent: "space-between",
+        gap: isMobile ? 12 : 16,
+        marginBottom: 12,
+      }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
+          {isMobile ? "More Events" : "More events near you"}
         </h2>
-        <div ref={filterRef} style={{ position: "relative" }}>
-          <button onClick={() => setFilterOpen((o) => !o)} aria-expanded={filterOpen} style={{
-            height: 40, padding: "0 14px 0 18px", borderRadius: 8,
-            border: "1px solid #E9EBEC", background: "#fff",
-            display: "inline-flex", alignItems: "center", gap: 18,
-            fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: "#0F1214",
-            cursor: "pointer",
-          }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <Icon name="Calendar" size={14} strokeWidth={2} color="#0F1214" />
-              {filterWindow}
+        <div ref={filterRef} style={{ position: "relative", minWidth: 0, maxWidth: "100%" }}>
+          {/* Single-line combo trigger. A leading SlidersHorizontal glyph
+              signals "filters" so the chips read as a button, not as a
+              passive sentence. Hover deepens the border + lightens the
+              fill; open state inverts to dark so it's obvious which row
+              is driving the open popover. */}
+          <button
+            onClick={() => setFilterOpen((o) => !o)}
+            aria-expanded={filterOpen}
+            onMouseEnter={(e) => { if (!filterOpen) { e.currentTarget.style.borderColor = "#0F1214"; e.currentTarget.style.background = "#F4F5F6"; } }}
+            onMouseLeave={(e) => { if (!filterOpen) { e.currentTarget.style.borderColor = "#E9EBEC"; e.currentTarget.style.background = "#fff"; } }}
+            style={{
+              height: 40, padding: "0 14px", borderRadius: 8,
+              border: `1px solid ${filterOpen ? "#0F1214" : "#E9EBEC"}`,
+              background: filterOpen ? "#0F1214" : "#fff",
+              color: filterOpen ? "#fff" : "#0F1214",
+              display: "block",
+              maxWidth: "100%",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              fontFamily: "inherit", fontSize: 13, fontWeight: 500,
+              cursor: "pointer",
+              textAlign: "left",
+              lineHeight: "38px",
+              transition: "background 140ms ease, border-color 140ms ease, color 140ms ease",
+            }}
+          >
+            <span style={{ display: "inline-block", verticalAlign: "-3px", marginRight: 8 }}>
+              <Icon name="SlidersHorizontal" size={14} strokeWidth={2} color={filterOpen ? "#fff" : "#0F1214"} />
             </span>
-            <span style={{ width: 1, height: 18, background: "#E9EBEC", flexShrink: 0 }} />
-            <span>{filterTime}</span>
-            <span style={{ width: 1, height: 18, background: "#E9EBEC", flexShrink: 0 }} />
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <Icon name="Navigation" size={13} strokeWidth={2.2} color="#5B7CFA" />
-              {filterLoc}
+            <span style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}>
+              <Icon name="Calendar" size={14} strokeWidth={2} color={filterOpen ? "#fff" : "#0F1214"} />
             </span>
-            <Icon name="ChevronDown" size={14} strokeWidth={2} color="#858F8F" />
+            {filterWindow}
+            <span style={{ color: filterOpen ? "rgba(255,255,255,.4)" : "#C8CDCD", margin: "0 10px" }}>·</span>
+            {filterTime}
+            <span style={{ color: filterOpen ? "rgba(255,255,255,.4)" : "#C8CDCD", margin: "0 10px" }}>·</span>
+            <span style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}>
+              <Icon name="Navigation" size={13} strokeWidth={2.2} color={filterOpen ? "#8AB6FF" : "#5B7CFA"} />
+            </span>
+            {filterLoc}
           </button>
           {filterOpen && (
             <div role="dialog" style={{
@@ -2413,21 +2501,29 @@ function MoreEventsNearYou({ theme, onOpenEvent }) {
           </div>
           <div>
             {g.rows.map((r, i) => (
-              <EventRow key={i} r={r} first={i === 0} onOpenEvent={onOpenEvent} theme={theme} Avatars={Avatars} />
+              <EventRow key={i} r={r} first={i === 0} onOpenEvent={onOpenEvent} theme={theme} Avatars={Avatars} viewport={viewport} />
             ))}
           </div>
         </div>
       ))}
-      {/* Show more — neutral pill at the end of the section. Could load a
-          next page of events; for the prototype it's a static affordance. */}
-      <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
+      {/* Show more — full-width bar on mobile (extends to the content
+          column edges), content-hugged pill on desktop. Same hover treatment. */}
+      <div style={{
+        marginTop: 8,
+        display: "flex",
+        justifyContent: isMobile ? "stretch" : "center",
+      }}>
         <button style={{
           height: 40, padding: "0 18px", borderRadius: 8,
           border: "1px solid #E9EBEC", background: "#fff",
-          display: "inline-flex", alignItems: "center", gap: 8,
+          display: "inline-flex", alignItems: "center",
+          justifyContent: "center", gap: 8,
           fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: "#0F1214",
           cursor: "pointer",
           transition: "background 120ms",
+          // Mobile: bar stretches to the row width so it reads as the
+          // section terminator. Desktop keeps its content-hugged pill.
+          width: isMobile ? "100%" : "auto",
         }}
         onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
         onMouseLeave={(e) => { e.currentTarget.style.background = "#fff"; }}>
@@ -2445,7 +2541,7 @@ function MoreEventsNearYou({ theme, onOpenEvent }) {
 function FilterSelect({ label, value, onChange, options }) {
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#858F8F" }}>{label}</span>
+      <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#4B5052" }}>{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -2466,10 +2562,101 @@ function FilterSelect({ label, value, onChange, options }) {
 // Sub-component so each row can carry its own hover state (subtle background
 // tint) without re-rendering the whole list on hover. Time + spots-left tag
 // top-align with the title/location/meta column.
-function EventRow({ r, first, onOpenEvent, theme, Avatars }) {
+function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" }) {
   const [hover, setHover] = React.useState(false);
+  const isMobile = viewport === "mobile";
+
+  // ---- Mobile layout ------------------------------------------------------
+  // Stacks the event content vertically: title → avatars+attending →
+  // location → metadata → bottom row with time + spots-left on the left
+  // and price + Reserve CTA on the right. No two-column grid — better fit
+  // for narrow viewports where the 96px reserved left column would chew
+  // up half the available width.
+  if (isMobile) {
+    return (
+      <div
+        data-card-hover
+        onClick={() => onOpenEvent && onOpenEvent()}
+        style={{
+          display: "flex", flexDirection: "column", gap: 6,
+          padding: "16px 0",
+          borderTop: first ? "1px solid #E9EBEC" : "1px solid #F4F5F6",
+          cursor: "pointer",
+        }}
+      >
+        <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214", letterSpacing: -0.2, lineHeight: 1.25 }}>
+          {r.title}
+        </div>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <Avatars />
+          <span style={{ fontSize: 13, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
+        </div>
+        {/* Single location+meta line — mobile collapses what was two
+            stacked rows on the desktop layout into one truncated row so
+            the card stays at 4 lines instead of 5. Meta detail (level,
+            format, coach) is still available on tap-through. */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6,
+          fontSize: 13, color: "#4B5052",
+          minWidth: 0,
+        }}>
+          <Icon name="MapPin" size={13} strokeWidth={1.75} color="#858F8F" />
+          <span style={{
+            flex: 1, minWidth: 0,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>{r.club} · {r.distance} · {r.meta}</span>
+        </div>
+        {/* Bottom row — time + spots tag on the left, price + Reserve CTA
+            on the right, balanced via space-between. */}
+        <div style={{
+          marginTop: 6,
+          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+        }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, color: "#0F1214" }}>{r.time}</span>
+            {(() => {
+              const s = supplyState(r);
+              return (
+                <span data-tag={s.urgent ? "warning" : "default"} style={{
+                  height: 22, padding: "0 10px", borderRadius: 6,
+                  background: s.urgent ? "#FEE2E2" : "#F4F5F6",
+                  color: s.urgent ? "#B91C1C" : "#0F1214",
+                  fontSize: 11.5, fontWeight: 600,
+                  display: "inline-flex", alignItems: "center",
+                  whiteSpace: "nowrap",
+                }}>{s.text}</span>
+              );
+            })()}
+          </div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 15, color: "#0F1214", whiteSpace: "nowrap" }}>{r.price}</span>
+            {/* Mobile: arrow-only square button — the row itself is the
+                primary tap target (whole card opens the event), so the
+                trailing pill collapses to an icon affordance instead of
+                competing for label space. */}
+            <button
+              onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
+              aria-label="Reserve event"
+              style={{
+                width: 40, height: 40, padding: 0,
+                borderRadius: 8,
+                background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Desktop layout (unchanged) -----------------------------------------
   return (
     <div
+      data-card-hover
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={() => onOpenEvent && onOpenEvent()}
@@ -2487,29 +2674,30 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars }) {
         transition: "background 140ms ease",
       }}
     >
-      {/* Left — time + spots-left tag. Top-aligned with the title in the
-          middle column so the row reads cleanly even when the title wraps. */}
       <div>
         <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", lineHeight: "21px" }}>{r.time}</div>
         <div style={{ marginTop: 6 }}>
-          <span style={{
-            height: 22, padding: "0 8px", borderRadius: 6,
-            background: "#FEE2E2", color: "#DC2626",
-            fontSize: 11, fontWeight: 700,
-            display: "inline-flex", alignItems: "center",
-          }}>{r.spotsLeft} Spots Left</span>
+          {(() => {
+            const s = supplyState(r);
+            return (
+              <span data-tag={s.urgent ? "warning" : "default"} style={{
+                height: 22, padding: "0 10px", borderRadius: 6,
+                background: s.urgent ? "#FEE2E2" : "#F4F5F6",
+                color: s.urgent ? "#B91C1C" : "#0F1214",
+                fontSize: 11.5, fontWeight: 600,
+                display: "inline-flex", alignItems: "center",
+                whiteSpace: "nowrap",
+              }}>{s.text}</span>
+            );
+          })()}
         </div>
       </div>
-      {/* Middle — 3 lines:
-          1) Title + avatars + "+X attending"
-          2) Location: MapPin + club, city, state, distance
-          3) Event metadata (format, DUPR range, instructor) */}
       <div style={{ minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", lineHeight: "21px" }}>
           <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.2 }}>{r.title}</span>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
             <Avatars />
-            <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
+            <span style={{ fontSize: 13, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
           </div>
         </div>
         <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#4B5052" }}>
@@ -2521,10 +2709,6 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars }) {
         </div>
       </div>
       <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", whiteSpace: "nowrap", alignSelf: "center" }}>{r.price}</div>
-      {/* CTA button — collapses to a 40px square arrow at rest. On row
-          hover, expands leftward into a "Reserve →" pill which pushes the
-          price column left and makes the action explicit. Width transitions
-          smoothly so the layout shift reads as one cohesive reveal. */}
       <button
         onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
         aria-label="Reserve event"
@@ -2551,7 +2735,10 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars }) {
 }
 
 // ---- Web-optimized dashboard ----
-function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onBookCourt, isCR, app, setApp }) {
+// Now also drives logged-out CR mobile so the experience mirrors desktop.
+// All dimensional tokens swap based on the viewport flag below.
+function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpenClub, onFindClubs, onBookCourt, isCR, app, setApp }) {
+  const isMobile = viewport === "mobile";
   // Reveal the floating CTA once PrimaryActionGrid has scrolled out of view
   // at the top of the scroll container. Same pattern as the mobile floater.
   const actionGridRef = React.useRef(null);
@@ -2581,23 +2768,40 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
   }, []);
   return (
     <div data-dark={theme.dark ? "true" : undefined} style={{
-      background: theme.t.bg, minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif", paddingBottom: 64,
+      background: theme.t.bg,
+      // On mobile the device frame's inner container has overflow: hidden,
+      // so DashboardDesktop has to be its own scroll context for sticky to
+      // function and for the page to actually scroll vertically. On desktop
+      // the parent already provides overflow-y so min-height: 100% suffices.
+      height: isMobile ? "100%" : undefined,
+      minHeight: isMobile ? undefined : "100%",
+      overflowY: isMobile ? "auto" : undefined,
+      // Clip any horizontal overflow on mobile so nothing — extended sticky
+      // shelves, off-screen carousel tails, etc — induces a horizontal
+      // scrollbar inside the device frame.
+      overflowX: isMobile ? "hidden" : undefined,
+      fontFamily: "Inter, system-ui, sans-serif",
+      // paddingBottom on the scroll container shifts sticky-bottom anchors
+      // OFF the visual bottom edge (sticky aligns to the padding box). Drop
+      // it on mobile so the action bar actually pins to the viewport edge;
+      // desktop keeps it for trailing breathing room.
+      paddingBottom: isMobile ? 0 : 64,
       color: theme.t.text,
       "--bg": theme.t.bg, "--surface": theme.t.surface, "--surface-soft": theme.t.surfaceSoft,
       "--text": theme.t.text, "--text-muted": theme.t.textMuted, "--text-subtle": theme.t.textSubtle,
       "--text-inverted": theme.t.textInverted, "--line": theme.t.line, "--rule": theme.t.rule, "--chip": theme.t.chip
     }}>
-      <ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => setQrOpen(true)} onFindClubs={onFindClubs} onOpenProfile={() => {if (window.__navigateProfile) window.__navigateProfile();}} active="Home" onNav={(l) => {if (window.__navigate) window.__navigate(l);}} />
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 32px 64px" }}>
+      <ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => setQrOpen(true)} onFindClubs={onFindClubs} onOpenProfile={() => {if (window.__navigateProfile) window.__navigateProfile();}} active="Home" onNav={(l) => {if (window.__navigate) window.__navigate(l);}} />
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 16px 80px" : "48px 32px 64px" }}>
         {racquetAlertOpen && window.ProShopAlert &&
         <div style={{ marginBottom: 24 }}>
-            <window.ProShopAlert theme={theme} desktop={true} onDismiss={() => setRacquetAlertOpen(false)} />
+            <window.ProShopAlert theme={theme} desktop={!isMobile} onDismiss={() => setRacquetAlertOpen(false)} />
           </div>
         }
-        <div style={{ marginBottom: 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 32, flexWrap: "wrap" }}>
-          <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 64, lineHeight: "68px", letterSpacing: -2, color: theme.t.text, margin: 0 }}>
+        <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
+          <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 26 : 56, lineHeight: isMobile ? "32px" : "64px", letterSpacing: isMobile ? -0.4 : -1.4, color: theme.t.text, margin: 0 }}>
             {isCR ?
-            <>Welcome to Court Reserve<br /><span style={{ color: "#858F8F" }}>Let's Play.</span></> :
+            <>Welcome to CourtReserve<br /><span style={{ color: "#4B5052" }}>Let's Play.</span></> :
             <>Hi {PLAYER.name}.<br /><span style={{ color: theme.t.textSubtle }}>Welcome back to {theme.logoText}!</span></>}
           </h1>
           <div style={{ paddingBottom: 8, display: "inline-flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
@@ -2631,30 +2835,81 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
         {isCR && window.SearchBar &&
         <div style={{
           position: "sticky",
-          top: 64, // matches logged-out ChromeBar height (desktop)
+          // 64 desktop matches the logged-out ChromeBar; 56 on mobile.
+          top: isMobile ? 56 : 64,
           zIndex: 40,
-          // Extend exactly to the edges of the device frame's content
-          // column (which is 1440 wide vs the maxWidth: 1200 parent). The
-          // -120 margins land flush against the device frame's
-          // overflow: hidden boundary so nothing protrudes and no
-          // horizontal scrollbar is induced on the scroll container.
-          marginLeft: -120,
-          marginRight: -120,
-          paddingLeft: 120,
-          paddingRight: 120,
-          // Gradient runs top → bottom: completely opaque white from the
-          // top through the bar (so anything scrolling behind it from
-          // above is fully hidden), then fades to transparent in the
-          // 16px bottom padding so content rising up from below dissolves
-          // smoothly into the sticky shelf instead of cutting at a hard
-          // edge. 16px padding on top + bottom flanks the bar evenly.
+          // Negative margins escape the maxWidth parent so the sticky shelf
+          // spans full device-frame width. Desktop has 120px gutter; mobile
+          // has 16px container padding so we only need -16 there.
+          marginLeft: isMobile ? -16 : -120,
+          marginRight: isMobile ? -16 : -120,
+          paddingLeft: isMobile ? 16 : 120,
+          paddingRight: isMobile ? 16 : 120,
           background: "linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 80%, rgba(255,255,255,0) 100%)",
-          marginBottom: 40,
-          paddingTop: 16,
-          paddingBottom: 16,
+          marginBottom: isMobile ? 0 : 8,
+          // Mobile: 24px shelf top padding + 8px H1 marginBottom = 32px
+          // total gap from title to search bar (per spec). Desktop unchanged.
+          paddingTop: isMobile ? 24 : 16,
+          // Mobile: 16px between bar and the location blurb below.
+          paddingBottom: isMobile ? 16 : 4,
         }}>
-            <window.SearchBar theme={theme} viewport="desktop" onSubmit={() => onBookCourt && onBookCourt()} />
+            {isMobile && window.SearchBarCompact
+              ? <window.SearchBarCompact theme={theme} viewport={viewport} onSubmit={() => onBookCourt && onBookCourt()} />
+              : <window.SearchBar theme={theme} viewport={viewport} onSubmit={() => onBookCourt && onBookCourt()} />}
           </div>
+        }
+        {/* Location blurb — sits BELOW the sticky SearchBar shelf (not
+            inside it). Confirms the auto-detected region and offers an
+            emphasized "Get Current Location" link to override. */}
+        {isCR &&
+        <div style={{
+          // Single-row blurb on both viewports — wraps naturally if the
+          // line can't fit so "Get Current Location" sits next to "Not
+          // Correct?" instead of dropping to its own line.
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: isMobile ? "flex-start" : "center",
+          columnGap: 6,
+          rowGap: 4,
+          fontSize: 13,
+          color: "#4B5052",
+          // Mobile: 24px blurb-marginBottom + 8px section-marginTop = 32px
+          // gap into Popular Clubs (per spec).
+          marginBottom: isMobile ? 24 : 24,
+          padding: isMobile ? "0 4px" : 0,
+          fontFamily: "Inter, system-ui, sans-serif",
+        }}>
+          <span>
+            It looks like you're in the <b style={{ color: "#0F1214", fontWeight: 700 }}>East Bay</b>. Not Correct?
+          </span>
+          <button
+            type="button"
+            style={{
+              background: "transparent",
+              border: 0,
+              // 10px y-padding inflates the tap area to ~36px while keeping
+              // the visual text size unchanged. Negative margins reclaim
+              // the layout space so the link sits where the eye expects.
+              padding: "10px 6px",
+              margin: "-10px -6px",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#1F4ED8",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+            }}
+          >
+            <Icon name="Navigation" size={13} strokeWidth={2.4} color="#1F4ED8" />
+            Get Current Location
+          </button>
+        </div>
         }
         {!isCR && window.BookCourtWidget &&
         <div style={{ marginBottom: 40 }}>
@@ -2663,21 +2918,21 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
         }
         <div ref={actionGridRef} aria-hidden="true" style={{ marginTop: 8 }} />
         {isCR &&
-        <VerifiedPopularClubs theme={theme} onOpenClub={onOpenClub} />
+        <VerifiedPopularClubs theme={theme} viewport={viewport} onOpenClub={onOpenClub} />
         }
         {isCR &&
-        <div style={{ marginTop: 32 }}>
-            <BookNowSegment theme={theme} />
+        <div style={{ marginTop: isMobile ? 32 : 16 }}>
+            <BookNowSegment theme={theme} viewport={viewport} />
           </div>
         }
         {isCR &&
-        <PopularEventsNearYou theme={theme} title="Trending events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <PopularEventsNearYou theme={theme} viewport={viewport} title="Trending events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
-        <MoreEventsNearYou theme={theme} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <MoreEventsNearYou theme={theme} viewport={viewport} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
-        <PopularEventsNearYou theme={theme} title="Recurring events near you" showLocationFilter={true} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <PopularEventsNearYou theme={theme} viewport={viewport} title="Recurring Events" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {!isCR && window.MyClubBookingPanel &&
         <window.MyClubBookingPanel
@@ -2701,7 +2956,7 @@ function DashboardDesktop({ theme, onOpenEventList, onOpenClub, onFindClubs, onB
         }
         {!isCR && <ClubLeaderboardSegment theme={theme} isCR={isCR} />}
       </div>
-      <DesktopActionFloater theme={theme} visible={pastActions} onOpenEventList={onOpenEventList} onFindClubs={onFindClubs} isCR={isCR} />
+      <DesktopActionFloater theme={theme} viewport={viewport} visible={pastActions} onOpenEventList={onOpenEventList} onFindClubs={onFindClubs} isCR={isCR} />
       {qrOpen && <MemberQRSheet theme={theme} onClose={() => setQrOpen(false)} />}
     </div>);
 
@@ -3171,7 +3426,7 @@ function PlayerNetwork({ theme }) {
           <div style={{ minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
               <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>{p.name}</span>
-              <span style={{ fontSize: 12, color: "#858F8F", fontWeight: 500 }}>{p.dupr.toFixed(1)} DUPR · {p.reason}</span>
+              <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 500 }}>{p.dupr.toFixed(1)} DUPR · {p.reason}</span>
             </div>
             <div style={{ marginTop: 4, fontSize: 12, color: "#4B5052", fontWeight: 500, lineHeight: 1.45 }}>{p.proof}</div>
           </div>
@@ -3745,7 +4000,7 @@ function FriendActivity({ theme }) {
               <span style={{ color: "#4B5052" }}>{a.verb}</span>{" "}
               <b style={{ fontFamily: theme.display, fontWeight: 700 }}>{a.what}</b>
             </div>
-            <div style={{ marginTop: 2, fontSize: 12, color: "#858F8F", fontWeight: 500 }}>{a.where} · {a.when}</div>
+            <div style={{ marginTop: 2, fontSize: 12, color: "#4B5052", fontWeight: 500 }}>{a.where} · {a.when}</div>
           </div>
           <button style={{ height: 34, padding: "0 14px", borderRadius: 8, border: 0, background: a.live ? theme.primary : "transparent", color: a.live ? "#fff" : theme.primary, fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer", flexShrink: 0 }}>{a.action}</button>
         </div>
@@ -4543,7 +4798,7 @@ function DrillsRecs({ theme }) {
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "#0F1214", letterSpacing: -0.1 }}>{d.title}</div>
             <div style={{ marginTop: 4, fontSize: 12, color: "#4B5052", fontWeight: 500, lineHeight: 1.45 }}>{d.why}</div>
-            <div style={{ marginTop: 4, fontSize: 11, color: "#858F8F", fontWeight: 500 }}>{d.duration} · {d.coach}</div>
+            <div style={{ marginTop: 4, fontSize: 11, color: "#4B5052", fontWeight: 500 }}>{d.duration} · {d.coach}</div>
           </div>
           <button style={{ height: 34, padding: "0 14px", borderRadius: 8, border: 0, background: "transparent", color: theme.primary, fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Try ›</button>
         </div>
@@ -4557,7 +4812,7 @@ function TournamentTeaser({ theme }) {
     <div style={{ padding: "18px 0", display: "flex", flexDirection: "column", gap: 14 }}>
       <div>
         <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>Spring Doubles Bracket</div>
-        <div style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, marginTop: 2 }}>Apr 6 · Old Coast · 32 teams</div>
+        <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 2 }}>Apr 6 · Old Coast · 32 teams</div>
       </div>
       <div style={{ fontSize: 13, color: "#0F1214", fontWeight: 500, lineHeight: 1.5 }}>
         <b style={{ color: theme.primary }}>You &amp; Reese</b> would seed at <b>#5 of 32</b>. Combined DUPR 8.3 — sweet spot for this bracket.

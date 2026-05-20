@@ -1,12 +1,11 @@
 // ChromeBarLoggedOut.jsx — chrome variant for the logged-out CourtReserve home.
 // ----------------------------------------------------------------------------
-// Matches the north-star design: green checkmark brandmark + center nav
-// (Reserve Now [active pill] · Reserve · Events · Activities · Messages) +
-// right cluster (Sign Up text link · Sign In dark pill with person icon).
-//
-// No SearchBar in chrome on this branch — the SearchBar moves into the page
-// hero on the logged-out home. ChromeBar (in Apps.jsx) delegates to this when
-// app === "cr".
+// Minimal logged-out chrome: brandmark on the left, Sign In on the right.
+// The center nav and Sign Up affordances were removed — the bottom action
+// bar covers primary actions and signed-out users can't switch clubs (so
+// the caret next to CourtReserve was dropped too). The same layout works
+// on desktop and mobile; sizes shift slightly to fit narrow viewports.
+// ChromeBar (in Apps.jsx) delegates to this when app === "cr".
 // ----------------------------------------------------------------------------
 
 const { useState: useStateCBLO } = React;
@@ -23,10 +22,6 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
     brandGreen: "#2E7D32",
   };
 
-  // Nav items in display order. "Reserve Now" is special — it sits in a dark
-  // pill and acts as the primary CTA / active home indicator.
-  const navItems = ["Reserve", "Events", "Activities", "Messages"];
-
   return (
     <div
       style={{
@@ -42,16 +37,18 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
         style={{
           maxWidth: desktop ? 1280 : "100%",
           margin: "0 auto",
-          // 64px total height = 16px top + 32px content + 16px bottom.
-          padding: desktop ? "16px 24px" : "12px 12px",
-          height: desktop ? 64 : 60,
+          // 64px total height = 16px top + 32px content + 16px bottom (desktop)
+          // 56px on mobile = 12px top + 32px content + 12px bottom
+          padding: desktop ? "16px 24px" : "12px 16px",
+          height: desktop ? 64 : 56,
           display: "flex",
           alignItems: "center",
-          gap: desktop ? 16 : 8,
-          position: "relative",
+          justifyContent: "space-between",
+          gap: 8,
         }}
       >
-        {/* Brandmark — green checkmark + "Court" light / "RESERVE" bold + chevron. */}
+        {/* Brandmark — green checkmark + "Court" light / "RESERVE" bold.
+            No caret — logged-out users can't switch clubs. */}
         <button
           type="button"
           onClick={() => onNav && onNav("Home")}
@@ -71,8 +68,8 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
           {/* Checkmark mark — green disc with white check */}
           <span
             style={{
-              width: 28,
-              height: 28,
+              width: desktop ? 28 : 24,
+              height: desktop ? 28 : 24,
               borderRadius: 999,
               background: C.brandGreen,
               display: "inline-flex",
@@ -82,136 +79,48 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
             }}
           >
             {window.Icon && (
-              <window.Icon name="Check" size={16} strokeWidth={3} color="#FFFFFF" />
+              <window.Icon name="Check" size={desktop ? 16 : 14} strokeWidth={3} color="#FFFFFF" />
             )}
           </span>
           <span
             style={{
               fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-              fontSize: 18,
+              fontSize: desktop ? 18 : 16,
+              fontWeight: 700,
               letterSpacing: -0.3,
               color: C.text,
-              display: "inline-flex",
-              alignItems: "baseline",
             }}
           >
-            <span style={{ fontWeight: 500 }}>Court</span>
-            <span style={{ fontWeight: 800, letterSpacing: 0.2 }}>RESERVE</span>
+            CourtReserve
           </span>
-          {window.Icon && (
-            <window.Icon name="ChevronDown" size={13} strokeWidth={2.2} color={C.text} />
-          )}
         </button>
 
-        {/* Center nav — desktop only. Mobile collapses to a hamburger surface
-            for now (out-of-scope; the bottom action bar covers primary nav). */}
-        {desktop && (
-          <nav
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-              display: "flex",
-              alignItems: "center",
-              // 16px between the Reserve Now pill and the first nav item,
-              // and between each nav item, for a balanced center cluster.
-              gap: 16,
-            }}
-          >
-            {/* Active "Reserve Now" pill — primary in-chrome CTA on the
-                logged-out home. Same 32h / 8r as the Sign In pill. */}
-            <button
-              type="button"
-              onClick={() => onNav && onNav("Reserve Now")}
-              style={{
-                height: 32,
-                padding: "0 14px",
-                borderRadius: 8,
-                background: C.pillBg,
-                color: C.pillFg,
-                border: 0,
-                fontFamily: "Inter, system-ui, sans-serif",
-                fontWeight: 600,
-                fontSize: 13,
-                cursor: "pointer",
-              }}
-            >
-              Reserve Now
-            </button>
-            {navItems.map((label) => {
-              const on = label === active;
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => onNav && onNav(label)}
-                  style={{
-                    background: "transparent",
-                    border: 0,
-                    padding: "6px 4px",
-                    cursor: "pointer",
-                    color: on ? C.text : C.text,
-                    fontFamily: "Inter, system-ui, sans-serif",
-                    fontSize: 14,
-                    fontWeight: on ? 700 : 500,
-                    transition: "color 140ms",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!on) e.currentTarget.style.color = C.textSubtle;
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!on) e.currentTarget.style.color = C.text;
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </nav>
-        )}
-
-        <div style={{ flex: 1 }} />
-
-        {/* Right cluster — Sign Up (text link) + Sign In (dark pill with icon). */}
-        <button
-          type="button"
-          onClick={() => onNav && onNav("Sign Up")}
-          style={{
-            background: "transparent",
-            border: 0,
-            height: 32,
-            padding: "0 10px",
-            cursor: "pointer",
-            color: C.text,
-            fontFamily: "Inter, system-ui, sans-serif",
-            fontWeight: 600,
-            fontSize: 13,
-          }}
-        >
-          Sign Up
-        </button>
+        {/* Right — Sign In dark pill with person icon. Sign Up text link
+            removed; Sign In carries both "register" and "log in" entry
+            intents to keep chrome tight. 44px tall so it meets the
+            primary-auth touch-target floor on mobile. */}
         <button
           type="button"
           onClick={() => onNav && onNav("Sign In")}
           style={{
-            height: 32,
-            padding: "0 14px 0 12px",
-            borderRadius: 8,
+            height: 44,
+            padding: "0 18px 0 14px",
+            borderRadius: 999,
             background: C.pillBg,
             color: C.pillFg,
             border: 0,
             display: "inline-flex",
             alignItems: "center",
-            gap: 6,
+            gap: 8,
             cursor: "pointer",
             fontFamily: "Inter, system-ui, sans-serif",
             fontWeight: 600,
             fontSize: 13,
+            flexShrink: 0,
           }}
         >
           {window.Icon && (
-            <window.Icon name="User" size={14} strokeWidth={2} color={C.pillFg} />
+            <window.Icon name="User" size={16} strokeWidth={2} color={C.pillFg} />
           )}
           Sign In
         </button>
