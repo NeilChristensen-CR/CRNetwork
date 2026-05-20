@@ -248,11 +248,15 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
         // "My clubs / Clubs around me" subgrouping (signed-out users have
         // no club affiliation to split by).
         return (
-          <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px" : "-16px -4px -16px" }}>
+          <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px 0" : "-16px -4px -16px" }}>
           <div ref={trackRef} style={{
             display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
             paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
-            paddingLeft: isMobile ? 20 : 4,
+            // Mobile: paddingLeft 4 so the leftmost card aligns with the
+            // 16px page gutter (carousel's marginLeft is 0 → outer aligns,
+            // 4px inner padding gives the card a slight breath from the
+            // card-shadow clip). Right side still bleeds via marginRight: -16.
+            paddingLeft: isMobile ? 4 : 4,
             paddingRight: isMobile ? 20 : 4,
             alignItems: "stretch"
           }}>

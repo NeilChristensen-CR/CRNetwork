@@ -2095,7 +2095,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
           fade can sit absolutely on top, and y-padding gives card hover
           shadows room to render without getting clipped by the scroll
           container's overflow box. */}
-      <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px" : "-16px -4px -16px" }}>
+      <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px 0" : "-16px -4px -16px" }}>
       <div ref={trackRef} style={{
         display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
         paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
@@ -2191,7 +2191,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
       </div>
       {/* Carousel wrapper — relative for the right-edge fade overlay, y
           padding so card hover shadows aren't clipped. */}
-      <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px" : "-16px -4px -16px" }}>
+      <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px 0" : "-16px -4px -16px" }}>
       <div ref={trackRef} style={{
         display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
         paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
@@ -2755,9 +2755,8 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           // Mobile: 24px shelf top padding + 8px H1 marginBottom = 32px
           // total gap from title to search bar (per spec). Desktop unchanged.
           paddingTop: isMobile ? 24 : 16,
-          // Mobile: 20px breathing room before the location blurb so the bar
-          // and blurb don't feel collapsed.
-          paddingBottom: isMobile ? 20 : 4,
+          // Mobile: 16px between bar and the location blurb below.
+          paddingBottom: isMobile ? 16 : 4,
         }}>
             {isMobile && window.SearchBarCompact
               ? <window.SearchBarCompact theme={theme} viewport={viewport} onSubmit={() => onBookCourt && onBookCourt()} />
@@ -2776,7 +2775,9 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           gap: isMobile ? 6 : 12,
           fontSize: 13,
           color: "#4B5052",
-          marginBottom: isMobile ? 16 : 24,
+          // Mobile: 24px blurb-marginBottom + 8px section-marginTop = 32px
+          // gap into Popular Clubs (per spec).
+          marginBottom: isMobile ? 24 : 24,
           padding: isMobile ? "0 4px" : 0,
           fontFamily: "Inter, system-ui, sans-serif",
         }}>

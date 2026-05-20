@@ -239,9 +239,24 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     whoCount: 1,
   });
   const v = values || internal;
+  // Per-segment "touched" tracker. Until a user picks a value the segment
+  // renders its placeholder text in grey (watermark style). Once selected,
+  // the value renders in normal dark text.
+  const [touched, setTouched] = useStateSB({ where: false, activity: false, when: false, who: false });
   const setValue = (key, val) => {
+    setTouched((prev) => ({ ...prev, [key]: true }));
     if (values && onChange) onChange({ ...values, [key]: val });
     else setInternal((prev) => ({ ...prev, [key]: val }));
+  };
+
+  // Placeholder copy per segment — shown until the user selects something.
+  // Where placeholder is "Location, City, Zip Code" per spec; the others
+  // double as their natural defaults so the prompt reads as a guide.
+  const PLACEHOLDERS = {
+    where: "Location, City, Zip Code",
+    activity: "Any Sport",
+    when: "Any Day • Any Time",
+    who: "1 Player",
   };
 
   // Which segment is currently focused. `null` = default state.
@@ -316,11 +331,13 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   const pillH = SIZES.pillH;
 
   // ---- Segments ----------------------------------------------------------
+  // `display` resolves to the placeholder when the segment hasn't been
+  // touched yet; the watermark color is applied at render time.
   const segments = [
-    { key: "where",    label: "WHERE",    value: v.where,    icon: "Navigation", anchorRef: whereRef },
-    { key: "activity", label: "ACTIVITY", value: v.activity, icon: null,         anchorRef: activityRef },
-    { key: "when",     label: "WHEN",     value: v.when,     icon: null,         anchorRef: whenRef },
-    { key: "who",      label: "WHO",      value: v.who,      icon: null,         anchorRef: whoRef },
+    { key: "where",    label: "WHERE",    value: v.where,    display: touched.where    ? v.where    : PLACEHOLDERS.where,    icon: "Navigation", anchorRef: whereRef },
+    { key: "activity", label: "ACTIVITY", value: v.activity, display: touched.activity ? v.activity : PLACEHOLDERS.activity, icon: null,         anchorRef: activityRef },
+    { key: "when",     label: "WHEN",     value: v.when,     display: touched.when     ? v.when     : PLACEHOLDERS.when,     icon: null,         anchorRef: whenRef },
+    { key: "who",      label: "WHO",      value: v.who,      display: touched.who      ? v.who      : PLACEHOLDERS.who,      icon: null,         anchorRef: whoRef },
   ];
 
   // Track background flips to gray once any segment is focused.
@@ -455,16 +472,19 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   alignItems: "center",
                   gap: 8,
                   fontFamily: "Inter, system-ui, sans-serif",
-                  fontWeight: 600,
+                  // Untouched segments render with a lighter weight + grey
+                  // watermark color; once touched they jump to the
+                  // selected-value style.
+                  fontWeight: touched[seg.key] ? 600 : 500,
                   fontSize: SIZES.valueFs,
-                  color: COLORS.value,
+                  color: touched[seg.key] ? COLORS.value : COLORS.label,
                   lineHeight: 1.2,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                 }}
               >
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{seg.value}</span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{seg.display}</span>
                 {seg.icon && window.Icon && (
                   <span style={{ display: "inline-flex", color: COLORS.arrowAccent }}>
                     <window.Icon name={seg.icon} size={13} strokeWidth={2.2} color={COLORS.arrowAccent} />
