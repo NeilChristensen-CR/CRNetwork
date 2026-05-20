@@ -808,11 +808,16 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   const [whereQuery, setWhereQuery] = useStateSB("");
   const [showAllWhere, setShowAllWhere] = useStateSB(false);
 
-  // ---- WHAT / WHEN multiselect state --------------------------------------
-  // Each is an array of ids. Committed back to v.activity / v.when as a
-  // comma-joined string so the pill subtitle still reads cleanly.
-  const [activities, setActivities] = useStateSB([]);
-  const [whenSelections, setWhenSelections] = useStateSB([]);
+  // ---- WHAT / WHEN single-select state -----------------------------------
+  // Every facet is single-select now — tapping a row commits and
+  // auto-advances to the next section. WHEN has two sub-facets (day range
+  // + time of day) that work the same way: pick a day range → focus
+  // shifts to time of day → pick a time → advance to WHO.
+  const [activity, setActivity] = useStateSB("");
+  const [whenDay, setWhenDay] = useStateSB("");
+  const [whenTime, setWhenTime] = useStateSB("");
+  // Which WHEN sub-accordion is open. "day" by default when WHEN opens.
+  const [openWhenSub, setOpenWhenSub] = useStateSB("day");
 
   // Reset on open — clean slate every time the sheet appears.
   useEffectSB(() => {
@@ -820,21 +825,23 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
       setOpenSection(null);
       setWhereQuery("");
       setShowAllWhere(false);
-      setActivities([]);
-      setWhenSelections([]);
+      setActivity("");
+      setWhenDay("");
+      setWhenTime("");
+      setOpenWhenSub("day");
     }
   }, [open]);
 
-  // Mirror multiselect arrays back to the committed values so the pill
+  // Mirror single-select state back to the committed values so the pill
   // subtitle reflects what the user picked.
   useEffectSB(() => {
-    if (activities.length === 0) return;
-    set("activity", activities.length === 1 ? activities[0] : `${activities[0]} +${activities.length - 1}`);
-  }, [activities]);
+    if (activity) set("activity", activity);
+  }, [activity]);
   useEffectSB(() => {
-    if (whenSelections.length === 0) return;
-    set("when", whenSelections.length === 1 ? whenSelections[0] : `${whenSelections[0]} +${whenSelections.length - 1}`);
-  }, [whenSelections]);
+    if (!whenDay && !whenTime) return;
+    const combined = whenDay && whenTime ? `${whenDay} · ${whenTime}` : (whenDay || whenTime);
+    set("when", combined);
+  }, [whenDay, whenTime]);
 
   // ---- Player stepper -----------------------------------------------------
   const playerCount = (() => {
@@ -898,9 +905,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
 
   // ---- Borderless list row -----------------------------------------------
   // Used by all section bodies. Stacked, no border, tight padding so the
-  // list reads as a vertical list of selectable items. `kind` controls the
-  // leading affordance: "icon" (default), "checkbox" (WHAT/WHEN multiselect),
-  // or "none".
+  // list reads as a vertical list of selectable items. `kind` controls
+  // the leading affordance:
+  //   "icon"   — leading 18px icon (WHERE rows)
+  //   "select" — radio-style row, trailing check on the active row only
+  //              (WHAT, WHEN day, WHEN time)
   const Row = ({ active, icon, label, sub, onClick, kind = "icon", trailing }) => (
     <button
       type="button"
@@ -914,18 +923,6 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         fontFamily: "inherit", textAlign: "left", cursor: "pointer",
       }}
     >
-      {kind === "checkbox" && (
-        <span style={{
-          width: 22, height: 22, borderRadius: 6,
-          border: `2px solid ${active ? "#0F1214" : "#C8CDCD"}`,
-          background: active ? "#0F1214" : "transparent",
-          display: "inline-flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0,
-          transition: "background 120ms ease, border-color 120ms ease",
-        }}>
-          {active && window.Icon && <window.Icon name="Check" size={14} strokeWidth={3} color="#FFFFFF" />}
-        </span>
-      )}
       {kind === "icon" && icon && window.Icon && (
         <span style={{ display: "inline-flex", flexShrink: 0, color: "#4B5052" }}>
           <window.Icon name={icon} size={18} strokeWidth={2} color="#4B5052" />
@@ -933,7 +930,9 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
       )}
       <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
         <span style={{
-          fontSize: 15, fontWeight: 500, color: "#0F1214",
+          fontSize: 15,
+          fontWeight: active ? 700 : 500,
+          color: "#0F1214",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           lineHeight: 1.3,
         }}>{label}</span>
@@ -944,26 +943,23 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           }}>{sub}</span>
         )}
       </span>
+      {kind === "select" && active && window.Icon && (
+        <span style={{ display: "inline-flex", flexShrink: 0 }}>
+          <window.Icon name="Check" size={18} strokeWidth={2.4} color="#0F1214" />
+        </span>
+      )}
       {trailing}
     </button>
   );
 
-  // ---- Multiselect togglers ----------------------------------------------
-  const toggleActivity = (id) =>
-    setActivities((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
-  const toggleWhen = (id) =>
-    setWhenSelections((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
-
   // ---- Chip text per section ---------------------------------------------
-  // Show committed value as a chip on the closed accordion. Multiselect
-  // sections show "First +N" when more than one is picked.
+  // Show committed value as a chip on the closed accordion. Single-select
+  // now, so the chip is just the picked id (or a "Day · Time" join for
+  // WHEN when both subsections have a value).
   const whereChip = v.where && v.where !== "Oakland, CA" ? v.where : null;
-  const whatChip = activities.length === 0 ? null
-    : activities.length === 1 ? activities[0]
-    : `${activities[0]} +${activities.length - 1}`;
-  const whenChip = whenSelections.length === 0 ? null
-    : whenSelections.length === 1 ? whenSelections[0]
-    : `${whenSelections[0]} +${whenSelections.length - 1}`;
+  const whatChip = activity || null;
+  const whenChip = whenDay && whenTime ? `${whenDay} · ${whenTime}`
+    : (whenDay || whenTime || null);
   const whoChip = v.who && v.who !== "1 Player" ? v.who : null;
 
   // ---- WHERE suggestion ranking ------------------------------------------
@@ -1160,75 +1156,134 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             </div>
           </SectionAccordion>
 
-          {/* ---- WHAT (renamed from Activity) — multiselect checkboxes --- */}
+          {/* ---- WHAT — radio single-select, auto-advance to WHEN -------- */}
           <SectionAccordion id="what" label="What" chip={whatChip}>
             <div>
               {SB_SPORTS.map((s) => (
                 <Row
                   key={s.id}
-                  kind="checkbox"
-                  active={activities.includes(s.id)}
+                  kind="select"
+                  active={activity === s.id}
                   label={s.id}
-                  onClick={() => toggleActivity(s.id)}
+                  onClick={() => {
+                    setActivity(s.id);
+                    setOpenSection("when");
+                    setOpenWhenSub("day");
+                  }}
                 />
               ))}
             </div>
-            <button
-              type="button"
-              onClick={() => setOpenSection("when")}
-              style={{
-                marginTop: 8,
-                width: "100%", height: 44, borderRadius: 10,
-                border: "1px solid #0F1214", background: "#FFFFFF",
-                color: "#0F1214",
-                fontFamily: "inherit", fontSize: 14, fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              Continue
-            </button>
           </SectionAccordion>
 
-          {/* ---- WHEN — multiselect checkboxes, vertical list ------------- */}
+          {/* ---- WHEN — two nested radio subsections --------------------- */}
+          {/* Day range and Time of day. Each is its own mini-accordion;
+              picking from Day range collapses it and auto-opens Time of
+              day. Picking from Time of day collapses both and advances
+              the outer accordion to WHO. */}
           <SectionAccordion id="when" label="When" chip={whenChip}>
-            <div>
-              {SB_WHEN_OPTIONS.map((w) => (
-                <Row
-                  key={w.id}
-                  kind="checkbox"
-                  active={whenSelections.includes(w.id)}
-                  label={w.label}
-                  onClick={() => toggleWhen(w.id)}
-                />
-              ))}
-              {SB_WHEN_TIME_BUCKETS.map((tb) => (
-                <Row
-                  key={tb.id}
-                  kind="checkbox"
-                  active={whenSelections.includes(tb.id)}
-                  label={tb.id}
-                  sub={tb.sub}
-                  onClick={() => toggleWhen(tb.id)}
-                />
-              ))}
+            {/* ---- Day range subsection ---- */}
+            <div style={{ borderTop: "1px solid #F4F5F6" }}>
+              <button
+                type="button"
+                onClick={() => setOpenWhenSub(openWhenSub === "day" ? null : "day")}
+                aria-expanded={openWhenSub === "day"}
+                style={{
+                  width: "100%",
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "12px 0",
+                  border: 0, background: "transparent",
+                  fontFamily: "inherit", textAlign: "left", cursor: "pointer",
+                }}
+              >
+                <span style={{ fontSize: 14, fontWeight: 700, color: "#0F1214" }}>Day range</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+                  {whenDay && openWhenSub !== "day" && (
+                    <span style={{
+                      height: 22, padding: "0 10px", borderRadius: 6,
+                      background: "#F4F5F6", color: "#0F1214",
+                      fontSize: 11.5, fontWeight: 600,
+                      display: "inline-flex", alignItems: "center",
+                    }}>{whenDay}</span>
+                  )}
+                  {window.Icon && (
+                    <window.Icon name={openWhenSub === "day" ? "ChevronUp" : "ChevronDown"} size={16} strokeWidth={2} color="#4B5052" />
+                  )}
+                </span>
+              </button>
+              {openWhenSub === "day" && (
+                <div style={{ paddingBottom: 8 }}>
+                  {SB_WHEN_OPTIONS.map((w) => (
+                    <Row
+                      key={w.id}
+                      kind="select"
+                      active={whenDay === w.id}
+                      label={w.label}
+                      onClick={() => {
+                        setWhenDay(w.id);
+                        // Advance to Time of day. If time is already set
+                        // skip to the outer WHO section instead.
+                        if (whenTime) setOpenSection("who");
+                        else setOpenWhenSub("time");
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={() => setOpenSection("who")}
-              style={{
-                marginTop: 8,
-                width: "100%", height: 44, borderRadius: 10,
-                border: "1px solid #0F1214", background: "#FFFFFF",
-                color: "#0F1214",
-                fontFamily: "inherit", fontSize: 14, fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              Continue
-            </button>
+
+            {/* ---- Time of day subsection ---- */}
+            <div style={{ borderTop: "1px solid #F4F5F6" }}>
+              <button
+                type="button"
+                onClick={() => setOpenWhenSub(openWhenSub === "time" ? null : "time")}
+                aria-expanded={openWhenSub === "time"}
+                style={{
+                  width: "100%",
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "12px 0",
+                  border: 0, background: "transparent",
+                  fontFamily: "inherit", textAlign: "left", cursor: "pointer",
+                }}
+              >
+                <span style={{ fontSize: 14, fontWeight: 700, color: "#0F1214" }}>Time of day</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+                  {whenTime && openWhenSub !== "time" && (
+                    <span style={{
+                      height: 22, padding: "0 10px", borderRadius: 6,
+                      background: "#F4F5F6", color: "#0F1214",
+                      fontSize: 11.5, fontWeight: 600,
+                      display: "inline-flex", alignItems: "center",
+                    }}>{whenTime}</span>
+                  )}
+                  {window.Icon && (
+                    <window.Icon name={openWhenSub === "time" ? "ChevronUp" : "ChevronDown"} size={16} strokeWidth={2} color="#4B5052" />
+                  )}
+                </span>
+              </button>
+              {openWhenSub === "time" && (
+                <div style={{ paddingBottom: 8 }}>
+                  {SB_WHEN_TIME_BUCKETS.map((tb) => (
+                    <Row
+                      key={tb.id}
+                      kind="select"
+                      active={whenTime === tb.id}
+                      label={tb.id}
+                      sub={tb.sub}
+                      onClick={() => {
+                        setWhenTime(tb.id);
+                        // Time picked — close WHEN entirely and advance
+                        // to WHO. The chip on the closed WHEN accordion
+                        // shows "Day · Time" combined.
+                        setOpenSection("who");
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </SectionAccordion>
 
-          {/* ---- WHO — borderless single row with stepper ----------------- */}
+          {/* ---- WHO — borderless row + contained pill stepper ----------- */}
           <SectionAccordion id="who" label="Who" chip={whoChip}>
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1237,27 +1292,41 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               <span style={{
                 fontFamily: "inherit", fontSize: 15, fontWeight: 500, color: "#0F1214",
               }}>Players (1 – 8)</span>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 14 }}>
+              {/* Single contained pill: [−] [N] [+] joined as one
+                  borderless rounded capsule against a subtle grey fill.
+                  The minus and plus glyphs sit inside without their own
+                  strokes — the outer pill is the only container. */}
+              <div style={{
+                display: "inline-flex", alignItems: "center",
+                background: "#F4F5F6",
+                borderRadius: 999,
+                padding: 4,
+                gap: 0,
+                height: 44,
+              }}>
                 <button
                   type="button"
                   onClick={() => setPlayers(playerCount - 1)}
                   disabled={playerCount <= 1}
                   aria-label="Fewer players"
                   style={{
-                    width: 44, height: 44, borderRadius: 999,
-                    border: "1px solid #E9EBEC", background: "#FFFFFF",
-                    color: "#0F1214", cursor: playerCount <= 1 ? "not-allowed" : "pointer",
-                    opacity: playerCount <= 1 ? 0.4 : 1,
+                    width: 36, height: 36, borderRadius: 999,
+                    border: 0, background: "transparent",
+                    color: "#0F1214",
+                    cursor: playerCount <= 1 ? "not-allowed" : "pointer",
+                    opacity: playerCount <= 1 ? 0.35 : 1,
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    padding: 0,
                   }}
                 >
-                  {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.2} color="#0F1214" />}
+                  {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="#0F1214" />}
                 </button>
                 <span style={{
-                  minWidth: 24, textAlign: "center",
+                  minWidth: 32, textAlign: "center",
                   fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-                  fontWeight: 800, fontSize: 18, color: "#0F1214",
+                  fontWeight: 800, fontSize: 16, color: "#0F1214",
                   fontVariantNumeric: "tabular-nums",
+                  padding: "0 4px",
                 }}>{playerCount}</span>
                 <button
                   type="button"
@@ -1265,38 +1334,42 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                   disabled={playerCount >= 8}
                   aria-label="More players"
                   style={{
-                    width: 44, height: 44, borderRadius: 999,
-                    border: "1px solid #E9EBEC", background: "#FFFFFF",
-                    color: "#0F1214", cursor: playerCount >= 8 ? "not-allowed" : "pointer",
-                    opacity: playerCount >= 8 ? 0.4 : 1,
+                    width: 36, height: 36, borderRadius: 999,
+                    border: 0, background: "transparent",
+                    color: "#0F1214",
+                    cursor: playerCount >= 8 ? "not-allowed" : "pointer",
+                    opacity: playerCount >= 8 ? 0.35 : 1,
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    padding: 0,
                   }}
                 >
-                  {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.2} color="#0F1214" />}
+                  {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#0F1214" />}
                 </button>
               </div>
             </div>
           </SectionAccordion>
         </div>
 
-        {/* Sticky footer — full-width Search button with safe-area cushion. */}
+        {/* Sticky footer — Search button sits on a gradient fade so the
+            scrolling content above dissolves into white instead of clipping
+            against a hard hairline. No top border. */}
         <div style={{
-          padding: "12px 16px calc(12px + env(safe-area-inset-bottom)) 16px",
-          borderTop: "1px solid #E9EBEC",
-          background: "#FFFFFF",
+          padding: "20px 16px calc(12px + env(safe-area-inset-bottom)) 16px",
+          background: "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 35%, #FFFFFF 100%)",
         }}>
           <button
             type="button"
             onClick={() => {
               // Build a normalized prefill payload — the booking flow can
-              // pick up `where / sports / when / players` and pre-populate
-              // its fields. We also stash on window for the prototype's
-              // navigation handoff, since onBookCourt currently calls
-              // setScreen("reserve-court") without a data channel.
+              // pick up `where / sport / day / time / players` and pre-
+              // populate its fields. We also stash on window for the
+              // prototype's navigation handoff, since onBookCourt currently
+              // calls setScreen("reserve-court") without a data channel.
               const prefill = {
                 where: v.where || null,
-                sports: activities.length ? activities : (v.activity ? [v.activity] : []),
-                when: whenSelections.length ? whenSelections : (v.when ? [v.when] : []),
+                sport: activity || v.activity || null,
+                whenDay: whenDay || null,
+                whenTime: whenTime || null,
                 players: playerCount,
               };
               window.__searchPrefill = prefill;
