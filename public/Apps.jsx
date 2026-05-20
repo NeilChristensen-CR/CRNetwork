@@ -2771,9 +2771,11 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           paddingLeft: isMobile ? 16 : 120,
           paddingRight: isMobile ? 16 : 120,
           background: "linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 80%, rgba(255,255,255,0) 100%)",
-          marginBottom: isMobile ? 0 : 40,
+          marginBottom: isMobile ? 0 : 8,
           paddingTop: isMobile ? 32 : 16,
-          paddingBottom: isMobile ? 32 : 16,
+          // Pulled in tight so the location blurb reads as a caption of the
+          // SearchBar above it (was 32/16 — too much air separated them).
+          paddingBottom: isMobile ? 8 : 4,
         }}>
             {isMobile && window.SearchBarCompact
               ? <window.SearchBarCompact theme={theme} viewport={viewport} onExpand={() => onBookCourt && onBookCourt()} />
@@ -2792,7 +2794,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           gap: isMobile ? 6 : 12,
           fontSize: 13,
           color: "#4B5052",
-          marginBottom: isMobile ? 20 : 32,
+          marginBottom: isMobile ? 16 : 24,
           padding: isMobile ? "0 4px" : 0,
           fontFamily: "Inter, system-ui, sans-serif",
         }}>
