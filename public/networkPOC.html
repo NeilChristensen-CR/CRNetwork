@@ -30,6 +30,18 @@
     70%  { transform: scale(2.4); opacity: 0; }
     100% { transform: scale(2.4); opacity: 0; }
   }
+  /* Honor user motion preference — collapses all CSS-driven transitions,
+     animations, and smooth-scroll behavior. Inline `transition` styles
+     written in JSX still need to be checked individually, but this gets
+     us most of the way to WCAG 2.3.3 compliance. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 </style>
 </head>
 <body>
