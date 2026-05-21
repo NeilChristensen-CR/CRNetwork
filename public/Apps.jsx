@@ -2159,7 +2159,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
   return (
     <div style={{ marginTop: 8 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 24 : 32, lineHeight: isMobile ? "32px" : "44px", letterSpacing: -0.2, color: theme.t.text, margin: 0 }}>
           Clubs near me
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -2289,7 +2289,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
   return (
     <div style={{ marginTop: isMobile ? 48 : 56 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 24 : 32, lineHeight: isMobile ? "32px" : "44px", letterSpacing: -0.2, color: theme.t.text, margin: 0 }}>
           {title}
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
@@ -2553,7 +2553,7 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
           hero SearchBar already covers. Filtering returns when there's
           a strong reason to repeat the controls here. */}
       <div style={{ marginBottom: 12 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 24 : 32, lineHeight: isMobile ? "32px" : "44px", letterSpacing: -0.2, color: theme.t.text, margin: 0 }}>
           {isMobile ? "More Events" : "More events near you"}
         </h2>
       </div>

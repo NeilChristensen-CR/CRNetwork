@@ -202,8 +202,8 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
       }}>
         <h2 style={{
           margin: 0,
-          fontFamily: theme.display, fontWeight: 800,
-          fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8,
+          fontFamily: theme.display, fontWeight: 700,
+          fontSize: isMobile ? 24 : 32, lineHeight: isMobile ? "32px" : "44px", letterSpacing: -0.2,
           color: t.text,
           minWidth: 0,
           flex: "0 1 auto",
