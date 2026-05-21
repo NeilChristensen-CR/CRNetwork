@@ -135,6 +135,12 @@
   --pp-border-error:    var(--pp-red-600);
   --pp-border-focus:    var(--pp-blue-600);
 
+  /* Map illustration palette — used by BookNowCard's MiniMap SVG. */
+  --pp-map-water: #E8F0EC;
+  --pp-map-land:  #F2F6F3;
+  --pp-map-road:  #FFFFFF;
+  --pp-map-block: #E1E9E3;
+
   /* ============================================================
      LAYER 3 — SEMANTIC (component-bound; consume aliases)
      These are illustrative; components below pick them up.
@@ -229,6 +235,12 @@
   --pp-border-default:  var(--pp-ink-500); /* #2F3436 */
   --pp-border-subtle:   var(--pp-ink-700); /* #212424 — barely-there on dark canvas */
   --pp-border-strong:   var(--pp-ink-300); /* #4B5052 */
+
+  /* Map illustration palette — dark variants for the MiniMap SVG. */
+  --pp-map-water: #1B252A;
+  --pp-map-land:  #222F35;
+  --pp-map-road:  #3A4A52;
+  --pp-map-block: #1F2A30;
 }
 
 /* ============================================================

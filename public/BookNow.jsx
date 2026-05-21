@@ -13,7 +13,20 @@
 //      pills. Clicking a time opens the Customize modal, pre-filled with
 //      that slot as a template the player can tweak before confirming.
 function BookNowSegment({ theme, viewport = "desktop" }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  // Fallback theme tokens read from the Pickle Pixels alias layer so
+  // any caller that omits theme.t still re-themes with data-theme="dark".
+  const t = theme.t || {
+    bg: "var(--pp-bg-default)",
+    surface: "var(--pp-bg-default)",
+    surfaceSoft: "var(--pp-bg-subtle)",
+    text: "var(--pp-fg-default)",
+    textMuted: "var(--pp-fg-muted)",
+    textSubtle: "var(--pp-fg-subtle)",
+    textInverted: "var(--pp-fg-onVibrant)",
+    line: "var(--pp-border-subtle)",
+    rule: "var(--pp-fg-default)",
+    chip: "var(--pp-bg-subtle)",
+  };
   const isMobile = viewport === "mobile";
 
   // ---- Filter state ----------------------------------------------------
@@ -230,7 +243,7 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
                   layout from Figma spec (node 8057-51707). 40×40 hit
                   area, 16px Caret glyph, hover lifts to surfaceSoft. */}
               <button onClick={() => scrollBy(-1)} aria-label="Previous"
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                 style={{
                   padding: 10, borderRadius: 8, border: 0,
@@ -238,10 +251,10 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   transition: "background 120ms ease",
                 }}>
-                <Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />
+                <Icon name="ChevronLeft" size={16} strokeWidth={2} color="currentColor" />
               </button>
               <button onClick={() => scrollBy(1)} aria-label="Next"
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                 style={{
                   padding: 10, borderRadius: 8, border: 0,
@@ -249,7 +262,7 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   transition: "background 120ms ease",
                 }}>
-                <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
+                <Icon name="ChevronRight" size={16} strokeWidth={2} color="currentColor" />
               </button>
             </div>
           }
@@ -466,14 +479,14 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
           - info-block gap 8 between title, ratings row, and sport row */}
       <div style={{
         padding: 12,
-        borderBottom: "1px solid #E9EBEC",
+        borderBottom: "1px solid var(--pp-border-subtle)",
         display: "flex", flexDirection: "column", gap: 12,
       }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {/* Title — display/d6 20/700/28, letter-spacing 0. */}
           <div style={{
             fontFamily: theme.display, fontWeight: 700, fontSize: 20,
-            color: "#0F1214", letterSpacing: 0, lineHeight: "28px",
+            color: "var(--pp-fg-default)", letterSpacing: 0, lineHeight: "28px",
           }}>{v.name}</div>
 
           {/* Location row — pin icon + "Club, City, State". Replaces the
@@ -485,9 +498,9 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
-            color: "#4B5052",
+            color: "var(--pp-fg-muted)",
           }}>
-            <Icon name="MapPin" size={14} strokeWidth={1.75} color="#4B5052" />
+            <Icon name="MapPin" size={14} strokeWidth={1.75} color="currentColor" />
             <span>{v.city}{v.state ? `, ${v.state}` : ""}</span>
           </div>
 
@@ -501,13 +514,13 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
             <span data-tag="default" style={{
               display: "inline-flex", alignItems: "center",
               padding: "2px 6px", borderRadius: 9999,
-              background: "#F4F5F6", color: "#2F3436",
+              background: "var(--pp-bg-subtle)", color: "var(--pp-fg-muted)",
               fontSize: 12, fontWeight: 400, lineHeight: "16px",
               letterSpacing: 0.3,
               whiteSpace: "nowrap",
             }}>{v.sport}</span>
-            <span style={{ color: "#0F1214", fontWeight: 700 }}>·</span>
-            <span style={{ color: "#2F3436", fontWeight: 400 }}>
+            <span style={{ color: "var(--pp-fg-default)", fontWeight: 700 }}>·</span>
+            <span style={{ color: "var(--pp-fg-muted)", fontWeight: 400 }}>
               Booked {v.booked} x Today
             </span>
           </div>
@@ -522,16 +535,16 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
             <button key={time} onClick={() => onPickSlot(time)} style={{
               flex: "1 0 0", minWidth: 88,
               padding: 8, borderRadius: 8,
-              border: "1px solid #222424",
-              background: "#FFFFFF", color: "#222424",
+              border: "1px solid var(--pp-fg-default)",
+              background: "var(--pp-bg-default)", color: "var(--pp-fg-default)",
               fontFamily: "inherit", fontWeight: 500, fontSize: 13, lineHeight: "16px",
               letterSpacing: 0.2,
               cursor: "pointer",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               transition: "background 120ms",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; }}>
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--pp-bg-default)"; }}>
               {time}
             </button>
           )}
@@ -548,15 +561,15 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
         marginTop: "auto",
         padding: 12,
         border: 0,
-        background: "#F4F5F6",
+        background: "var(--pp-bg-subtle)",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         gap: 12,
-        fontFamily: "inherit", fontSize: 13, fontWeight: 400, color: "#0F1214",
+        fontFamily: "inherit", fontSize: 13, fontWeight: 400, color: "var(--pp-fg-default)",
         lineHeight: "16px", letterSpacing: 0.2,
         cursor: "pointer",
       }}>
         See Events & Info
-        <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
+        <Icon name="ChevronRight" size={16} strokeWidth={2} color="currentColor" />
       </button>
     </div>);
 
@@ -700,12 +713,12 @@ function CustomizeReservationModal({ slot, theme, defaultPlayers, defaultDay, on
             }}>Cancel</button>
             <button onClick={onClose} style={{
               height: 40, padding: "0 18px", borderRadius: 999, border: 0,
-              background: theme.primary, color: "#fff",
+              background: theme.primary, color: "var(--pp-fg-onVibrant)",
               fontFamily: "inherit", fontWeight: 700, fontSize: 13, cursor: "pointer",
               display: "inline-flex", alignItems: "center", gap: 8
             }}>
               Confirm booking
-              <Icon name="ArrowRight" size={13} strokeWidth={2.4} color="#fff" />
+              <Icon name="ArrowRight" size={13} strokeWidth={2.4} color="currentColor" />
             </button>
           </div>
         </div>
@@ -795,13 +808,14 @@ function MiniMap({ venue, theme }) {
     return x / 233280;
   };
 
-  // Colors — keep the map soft so the pin + label tag remain the focal
-  // points. Slight green tint to anchor it to the brand without competing
-  // with the time-slot CTAs below.
-  const water = theme.dark ? "#1B252A" : "#E8F0EC";
-  const land = theme.dark ? "#222F35" : "#F2F6F3";
-  const road = theme.dark ? "#3A4A52" : "#FFFFFF";
-  const block = theme.dark ? "#1F2A30" : "#E1E9E3";
+  // Map colors read from CSS variables so the SVG fills re-theme
+  // automatically when data-theme="dark" cascades from <html>. The
+  // dark variants live in colors_and_type.css next to the alias
+  // overrides; theme.dark (per-club) is no longer the only switch.
+  const water = "var(--pp-map-water)";
+  const land  = "var(--pp-map-land)";
+  const road  = "var(--pp-map-road)";
+  const block = "var(--pp-map-block)";
 
   // Generate a couple of "blocks" (faint rectangles) and "roads" (lines)
   // from the seed.
@@ -851,8 +865,8 @@ function MiniMap({ venue, theme }) {
         position: "absolute", top: 12, left: 12,
         display: "inline-flex", alignItems: "center",
         padding: "4px 8px", borderRadius: 9999,
-        background: "#F4F5F6",
-        color: "#2F3436",
+        background: "var(--pp-bg-subtle)",
+        color: "var(--pp-fg-muted)",
         fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
         fontWeight: 400,
         whiteSpace: "nowrap",
@@ -871,8 +885,8 @@ function MiniMap({ venue, theme }) {
           position: "absolute", top: 12, right: 12,
           display: "inline-flex", alignItems: "center",
           padding: "4px 8px", borderRadius: 9999,
-          background: "#F4F5F6",
-          color: "#2F3436",
+          background: "var(--pp-bg-subtle)",
+          color: "var(--pp-fg-muted)",
           fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
           fontWeight: 400,
           whiteSpace: "nowrap",
@@ -880,7 +894,7 @@ function MiniMap({ venue, theme }) {
           <span style={{ display: "inline-flex", alignItems: "center", padding: 4 }}>
             <span data-tag-dot style={{
               width: 8, height: 8, borderRadius: 9999,
-              background: "#2E7D32", flexShrink: 0,
+              background: "var(--pp-green-700)", flexShrink: 0,
               boxShadow: "0 1px 1px rgba(0,0,0,.08)",
             }} />
           </span>
