@@ -2108,7 +2108,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
     <div style={{ marginTop: 8 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
         <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
-          Popular clubs near you
+          Clubs near me
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
