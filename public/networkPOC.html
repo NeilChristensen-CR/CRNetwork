@@ -9,7 +9,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  html, body { margin: 0; padding: 0; background: #F4F5F6; font-family: "Inter", system-ui, sans-serif; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #F4F5F6;
+    font-family: "Inter", system-ui, sans-serif;
+    /* The prototype renders flush to the viewport now (no device-frame
+       card to clip overflow). Hiding horizontal overflow at the page
+       level prevents extended sticky shelves and negative-margin tracks
+       (SearchBar, action bar, MoreEventsNearYou) from triggering a
+       horizontal scrollbar on the body. Vertical scroll stays default. */
+    overflow-x: hidden;
+  }
   * { box-sizing: border-box; }
   /* Focus-visible rings — keyboard users get an obvious blue ring on
      every interactive element. :focus-visible avoids ringing on click,
@@ -79,27 +89,27 @@
 <!-- Cache-buster — bump ?v= when iterating on a .jsx file so the browser
      refetches it instead of serving the previously-compiled version.
      Babel-standalone has no module hashing of its own. -->
-<script type="text/babel" src="Components.jsx?v=20260521a"></script>
-<script type="text/babel" src="SearchBar.jsx?v=20260521a"></script>
-<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521a"></script>
-<script type="text/babel" src="data.jsx?v=20260521a"></script>
-<script type="text/babel" src="EventCard.jsx?v=20260521a"></script>
-<script type="text/babel" src="BrowseDesktop.jsx?v=20260521a"></script>
-<script type="text/babel" src="FilterDesktop.jsx?v=20260521a"></script>
-<script type="text/babel" src="Mobile.jsx?v=20260521a"></script>
-<script type="text/babel" src="FilterBarD.jsx?v=20260521a"></script>
-<script type="text/babel" src="RecurringCarousel.jsx?v=20260521a"></script>
-<script type="text/babel" src="EventDetails.jsx?v=20260521a"></script>
-<script type="text/babel" src="EventRegistration.jsx?v=20260521a"></script>
-<script type="text/babel" src="BookNow.jsx?v=20260521a"></script>
-<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521a"></script>
-<script type="text/babel" src="BookCourtWidget.jsx?v=20260521a"></script>
-<script type="text/babel" src="Apps.jsx?v=20260521a"></script>
-<script type="text/babel" src="ClubDetail.jsx?v=20260521a"></script>
-<script type="text/babel" src="FindClubs.jsx?v=20260521a"></script>
-<script type="text/babel" src="Profile.jsx?v=20260521a"></script>
-<script type="text/babel" src="ReserveCourt.jsx?v=20260521a"></script>
-<script type="text/babel" src="design-canvas.jsx?v=20260521a"></script>
+<script type="text/babel" src="Components.jsx?v=20260521t"></script>
+<script type="text/babel" src="SearchBar.jsx?v=20260521t"></script>
+<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521t"></script>
+<script type="text/babel" src="data.jsx?v=20260521t"></script>
+<script type="text/babel" src="EventCard.jsx?v=20260521t"></script>
+<script type="text/babel" src="BrowseDesktop.jsx?v=20260521t"></script>
+<script type="text/babel" src="FilterDesktop.jsx?v=20260521t"></script>
+<script type="text/babel" src="Mobile.jsx?v=20260521t"></script>
+<script type="text/babel" src="FilterBarD.jsx?v=20260521t"></script>
+<script type="text/babel" src="RecurringCarousel.jsx?v=20260521t"></script>
+<script type="text/babel" src="EventDetails.jsx?v=20260521t"></script>
+<script type="text/babel" src="EventRegistration.jsx?v=20260521t"></script>
+<script type="text/babel" src="BookNow.jsx?v=20260521t"></script>
+<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521t"></script>
+<script type="text/babel" src="BookCourtWidget.jsx?v=20260521t"></script>
+<script type="text/babel" src="Apps.jsx?v=20260521t"></script>
+<script type="text/babel" src="ClubDetail.jsx?v=20260521t"></script>
+<script type="text/babel" src="FindClubs.jsx?v=20260521t"></script>
+<script type="text/babel" src="Profile.jsx?v=20260521t"></script>
+<script type="text/babel" src="ReserveCourt.jsx?v=20260521t"></script>
+<script type="text/babel" src="design-canvas.jsx?v=20260521t"></script>
 <script type="text/babel">
   const { useState } = React;
 
@@ -126,7 +136,46 @@
   }
 
   function Combined() {
-    const [device, setDevice] = useState("desktop");
+    // Responsive viewport detection — the device toggle reads the
+    // actual window width on mount and on resize, picking "mobile"
+    // for narrow viewports (< 768px) and "desktop" otherwise. The
+    // ControlPanel can still force-override via setDevice for design
+    // QA across breakpoints without resizing the window.
+    //
+    // Breakpoints (matches common tablet/web ranges):
+    //   mobile          <  768px  → viewport="mobile"
+    //   tablet / web    ≥ 768px   → viewport="desktop"
+    //
+    // The DashboardDesktop internals constrain content to maxWidth
+    // 1200 already, so tablet (768-1024), desktop web (1024-1440), and
+    // large web (≥1440) all read as the same desktop layout
+    // proportionally centered — page padding bumps with viewport.
+    const getInitialDevice = () => {
+      if (typeof window === "undefined") return "desktop";
+      return window.matchMedia && window.matchMedia("(max-width: 767px)").matches
+        ? "mobile" : "desktop";
+    };
+    const [device, setDevice] = useState(getInitialDevice());
+    const [userOverrode, setUserOverrode] = useState(false);
+    React.useEffect(() => {
+      if (typeof window === "undefined" || !window.matchMedia) return;
+      const mq = window.matchMedia("(max-width: 767px)");
+      const onChange = () => {
+        // Only auto-flip when the user hasn't manually picked a device
+        // via the ControlPanel. Manual override sticks until the page
+        // reloads — keeps QA mode from getting disrupted by a stray
+        // resize while toggling.
+        if (!userOverrode) setDevice(mq.matches ? "mobile" : "desktop");
+      };
+      if (mq.addEventListener) mq.addEventListener("change", onChange);
+      else mq.addListener(onChange);
+      return () => {
+        if (mq.removeEventListener) mq.removeEventListener("change", onChange);
+        else mq.removeListener(onChange);
+      };
+    }, [userOverrode]);
+    // Wrap setDevice so any ControlPanel toggle marks the override flag.
+    const setDeviceManual = (next) => { setUserOverrode(true); setDevice(next); };
     // Auth state — logged-out defaults to the universal CourtReserve view
     // (multi-club discovery), logged-in defaults to the player's home
     // club (Old Coast). Toggling forces the matching brand app.
@@ -344,8 +393,8 @@
               </button>
             </div>
             <Group label="Device">
-              <RadioRow on={device === "desktop"} onClick={() => setDevice("desktop")} icon="Monitor" label="Desktop" />
-              <RadioRow on={device === "mobile"}  onClick={() => setDevice("mobile")}  icon="Smartphone" label="Mobile" />
+              <RadioRow on={device === "desktop"} onClick={() => setDeviceManual("desktop")} icon="Monitor" label="Desktop" />
+              <RadioRow on={device === "mobile"}  onClick={() => setDeviceManual("mobile")}  icon="Smartphone" label="Mobile" />
             </Group>
             <Group label="Session">
               <RadioRow on={!loggedIn} onClick={() => setLoggedIn(false)} icon="LogIn" label="Logged out" />
@@ -383,15 +432,26 @@
     );
 
     return (
-      <div style={{ background: "#F4F5F6", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif", padding: "20px 0 40px" }}>
-        {/* Two-column layout — device frame on the left, control panel on
-            the right. The panel sticks to the top of the viewport as the
-            canvas scrolls. */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", gap: 24, padding: "0 32px" }}>
+      // Live prototype — the app renders flush to the viewport without
+      // a device-card wrapper. Outer is a 100vh column with the
+      // ControlPanel floating on top; the inner element gets the
+      // `device-frame-inner` ID so the MobileSearchSheet's portal
+      // target still resolves on mobile. Desktop also carries the ID
+      // for consistency (portal lookups return whichever node mounts).
+      <div style={{ background: "#F4F5F6", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
+        <div style={{ display: "flex", justifyContent: "center" }}>
           {device === "desktop" ? (
-            <div ref={deviceFrameRef} style={{
-              width: 1440, height: 1024, background: "#fff", borderRadius: 16,
-              overflow: "hidden", boxShadow: "0 10px 40px rgba(0,0,0,.08)",
+            <div id="device-frame-inner" ref={deviceFrameRef} style={{
+              // Fills the viewport edge-to-edge — `height: 100vh` (not
+              // just minHeight) so the nested `flex: 1 overflowY: auto`
+              // scroll container below still has a bounded parent to
+              // size against. Sticky headers + the floating action bar
+              // anchor to that inner scroller exactly like before, just
+              // at viewport height instead of the legacy 1024px card.
+              width: "100%", height: "100vh",
+              background: "#fff",
+              overflowX: "hidden",
+              position: "relative",
               display: "flex", flexDirection: "column",
             }}>
               <div style={{ flex: 1, overflowY: "auto" }}>
@@ -473,19 +533,27 @@
               </div>
             </div>
           ) : (
-            <div ref={deviceFrameRef} style={{ width: 410, height: 860, background: "#0F1214", padding: 8, borderRadius: 36, boxShadow: "0 14px 50px rgba(0,0,0,.18)" }}>
-              {/* id="device-frame-inner" — portal target for the
-                  MobileSearchSheet so the bottom sheet can escape the
-                  sticky search shelf and overlay the full mobile frame. */}
-              <div id="device-frame-inner" style={{ width: "100%", height: "100%", borderRadius: 28, background: "#fff", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }}>
-                <div style={{ height: 44, padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 13, fontWeight: 600, color: "#0F1214", flexShrink: 0 }}>
-                  <span>9:41</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <Icon name="Signal" size={14} />
-                    <Icon name="Wifi" size={14} />
-                    <Icon name="BatteryFull" size={16} />
-                  </div>
-                </div>
+            // Mobile — 410-wide column centered in the viewport. The
+            // phone bezel + simulated iOS status bar are gone (the user
+            // can use their browser DevTools to mock a real device);
+            // we just want a constrained column that mobile components
+            // can use to demonstrate their breakpoint behavior. The
+            // `device-frame-inner` ID stays on this wrapper so the
+            // MobileSearchSheet portal target still resolves.
+            // `height: 100vh` on the inner keeps the existing
+            // `flex: 1 overflow: hidden` body container bounded so
+            // sticky shelves + action bars anchor correctly.
+            <div ref={deviceFrameRef} style={{
+              width: "100%", maxWidth: 410, height: "100vh",
+              display: "flex", justifyContent: "center",
+            }}>
+              <div id="device-frame-inner" style={{
+                width: "100%", height: "100%",
+                background: "#fff",
+                overflowX: "hidden",
+                position: "relative",
+                display: "flex", flexDirection: "column",
+              }}>
                 <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
                   {forceType
                     ? (forceType === "register"

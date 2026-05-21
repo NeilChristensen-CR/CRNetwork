@@ -1,13 +1,13 @@
 // SearchBar.jsx — Network discovery search pill
 // ----------------------------------------------------------------------------
-// Airbnb-style 4-segment pill (WHERE / ACTIVITY / WHEN / WHO) with a circular
+// Airbnb-style 4-segment pill (WHERE / WHAT / WHEN / WHO) with a circular
 // submit button on the right. Six interactive states:
 //
 //   1. Default              — unified white pill, no segment highlighted
 //   2. Hover (per segment)  — subtle gray fill on the hovered segment
 //   3. WHERE focused        — track turns gray; WHERE lifts as a white pill
 //                              + popover with city list opens below it
-//   4. ACTIVITY focused     — same lift; popover with sport list
+//   4. WHAT focused         — same lift; popover with sport list
 //   5. WHEN focused         — same lift; popover with date/time options
 //   6. WHO focused          — same lift; popover with player stepper; AND
 //                              the submit button expands to a labeled pill
@@ -419,18 +419,24 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // trackBg uses the design system's surfaceSoft tone (#F4F5F6) so the
   // selected-state recede is subtle — segments still stand out as lifted
   // white pills, but the surrounding track no longer looks heavy.
+  // Tokens here are aligned to the Figma px.club SearchBar spec
+  // (node 8059-57624). The focused track uses #EDF3F3 (system/bg/default/
+  // primary), label takes the secondary text token #4B5052, value uses
+  // #0F1214 (inputs/neutral/fg/default), and the submit pill takes the
+  // buttons/primary/bg/default token #222424 — slightly lighter than
+  // pure black so it reads as a soft dark capsule.
   const COLORS = {
     pillBg:        "#FFFFFF",
-    trackBg:       "#F4F5F6",
+    trackBg:       "#EDF3F3",
     focusBg:       "#FFFFFF",
     hoverBg:       "rgba(15,18,20,.04)",  // unfocused-segment hover fill
-    label:         "#858F8F",
+    label:         "#4B5052",
     value:         "#0F1214",
-    divider:       "rgba(15,18,20,.06)",
+    divider:       "#E9EBEC",              // visible 1px segment dividers
     arrowAccent:   "#5B7CFA",
-    submitBg:      "#0F1214",
+    submitBg:      "#222424",
     submitFg:      "#FFFFFF",
-    border:        "rgba(15,18,20,.06)",
+    border:        "#E9EBEC",
   };
 
   // ---- Geometry ----------------------------------------------------------
@@ -444,15 +450,24 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // Container padding stays 8px (the user-spec outer gutter) so the bar's
   // overall height = segH (64) + pad*2 (16) = 80. Each segment ends up at
   // a clean 64 internal height.
+  // Per Figma spec — label is `overline` (10/0.8 ls, lh 12), value is `p1
+  // medium` (16/0 ls, lh 24). Mobile drops one notch on each (9/0.7 ls,
+  // 14/0 ls) so the bar still fits within a 360px column without crushing
+  // the value text.
+  // Per the updated Figma spec (revisited node 8059-57624), each segment
+  // wrapper has only 4px padding (vs the 8px first pass) — the bar reads
+  // tighter and the lifted-pill focus state sits closer to its neighbors.
+  // Container height shrinks accordingly: segH 60 (=12+24-text+12+4*2) →
+  // overall pillH 68 desktop.
   const SIZES = desktop
-    ? { pillH: 80, pad: 8, gap: 8,
-        segPadX: 22, segPadY: 12, whoPadRight: 8,
-        segGapY: 4, labelFs: 10.5, labelLs: 1.3,
-        valueFs: 14, btn: 40, btnExpW: 112, radius: 999 }
-    : { pillH: 76, pad: 8, gap: 8,
+    ? { pillH: 68, pad: 4, gap: 0,
+        segPadX: 24, segPadY: 12, whoPadRight: 8,
+        segGapY: 4, labelFs: 10, labelLs: 0.8,
+        valueFs: 16, btn: 32, btnExpW: 104, radius: 999 }
+    : { pillH: 64, pad: 4, gap: 0,
         segPadX: 16, segPadY: 10, whoPadRight: 8,
-        segGapY: 3, labelFs: 9.5, labelLs: 1.2,
-        valueFs: 13, btn: 36, btnExpW: 100, radius: 999 };
+        segGapY: 3, labelFs: 9, labelLs: 0.7,
+        valueFs: 14, btn: 30, btnExpW: 92, radius: 999 };
   const pillH = SIZES.pillH;
 
   // ---- Segments ----------------------------------------------------------
@@ -460,16 +475,21 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // touched yet; the watermark color is applied at render time.
   const segments = [
     { key: "where",    label: "WHERE",    value: v.where,    display: touched.where    ? v.where    : PLACEHOLDERS.where,    icon: "Navigation", anchorRef: whereRef },
-    { key: "activity", label: "ACTIVITY", value: v.activity, display: touched.activity ? v.activity : PLACEHOLDERS.activity, icon: null,         anchorRef: activityRef },
+    { key: "activity", label: "WHAT",     value: v.activity, display: touched.activity ? v.activity : PLACEHOLDERS.activity, icon: null,         anchorRef: activityRef },
     { key: "when",     label: "WHEN",     value: v.when,     display: touched.when     ? v.when     : PLACEHOLDERS.when,     icon: null,         anchorRef: whenRef },
     { key: "who",      label: "WHO",      value: v.who,      display: touched.who      ? v.who      : PLACEHOLDERS.who,      icon: null,         anchorRef: whoRef },
   ];
 
-  // Track background flips to gray once any segment is focused.
+  // Track background flips to the mint surfaceSoft tone (#EDF3F3) once any
+  // segment is focused — matches the Figma spec's `bg/default/primary`
+  // token. The unfocused track is plain white with the buttons/primary
+  // elevation/200 shadow (0/2/4 alpha 8) — no border. Focused state adds
+  // a subtle inset white highlight per the spec's elevation/subtle/inset
+  // recipe so the mint track reads as a frame around the lifted pill.
   const trackBg = active ? COLORS.trackBg : COLORS.pillBg;
   const trackShadow = active
-    ? "inset 0 0 0 1px " + COLORS.border
-    : "0 1px 2px rgba(15,18,20,.04), 0 4px 14px rgba(15,18,20,.06), inset 0 0 0 1px " + COLORS.border;
+    ? "inset 0 1px 0 rgba(255,255,255,.12), inset 0 1px 1px rgba(0,0,0,.08)"
+    : "0 2px 4px rgba(0,0,0,.08)";
 
   // ---- Search submit button (lives inside the WHO segment) ---------------
   // Default state: 40px dark capsule with a search icon. When WHO is the
@@ -504,32 +524,39 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
       onMouseEnter={(e) => { e.currentTarget.style.background = "#212425"; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.submitBg; }}
       style={{
+        // Submit button matches the Figma spec's p-8 + min-w-72
+        // recipe — 8px padding all sides, 16px icon glyph, so unfocused
+        // state is 32×32 with a 72px min-width that only applies once
+        // the "Search" label rolls out. Stays fully rounded (999).
         height: SIZES.btn,
         width: expanded ? SIZES.btnExpW : SIZES.btn,
         borderRadius: SIZES.radius,
         background: COLORS.submitBg,
         color: COLORS.submitFg,
         border: 0,
-        padding: expanded ? "0 14px 0 16px" : 0,
+        padding: expanded ? "0 12px" : 0,
         display: "inline-flex",
         alignItems: "center",
-        justifyContent: expanded ? "space-between" : "center",
-        gap: expanded ? 8 : 0,
+        justifyContent: "center",
+        gap: 6,
         cursor: "pointer",
         flexShrink: 0,
-        boxShadow: "0 2px 6px rgba(15,18,20,.18)",
+        // elevation/200 (buttons): 0 2px 4px alpha 8.
+        boxShadow: "0 2px 4px rgba(0,0,0,.08)",
         fontFamily: "Inter, system-ui, sans-serif",
-        fontWeight: 700,
+        // Per Figma label is p3/medium = 13/0.2 ls / 16 lh.
+        fontWeight: 500,
         fontSize: 13,
+        letterSpacing: 0.2,
         whiteSpace: "nowrap",
         overflow: "hidden",
         transition: "background 160ms ease, width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
       }}
     >
-      {expanded && <span>Search</span>}
       {window.Icon && (
-        <window.Icon name={expanded ? "ArrowRight" : "Search"} size={14} strokeWidth={2.2} color={COLORS.submitFg} />
+        <window.Icon name="Search" size={16} strokeWidth={2} color={COLORS.submitFg} />
       )}
+      {expanded && <span>Search</span>}
     </button>
   );
 
@@ -544,7 +571,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // the WHO container). That extension is drawn as an absolute child that
   // overhangs the segment's right edge into the bar's reserved submit area
   // — it doesn't change WHO's own flex width.
-  const Segment = ({ seg, focused, isWho }) => {
+  const Segment = ({ seg, focused, isWho, isLast }) => {
     const onClick = (e) => { e.stopPropagation(); setActive(focused ? null : seg.key); };
     // WHO has asymmetric padding (12px right vs 24px elsewhere) because
     // the right side is occupied by the submit circle button; matching its
@@ -560,6 +587,15 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
           flex: "1 1 0",
           minWidth: 0,
           display: "flex",
+          // Segment dividers — 1px vertical line between segments, matching
+          // Figma spec. The last segment (WHO) skips the border so the bar
+          // doesn't render a trailing line into the submit area.
+          borderRight: isLast ? "none" : `1px solid ${COLORS.divider}`,
+          // Each segment owns 8px of inner padding (Figma "1/interactive"
+          // wrapper) so its lifted-white-pill state has breathing room
+          // before the divider.
+          padding: SIZES.pad,
+          boxSizing: "border-box",
         }}
       >
         {(hover) => (
@@ -574,7 +610,6 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
               position: "relative",
               flex: "1 1 0",
               minWidth: 0,
-              height: pillH - SIZES.pad * 2,
               borderRadius: SIZES.radius,
               padding,
               display: "flex",
@@ -587,8 +622,12 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                 : hover
                   ? COLORS.hoverBg
                   : "transparent",
+              // Focused-segment elevation matches the bar's own
+              // elevation/200 token (0 2px 4px alpha 8) so the lifted
+              // pill reads as the same material as the bar, not a heavier
+              // popover on top of it.
               boxShadow: focused
-                ? "0 2px 8px rgba(15,18,20,.08), 0 8px 24px rgba(15,18,20,.10)"
+                ? "0 2px 4px rgba(0,0,0,.08)"
                 : "none",
               transition: "background 160ms ease, box-shadow 200ms ease",
             }}
@@ -629,10 +668,14 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   whiteSpace: "nowrap",
                 }}
               >
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{seg.display}</span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>{seg.display}</span>
+                {/* Per Figma, the trailing icon (WHERE only) lives at the
+                    value-row level inside a 20px box at the right edge of
+                    the segment — same size as the WHO submit button glyph
+                    so the two right-side affordances feel paired. */}
                 {seg.icon && window.Icon && (
-                  <span style={{ display: "inline-flex", color: COLORS.arrowAccent }}>
-                    <window.Icon name={seg.icon} size={13} strokeWidth={2.2} color={COLORS.arrowAccent} />
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, flexShrink: 0, color: COLORS.arrowAccent }}>
+                    <window.Icon name={seg.icon} size={16} strokeWidth={2} color={COLORS.arrowAccent} />
                   </span>
                 )}
               </div>
@@ -810,19 +853,19 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
       };
       return (
         <SBPopover anchorRef={anchorRef} minWidth={260}>
-          <div style={{ padding: "10px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
-            Players
-          </div>
-          {/* The +/- buttons disable at 1 and 8 (`whoCount <= 1` /
-              `whoCount >= 8`), so the range is enforced by interaction
-              alone — no separate "1–8 players" label needed. */}
+          {/* WHO popover — the "Players" eyebrow above the stepper was
+              dropped (the segment label already says WHO + "N Player(s)",
+              and the only control is the stepper, so a second label is
+              redundant). The stepper pill now fills the popover width
+              instead of hugging right, so the +/- targets sit at the
+              edges where players' thumbs naturally land. */}
           <div style={{
-            padding: "8px 12px 12px 12px",
-            display: "flex", alignItems: "center", justifyContent: "flex-end",
-            gap: 12,
+            padding: 12,
+            display: "flex",
           }}>
             <div style={{
-              display: "inline-flex", alignItems: "center",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              flex: 1, minWidth: 0,
               background: "#F4F5F6",
               borderRadius: 999,
               padding: 4,
@@ -841,12 +884,13 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   opacity: whoCount <= 1 ? 0.35 : 1,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   padding: 0,
+                  flexShrink: 0,
                 }}
               >
                 {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="#0F1214" />}
               </button>
               <span style={{
-                minWidth: 80, textAlign: "center",
+                flex: 1, textAlign: "center",
                 fontFamily: "Axiforma, Inter, system-ui, sans-serif",
                 fontWeight: 700, fontSize: 14, color: "#0F1214",
                 fontVariantNumeric: "tabular-nums",
@@ -866,6 +910,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   opacity: whoCount >= 8 ? 0.35 : 1,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   padding: 0,
+                  flexShrink: 0,
                 }}
               >
                 {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#0F1214" />}
@@ -896,19 +941,24 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
           borderRadius: SIZES.radius,
           background: trackBg,
           boxShadow: trackShadow,
-          padding: SIZES.pad,
+          // Track itself has no inner padding — each segment owns its 8px
+          // gutter so the divider lines can sit cleanly between adjacent
+          // segments (per Figma spec node 8059-57624).
+          padding: 0,
           display: "flex",
           alignItems: "stretch",
           gap: SIZES.gap,
+          overflow: "hidden",
           transition: "background 200ms ease, box-shadow 200ms ease",
         }}
       >
-        {segments.map((seg) => (
+        {segments.map((seg, i) => (
           <Segment
             key={seg.key}
             seg={seg}
             focused={active === seg.key}
             isWho={seg.key === "who"}
+            isLast={i === segments.length - 1}
           />
         ))}
       </div>
@@ -944,7 +994,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
 
 // ---- Mobile bottom sheet --------------------------------------------------
 // Full-height sheet that slides up from the bottom of the viewport. Renders
-// the four facets stacked in segment order (Where → Activity → When → Who)
+// the four facets stacked in segment order (Where → What → When → Who)
 // with the option lists from the desktop SearchBar so the discovery model
 // stays consistent.
 //
@@ -1737,96 +1787,134 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
   return ReactDOM.createPortal(sheet, portalTarget);
 }
 
-// ---- Carousel section ---------------------------------------------------
-// Used inside SearchResultsModal to render a themed strip of club cards.
-// Title + sub copy header (h2-style, smaller than the modal title) with
-// optional Prev/Next arrows when more than 2 cards exist.
-function SBResultsCarousel({ title, sub, clubs, theme, onSelectClub }) {
-  const trackRef = useRefSB(null);
-  if (!clubs || clubs.length === 0) return null;
-  const scroll = (dx) => {
-    const el = trackRef.current; if (!el) return;
-    el.scrollBy({ left: dx, behavior: "smooth" });
-  };
+// ---- Map thumbnail (SearchResultsModal) ---------------------------------
+// 96×96 square preview rendered as a stylized SVG (cross-streets +
+// centered pin). Reads as a quick "where is this" anchor on the left
+// of each club row without pulling in a real map tile API. Distance
+// pill in the corner gives the same at-a-glance signal the
+// BookNowCard's MiniMap carries.
+function SBClubMapThumb({ club }) {
+  // Deterministic per-club layout — stable across renders so the
+  // streets don't churn between mounts of the same row. Hash the id.
+  const hash = (() => { let h = 0; const s = String(club.id || ""); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; })();
+  const xPin = 40 + (hash % 20);          // jitter the pin x-position
+  const yPin = 40 + ((hash >> 3) % 20);   // jitter the pin y-position
+  const xRoad1 = 25 + (hash % 30);
+  const yRoad1 = 30 + ((hash >> 2) % 30);
   return (
-    <section style={{ padding: "0 0 16px 0" }}>
-      <div style={{
-        display: "flex", alignItems: "flex-end", justifyContent: "space-between",
-        padding: "16px 24px 8px 24px", gap: 16,
-      }}>
-        <div style={{ minWidth: 0 }}>
-          <h3 style={{
-            margin: 0,
-            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-            fontWeight: 800, fontSize: 17, letterSpacing: -0.3,
-            color: "#0F1214", lineHeight: 1.2,
-          }}>{title}</h3>
-          {sub && (
-            <div style={{
-              marginTop: 2, fontSize: 12.5, color: "#4B5052", lineHeight: 1.3,
-            }}>{sub}</div>
-          )}
-        </div>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-          <button
-            type="button"
-            onClick={() => scroll(-340)}
-            aria-label="Previous"
-            style={{
-              width: 36, height: 36, borderRadius: 999, border: 0,
-              background: "transparent", cursor: "pointer",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
-            }}
-          >
-            {window.Icon && <window.Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />}
-          </button>
-          <button
-            type="button"
-            onClick={() => scroll(340)}
-            aria-label="Next"
-            style={{
-              width: 36, height: 36, borderRadius: 999, border: 0,
-              background: "transparent", cursor: "pointer",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
-            }}
-          >
-            {window.Icon && <window.Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />}
-          </button>
-        </div>
-      </div>
-      <div
-        ref={trackRef}
-        style={{
-          display: "flex", gap: 16,
-          overflowX: "auto", scrollSnapType: "x mandatory",
-          padding: "8px 24px 16px 24px",
-          scrollbarWidth: "none",
-        }}
-      >
-        {clubs.map((c) => (
-          <div
-            key={c.id}
-            onClick={() => onSelectClub && onSelectClub(c.name, c.id)}
-            style={{
-              flex: "0 0 280px", scrollSnapAlign: "start",
-              cursor: "pointer", display: "flex",
-            }}
-          >
-            {window.BookNowCard && (
-              <window.BookNowCard
-                v={c}
-                theme={theme}
-                viewport="desktop"
-                onPickSlot={() => onSelectClub && onSelectClub(c.name, c.id)}
-                onOpenClub={() => onSelectClub && onSelectClub(c.name, c.id)}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-    </section>
+    <div style={{
+      position: "relative",
+      width: 96, height: 96,
+      borderRadius: 8,
+      overflow: "hidden",
+      background: "#EDF3F3",
+      flexShrink: 0,
+    }}>
+      <svg viewBox="0 0 96 96" width="96" height="96" style={{ display: "block" }} aria-hidden="true">
+        {/* base tone */}
+        <rect width="96" height="96" fill="#EDF3F3" />
+        {/* park / blocks */}
+        <rect x="0" y="0" width="50" height="36" fill="#E0EBE7" />
+        <rect x="56" y="58" width="40" height="38" fill="#E0EBE7" />
+        {/* streets */}
+        <line x1="0" y1={yRoad1} x2="96" y2={yRoad1} stroke="#FFFFFF" strokeWidth="3" />
+        <line x1={xRoad1} y1="0" x2={xRoad1} y2="96" stroke="#FFFFFF" strokeWidth="3" />
+        <line x1="0" y1="72" x2="96" y2="72" stroke="#FFFFFF" strokeWidth="2.4" />
+        {/* pin */}
+        <g transform={`translate(${xPin} ${yPin})`}>
+          <ellipse cx="0" cy="11" rx="6" ry="2" fill="rgba(15,18,20,.18)" />
+          <path d="M 0 -10 C -6 -10 -10 -6 -10 0 C -10 6 0 14 0 14 C 0 14 10 6 10 0 C 10 -6 6 -10 0 -10 Z" fill="#2E7D32" stroke="#fff" strokeWidth="1.4" />
+          <circle cx="0" cy="-1" r="3" fill="#fff" />
+        </g>
+      </svg>
+      {/* Distance pill — neutral chip in the top-left of the map. */}
+      <span style={{
+        position: "absolute", top: 6, left: 6,
+        padding: "2px 6px", borderRadius: 9999,
+        background: "#F4F5F6", color: "#2F3436",
+        fontSize: 11, lineHeight: "14px", letterSpacing: 0.3,
+        fontWeight: 500,
+        whiteSpace: "nowrap",
+      }}>{club.distance}mi</span>
+    </div>
   );
 }
+
+// ---- Club list row (SearchResultsModal) ---------------------------------
+// Mirrors the logged-out home's MoreEventsNearYou EventRow pattern: 24px
+// padding, gap 24, white-rest / soft-tint-hover zebra, dark icon-only
+// Reserve square that expands to "Reserve" on hover. Each row is one
+// club — 96×96 map square on the left, then `name` headline, location
+// line, and the sport/booked caption.
+function SBClubListRow({ club, onSelect }) {
+  const [hover, setHover] = useStateSB(false);
+  return (
+    <div
+      data-card-hover
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={() => onSelect && onSelect(club.name, club.id)}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 24,
+        padding: 24,
+        borderBottom: "1px solid #E9EBEC",
+        background: hover ? "rgba(0,0,0,.04)" : "#FFFFFF",
+        cursor: "pointer",
+        transition: "background 140ms ease",
+      }}
+    >
+      <SBClubMapThumb club={club} />
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700,
+          fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+          color: "#0F1214",
+        }}>{club.name}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+          {window.Icon && <window.Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />}
+          <span>{club.city}, {club.state}</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <span style={{
+            padding: "2px 6px", borderRadius: 9999,
+            background: "#F4F5F6", color: "#2F3436",
+            fontSize: 12, lineHeight: "16px", letterSpacing: 0.3, fontWeight: 400,
+            whiteSpace: "nowrap",
+          }}>{club.sport}</span>
+          <span style={{ fontSize: 12, lineHeight: "16px", letterSpacing: 0.3, color: "#2F3436" }}>
+            · Booked {club.booked} x Today
+          </span>
+        </div>
+      </div>
+      <button
+        onClick={(e) => { e.stopPropagation(); onSelect && onSelect(club.name, club.id); }}
+        aria-label="Select club"
+        style={{
+          minWidth: hover ? 132 : 48,
+          height: 48,
+          padding: hover ? "0 16px" : 0,
+          borderRadius: 8,
+          background: "#222424", color: "#fff", border: 0, cursor: "pointer",
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          gap: hover ? 8 : 0,
+          fontFamily: "inherit", fontWeight: 500, fontSize: 16, lineHeight: "24px",
+          whiteSpace: "nowrap", flexShrink: 0, overflow: "hidden",
+          boxShadow: "0 2px 4px rgba(0,0,0,.08)",
+          transition: "min-width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
+        }}
+      >
+        {hover && <span>Reserve</span>}
+        {window.Icon && <window.Icon name="ArrowRight" size={24} strokeWidth={1.75} color="#fff" />}
+      </button>
+    </div>
+  );
+}
+
+// (SBClubListSection was used when the modal stacked per-cut H3
+// section titles; that role moved to the segmented controller in the
+// header so the section wrapper is no longer needed.)
 
 // ---- Desktop results modal -----------------------------------------------
 // Centered modal that opens after the user taps Search in the desktop
@@ -1859,6 +1947,26 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
   const v = values || {};
   const filterChips = [v.where, v.activity, v.when, v.who].filter(Boolean);
 
+  // Tab segments — segmented controller replaces the previous H2 +
+  // per-section H3 headings. Each tab filters SB_RESULTS_CLUBS by a
+  // different intent so the modal stays a single scannable list at a
+  // time instead of three stacked carousels.
+  //   Recommended    full set; intentionally a curated "for you" mix
+  //   Popular        booked ≥ 20 (the prior "Popular near you" cut)
+  //   Closest to you distance ≤ 5 mi
+  //   Relevant       narrowed to clubs matching the SearchBar's
+  //                  activity filter when one is set; otherwise the
+  //                  full set so the tab still renders content.
+  const sportFilter = v.activity && v.activity !== "Any Sport" ? v.activity : null;
+  const TABS = [
+    { key: "recommended",  label: "Recommended",   clubs: SB_RESULTS_CLUBS },
+    { key: "popular",      label: "Popular",       clubs: SB_RESULTS_CLUBS.filter((c) => c.booked >= 20) },
+    { key: "closest",      label: "Closest to you", clubs: SB_RESULTS_CLUBS.filter((c) => parseFloat(c.distance) <= 5) },
+    { key: "relevant",     label: "Relevant",      clubs: sportFilter ? SB_RESULTS_CLUBS.filter((c) => c.sport === sportFilter) : SB_RESULTS_CLUBS },
+  ];
+  const [activeTabKey, setActiveTabKey] = useStateSB("recommended");
+  const activeTab = TABS.find((t) => t.key === activeTabKey) || TABS[0];
+
   const modal = (
     <>
       {/* Backdrop — covers the whole browser viewport on desktop.
@@ -1876,22 +1984,20 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           zIndex: 200,
         }}
       />
-      {/* Modal — capped at 920px wide so it sits inside the desktop's
-          1200px content column with breathing room on each side, and
-          75vh tall so it doesn't push past the visible viewport even
-          on shorter desktop windows. With carousel sections the body
-          doesn't need to grow vertically — horizontal scroll absorbs
-          the volume per section. */}
+      {/* Modal — capped at 640px wide. Rows are vertical-list shape now
+          (no multi-card carousels), so a narrower column reads as a
+          dialog rather than a full-bleed listing. 75vh tall caps the
+          vertical so the modal stays inside even shorter windows. */}
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Available clubs"
+        aria-label="Search results"
         style={{
           position: "fixed",
           left: "50%", top: "50%",
           transform: open ? "translate(-50%, -50%) scale(1)" : "translate(-50%, -50%) scale(.96)",
           opacity: open ? 1 : 0,
-          width: "min(920px, calc(100vw - 48px))",
+          width: "min(640px, calc(100vw - 48px))",
           maxHeight: "min(75vh, 720px)",
           background: "#FFFFFF",
           borderRadius: 16,
@@ -1904,43 +2010,79 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           overflow: "hidden",
         }}
       >
-        {/* Header */}
+        {/* Header — segmented controller + close X. The H2 title is
+            gone; the active tab label IS the title. */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "20px 24px 16px 24px",
+          padding: "16px 16px 12px 24px", gap: 12,
         }}>
-          <h2 style={{
-            margin: 0,
-            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-            fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
-            color: "#0F1214",
-          }}>Available clubs</h2>
+          {/* Segmented controller — 4 tabs inside a #F4F5F6 track.
+              Active tab lifts to a white pill with elevation/200
+              shadow; inactive tabs sit transparent and recede. Same
+              recipe as the hero SearchBar's segment track. */}
+          <div role="tablist" aria-label="Filter clubs" style={{
+            display: "inline-flex", alignItems: "center",
+            padding: 4, gap: 4,
+            background: "#F4F5F6", borderRadius: 999,
+            flexShrink: 1, minWidth: 0,
+            overflowX: "auto", scrollbarWidth: "none",
+          }}>
+            {TABS.map((tab) => {
+              const isActive = tab.key === activeTabKey;
+              return (
+                <button
+                  key={tab.key}
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveTabKey(tab.key)}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: 999, border: 0,
+                    background: isActive ? "#FFFFFF" : "transparent",
+                    boxShadow: isActive ? "0 2px 4px rgba(0,0,0,.08)" : "none",
+                    color: isActive ? "#0F1214" : "#4B5052",
+                    fontFamily: "inherit",
+                    fontWeight: isActive ? 600 : 500, fontSize: 13, lineHeight: "20px",
+                    letterSpacing: 0,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    transition: "background 160ms ease, box-shadow 200ms ease, color 160ms ease",
+                  }}
+                >{tab.label}</button>
+              );
+            })}
+          </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
             style={{
-              width: 44, height: 44, border: 0, padding: 0,
+              width: 40, height: 40, border: 0, padding: 0,
               background: "transparent",
-              display: "inline-flex", alignItems: "center", justifyContent: "flex-end",
-              cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", borderRadius: 999, flexShrink: 0,
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
           >
-            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="#0F1214" />}
+            {window.Icon && <window.Icon name="X" size={20} strokeWidth={2} color="#0F1214" />}
           </button>
         </div>
 
-        {/* Filter chip row */}
+        {/* Filter chip row — tokens match the homepage neutral tag
+            (tagschips/neutral/sm): 2/6 padding, fully rounded, fontSize
+            12 / 0.3 ls, #F4F5F6 bg, #2F3436 text. */}
         {filterChips.length > 0 && (
           <div style={{
             padding: "0 24px 16px 24px",
             display: "flex", flexWrap: "wrap", gap: 6,
           }}>
             {filterChips.map((c, i) => (
-              <span key={i} style={{
-                height: 22, padding: "0 10px", borderRadius: 6,
-                background: "#F4F5F6", color: "#0F1214",
-                fontSize: 11.5, fontWeight: 600,
+              <span key={i} data-tag="default" style={{
+                padding: "2px 6px", borderRadius: 9999,
+                background: "#F4F5F6", color: "#2F3436",
+                fontSize: 12, lineHeight: "16px", letterSpacing: 0.3, fontWeight: 400,
                 display: "inline-flex", alignItems: "center",
                 whiteSpace: "nowrap",
               }}>{c}</span>
@@ -1948,38 +2090,16 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           </div>
         )}
 
-        {/* Scrollable body — broken into themed carousel sections so
-            the list reads as curated picks rather than a single grid. */}
+        {/* Scrollable body — single list of rows for the active tab.
+            No section H3 headings (the segmented controller above
+            already names the cut), no carousels. Pure scannable list. */}
         <div style={{
           flex: 1,
           overflowY: "auto",
-          padding: "0 0 24px 0",
+          padding: "0 0 12px 0",
         }}>
-          {[
-            {
-              title: "Popular near you",
-              sub: "Most booked clubs in your area",
-              clubs: SB_RESULTS_CLUBS.filter((c) => c.booked >= 20),
-            },
-            {
-              title: "Ready to book today",
-              sub: "Open courts in the next few hours",
-              clubs: SB_RESULTS_CLUBS.filter((c) => c.times && c.times.length >= 4).slice(0, 5),
-            },
-            {
-              title: "Closest to you",
-              sub: "Under 5 miles away",
-              clubs: SB_RESULTS_CLUBS.filter((c) => parseFloat(c.distance) <= 5),
-            },
-          ].map((section, sIdx) => (
-            <SBResultsCarousel
-              key={sIdx}
-              title={section.title}
-              sub={section.sub}
-              clubs={section.clubs}
-              theme={theme}
-              onSelectClub={onSelectClub}
-            />
+          {activeTab.clubs.map((c) => (
+            <SBClubListRow key={c.id} club={c} onSelect={onSelectClub} />
           ))}
         </div>
       </div>

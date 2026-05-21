@@ -1893,18 +1893,23 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
   };
   // Each action carries a long label (desktop) and a short label (mobile) so
   // the 4-action bar fits inside the 410px device frame without truncating.
+  // Icons map to the Figma spec semantics (Calendar / Trophy /
+  // PingPong / GraduationCap). Lucide ships Calendar, Trophy, and
+  // GraduationCap natively; PingPong (paddle sport) doesn't exist in
+  // Lucide so "Find a Club" uses `Building2` — the closest semantic
+  // glyph available (club venue / building).
   const items = isCR ?
   [
-  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: openResults, primary: true },
-  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: openResults },
-  { icon: "MapPin",    label: "Find a Club",   shortLabel: "Find Club",  onClick: onFindClubs },
-  { icon: "User",      label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }] :
+  { icon: "Calendar",       label: "Book a Court",  shortLabel: "Book Court", onClick: openResults, primary: true },
+  { icon: "Trophy",         label: "Find an Event", shortLabel: "Find Event", onClick: openResults },
+  { icon: "Building2",      label: "Find a Club",   shortLabel: "Find Club",  onClick: onFindClubs },
+  { icon: "GraduationCap",  label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }] :
 
   [
-  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: openResults, primary: true },
-  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: openResults },
-  { icon: "Users",     label: "Open Play",     shortLabel: "Open Play",  onClick: null },
-  { icon: "User",      label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }];
+  { icon: "Calendar",       label: "Book a Court",  shortLabel: "Book Court", onClick: openResults, primary: true },
+  { icon: "Trophy",         label: "Find an Event", shortLabel: "Find Event", onClick: openResults },
+  { icon: "Users",          label: "Open Play",     shortLabel: "Open Play",  onClick: null },
+  { icon: "GraduationCap",  label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }];
 
   // On the logged-out CourtReserve home the floater is persistent — it acts
   // as the primary action selector pinned to the bottom of the viewport
@@ -1985,32 +1990,37 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
         ref={trackRef}
         onMouseLeave={() => setHovered(null)}
         style={{
+          // Track tokens per updated Figma spec (node 8059-57685):
+          // bg #0B0E0E (system/bg/neutrals/card on dark),
+          // pad 4 + gap 4 (compact, was 8/8),
+          // fully rounded, elevation/500 drop shadow.
           pointerEvents: "auto",
           position: "relative",
           display: isMobile ? "flex" : "inline-flex",
           width: isMobile ? "100%" : "auto",
           alignItems: "center",
-          gap: isMobile ? 4 : 6,
-          background: theme.dark ? "rgba(20,23,27,.92)" : "rgba(15,18,20,.96)",
-          backdropFilter: "blur(14px)",
-          color: "#fff",
-          padding: 6, borderRadius: 999,
-          boxShadow: "0 14px 40px rgba(15,18,20,.28), 0 2px 8px rgba(15,18,20,.18)",
+          gap: 4,
+          background: "#0B0E0E",
+          color: "#EDF3F3",
+          padding: 4, borderRadius: 999,
+          boxShadow: "0 16px 16px rgba(0,0,0,.16)",
         }}
       >
-        {/* Sliding pill — single absolutely-positioned capsule that tracks
-            the active item via transform + width. Sits BEHIND the buttons
-            (zIndex: 0) so the button text stays interactive on top. */}
+        {/* Sliding pill — pure WHITE capsule per the updated Figma spec
+            (buttons/neutral/bg/default = white, was mint #EDF3F3).
+            Top/bottom insets match the 4px track padding so the pill
+            sits flush against the dark track edges. */}
         <div
           aria-hidden="true"
           style={{
             position: "absolute",
-            top: 6, bottom: 6,
+            top: 4, bottom: 4,
             left: 0,
             width: pillRect.width,
             transform: `translateX(${pillRect.left}px)`,
-            background: "#fff",
+            background: "#FFFFFF",
             borderRadius: 999,
+            boxShadow: "0 2px 4px rgba(0,0,0,.08)",
             transition: "transform 280ms cubic-bezier(.2,.8,.2,1), width 280ms cubic-bezier(.2,.8,.2,1)",
             pointerEvents: "none",
             zIndex: 0,
@@ -2025,33 +2035,44 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
               onClick={it.onClick || undefined}
               onMouseEnter={() => setHovered(idx)}
               style={{
-                // Desktop hugs content; mobile fills the row evenly.
+                // Desktop tokens per the updated Figma spec
+                // (buttons/lg sizing): 12 / 16 padding + minWidth 72
+                // + 24px icon + p1/medium label (16 / 24 lh, 0 ls).
+                // Active text uses buttons/neutral/fg/default = #191D1F.
+                // Mobile keeps tighter horizontal padding so 4 items
+                // remain readable inside the 360px viewport.
                 position: "relative",
                 zIndex: 1,
                 flex: isMobile ? 1 : "0 0 auto",
-                minWidth: 0,
-                height: 44,
-                padding: isMobile ? "0 8px" : "0 18px",
+                minWidth: isMobile ? 0 : 72,
+                padding: isMobile ? "10px 8px" : "12px 16px",
                 borderRadius: 999, border: 0,
                 background: "transparent",
-                color: isActive ? "#0F1214" : "#fff",
-                fontFamily: "inherit", fontWeight: 700,
-                fontSize: isMobile ? 12 : 13,
+                color: isActive ? "#191D1F" : "#EDF3F3",
+                fontFamily: "inherit",
+                fontWeight: 500,
+                fontSize: isMobile ? 13 : 16,
+                lineHeight: isMobile ? "20px" : "24px",
+                letterSpacing: 0,
                 cursor: it.onClick ? "pointer" : "default",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 gap: isMobile ? 0 : 8,
                 whiteSpace: "nowrap",
-                // Only color animates per-button; the white background is
-                // owned by the sliding pill above.
+                // Only color animates per-button; the white background
+                // is owned by the sliding pill above.
                 transition: "color 200ms ease",
               }}
             >
               {/* Icons appear only on desktop; mobile hides them so labels
-                  fit comfortably across the 4-item row. */}
+                  fit comfortably across the 4-item row. Per the updated
+                  Figma spec the icon is 24px (was 20). */}
               {!isMobile && (
-                <Icon name={it.icon} size={14} color={isActive ? "#0F1214" : "#fff"} strokeWidth={2.2} />
+                <Icon name={it.icon} size={24} color={isActive ? "#191D1F" : "#EDF3F3"} strokeWidth={1.75} />
               )}
-              {it.shortLabel}
+              {/* Desktop uses the long label per Figma spec ("Book a
+                  Court" not "Book Court"); mobile keeps the short label
+                  to stay readable inside the 360px viewport. */}
+              {isMobile ? it.shortLabel : it.label}
             </button>
           );
         })}
@@ -2073,6 +2094,42 @@ function supplyState({ spotsLeft, totalSpots }) {
   const urgent = spotsLeft / totalSpots <= 0.3;
   return { urgent, text: `${spotsLeft} of ${totalSpots} spots` };
 }
+
+// ---- trendingSupplyState — qualitative pill used by Trending events.
+// Where MoreEventsNearYou shows a literal "{n} of {N} spots" count so a
+// scanning player can compare exact availability across a long list, the
+// trending carousel is curated — the pill is a *headline* about the event
+// instead of a count. Returns one of four variants in priority order:
+//   limited  — fill ≥80% / scarce seats, urgent red treatment
+//   dupr     — event has a DUPR-tagged level (signals "rated play")
+//   filling  — fill ≥50%, soft amber treatment
+//   open     — neutral fallback
+// The priority order (limited → dupr → filling → open) means a packed
+// DUPR event still surfaces as "Limited Spots Left" because urgency wins.
+function trendingSupplyState({ spotsLeft, totalSpots, tags }) {
+  const filled = (typeof totalSpots === "number" && totalSpots > 0)
+    ? (totalSpots - spotsLeft) / totalSpots
+    : 1;
+  const hasDupr = Array.isArray(tags) && tags.some((t) => /DUPR/i.test(t));
+  if (filled >= 0.8) return { variant: "limited", text: "Limited Spots Left" };
+  if (hasDupr)       return { variant: "dupr",    text: "DUPR Rated" };
+  if (filled >= 0.5) return { variant: "filling", text: "Filling Fast" };
+  return { variant: "open", text: "Open Spots" };
+}
+
+// Pill palette indexed by the variant returned from trendingSupplyState.
+// Kept inline (not a CSS class) so the hover-invert rules in
+// networkPOC.html — which target `[data-tag="warning"]` / `[data-tag=
+// "default"]` — still kick in: the dupr/filling cards use data-tag
+// "default" so they invert to dark on hover just like the other neutral
+// pills; only the limited pill carries `data-tag="warning"` so it
+// inverts to the white-on-red urgent state.
+const TRENDING_PILL = {
+  limited: { bg: "#FEE2E2", fg: "#B91C1C" },
+  dupr:    { bg: "#DBEAFE", fg: "#1E3A8A" },
+  filling: { bg: "#FEF3C7", fg: "#92400E" },
+  open:    { bg: "#F4F5F6", fg: "#0F1214" },
+};
 
 // ---- Verified popular clubs near you — horizontal carousel of map-image
 // venue cards. Each card: map preview with distance badge, club name,
@@ -2107,23 +2164,35 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
   return (
     <div style={{ marginTop: 8 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
-          Popular clubs near you
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
+          Clubs near me
         </h2>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-          <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
-            width: 44, height: 44, borderRadius: 8, border: 0,
-            background: "transparent", cursor: "pointer",
-            display: "inline-flex", alignItems: "center", justifyContent: "center"
-          }}>
-            <Icon name="ChevronLeft" size={18} strokeWidth={2} color="#0F1214" />
+        {/* Section nav — ghost icon-only buttons per Figma spec
+            (node 8057-51707). 40×40 clickable area (p-10 + 20px inner
+            container holding the 16px Caret glyph), rounded-xs 8px, no
+            background. Hover lifts to surfaceSoft for clear feedback. */}
+        <div style={{ display: "inline-flex", alignItems: "center" }}>
+          <button onClick={() => scrollBy(-340)} aria-label="Previous"
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            style={{
+              padding: 10, borderRadius: 8, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              transition: "background 120ms ease",
+            }}>
+            <Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />
           </button>
-          <button onClick={() => scrollBy(340)} aria-label="Next" style={{
-            width: 44, height: 44, borderRadius: 8, border: 0,
-            background: "transparent", cursor: "pointer",
-            display: "inline-flex", alignItems: "center", justifyContent: "center"
-          }}>
-            <Icon name="ChevronRight" size={18} strokeWidth={2} color="#0F1214" />
+          <button onClick={() => scrollBy(340)} aria-label="Next"
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            style={{
+              padding: 10, borderRadius: 8, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              transition: "background 120ms ease",
+            }}>
+            <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
           </button>
         </div>
       </div>
@@ -2172,21 +2241,37 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
 // ---- Popular events near you — carousel of event cards. Each card:
 // club brand mark, spots-left badge, title, club row, distance, schedule,
 // tag pills, and price + spots-remaining footer.
-function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false, viewport = "desktop" }) {
+// Default carousel data — distinct clubs, titles, dates, prices, and
+// tags per card so the carousel reads as a real list rather than a
+// repeated stub. Hoisted out of the component so callers (Trending,
+// Events for Beginners, Recurring) can either accept it or pass their
+// own `events` prop without re-running this allocation on every render.
+const POPULAR_EVENTS_DEFAULT = [
+  { id: "e1", logoMark: "OC", logoBg: "#2E5D52", logoFg: "#F2A93B", logoLine1: "OLD COAST",  logoLine2: "PICKLEBALL", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", date: "Wed, May 13", duration: "6:00 PM – 7:00 PM",  spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 DUPR", "Men's Only", "Ages 12-15"] },
+  { id: "e2", logoMark: "VB", logoBg: "#7C3AED", logoFg: "#FBBF24", logoLine1: "VILANO",     logoLine2: "BEACH",      title: "Saturday Morning Doubles League",          club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", date: "Sat, May 16", duration: "8:00 AM – 10:00 AM", spotsLeft: 4, totalSpots: 24, taken: 20, price: "$25",       tags: ["3.5 - 4.0 DUPR", "Mixed", "League"] },
+  { id: "e3", logoMark: "DD", logoBg: "#8E5BE8", logoFg: "#FFD166", logoLine1: "DILL",       logoLine2: "DINKERS",    title: "Beginner-Friendly Open Play",              club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", date: "Thu, May 14", duration: "5:30 PM – 7:00 PM", spotsLeft: 6, totalSpots: 12, taken: 6,  price: "$10",       tags: ["2.5 - 3.0 DUPR", "All Ages", "Open Play"] },
+  { id: "e4", logoMark: "AT", logoBg: "#1F4ED8", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "Singles Ladder Match Night",               club: "Anastasia Tennis Club",     city: "St. Augustine, FL", distance: "2.4 mi", date: "Tue, May 12", duration: "6:30 PM – 9:00 PM", spotsLeft: 3, totalSpots: 8,  taken: 5,  price: "$20",       tags: ["4.0+ DUPR", "Singles", "Ladder"] },
+  { id: "e5", logoMark: "TP", logoBg: "#0F1214", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Kids Pickleball Clinic",                   club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:00 AM", spotsLeft: 5, totalSpots: 10, taken: 5,  price: "Free",      tags: ["Ages 8-12", "Coach-led", "Free"] },
+  { id: "e6", logoMark: "HP", logoBg: "#D6573B", logoFg: "#FFFFFF", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Drop-In Round Robin",                club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Fri, May 15", duration: "7:00 PM – 9:00 PM", spotsLeft: 2, totalSpots: 8,  taken: 6,  price: "$30",       tags: ["3.0 - 4.0 DUPR", "Doubles", "Drop-In"] },
+];
+
+// Beginner-focused carousel data — low DUPR ranges (≤3.0), "All Levels"
+// / "Beginner" / "Intro" tags, and forgiving formats (open play, drop-
+// in, clinic). All cards stay under the 50% fill threshold so the
+// trending pill resolves to "DUPR Rated" or "Open Spots" rather than
+// urgency — beginners shouldn't see scarcity-heavy framing.
+const BEGINNER_EVENTS_DEFAULT = [
+  { id: "b1", logoMark: "OC", logoBg: "#2E5D52", logoFg: "#F2A93B", logoLine1: "OLD COAST",  logoLine2: "PICKLEBALL", title: "Intro to Pickleball — 60-Minute Clinic",   club: "Old Coast Pickleball",      city: "St. Augustine, FL",  distance: "2.1 mi", date: "Sun, May 17", duration: "9:00 AM – 10:00 AM",  spotsLeft: 8,  totalSpots: 12, taken: 4,  price: "$15",  tags: ["2.0 - 2.5 DUPR", "Beginner", "Coach-led"] },
+  { id: "b2", logoMark: "TP", logoBg: "#0F1214", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Beginner Bootcamp — Skills + Match Play", club: "Treaty Park Tennis",        city: "St. Augustine, FL",  distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:30 AM", spotsLeft: 6,  totalSpots: 10, taken: 4,  price: "$25",  tags: ["2.5 - 3.0 DUPR", "Beginner", "Doubles"] },
+  { id: "b3", logoMark: "DD", logoBg: "#8E5BE8", logoFg: "#FFD166", logoLine1: "DILL",       logoLine2: "DINKERS",    title: "Newcomer Open Play — All Welcome",         club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",   distance: "8.4 mi", date: "Thu, May 14", duration: "5:30 PM – 7:00 PM",  spotsLeft: 10, totalSpots: 16, taken: 6,  price: "$10",  tags: ["All Levels", "Open Play", "Casual"] },
+  { id: "b4", logoMark: "VB", logoBg: "#7C3AED", logoFg: "#FBBF24", logoLine1: "VILANO",     logoLine2: "BEACH",      title: "Tennis 101 — Rules, Grip & Rally",         club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",   distance: "2.6 mi", date: "Mon, May 18", duration: "6:00 PM – 7:30 PM",  spotsLeft: 7,  totalSpots: 8,  taken: 1,  price: "$30",  tags: ["Beginner", "Coach-led", "Adult"] },
+  { id: "b5", logoMark: "HP", logoBg: "#D6573B", logoFg: "#FFFFFF", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Intro — Try the Sport for $5",       club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Wed, May 13", duration: "7:00 PM – 8:00 PM",  spotsLeft: 9,  totalSpots: 12, taken: 3,  price: "$5",   tags: ["Beginner", "Drop-In", "Free Loaner Gear"] },
+  { id: "b6", logoMark: "AT", logoBg: "#1F4ED8", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "First Serve — New Player Social",          club: "Anastasia Tennis Club",     city: "St. Augustine, FL",  distance: "2.4 mi", date: "Fri, May 15", duration: "5:00 PM – 6:30 PM",  spotsLeft: 8,  totalSpots: 10, taken: 2,  price: "Free", tags: ["2.0 - 2.5 DUPR", "Social", "All Ages"] },
+];
+
+function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false, viewport = "desktop", events = POPULAR_EVENTS_DEFAULT }) {
   const isMobile = viewport === "mobile";
   const trackRef = React.useRef(null);
-  // Varied event data — distinct clubs, titles, dates, prices, and tags per
-  // card so the carousel reads as a real list rather than a repeated stub.
-  // Each event carries its own brandmark colors so the header logo varies
-  // per card.
-  const events = [
-    { id: "e1", logoMark: "OC", logoBg: "#2E5D52", logoFg: "#F2A93B", logoLine1: "OLD COAST",  logoLine2: "PICKLEBALL", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", date: "Wed, May 13", duration: "6:00 PM – 7:00 PM",  spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 DUPR", "Men's Only", "Ages 12-15"] },
-    { id: "e2", logoMark: "VB", logoBg: "#7C3AED", logoFg: "#FBBF24", logoLine1: "VILANO",     logoLine2: "BEACH",      title: "Saturday Morning Doubles League",          club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", date: "Sat, May 16", duration: "8:00 AM – 10:00 AM", spotsLeft: 4, totalSpots: 24, taken: 20, price: "$25",       tags: ["3.5 - 4.0 DUPR", "Mixed", "League"] },
-    { id: "e3", logoMark: "DD", logoBg: "#8E5BE8", logoFg: "#FFD166", logoLine1: "DILL",       logoLine2: "DINKERS",    title: "Beginner-Friendly Open Play",              club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", date: "Thu, May 14", duration: "5:30 PM – 7:00 PM", spotsLeft: 6, totalSpots: 12, taken: 6,  price: "$10",       tags: ["2.5 - 3.0 DUPR", "All Ages", "Open Play"] },
-    { id: "e4", logoMark: "AT", logoBg: "#1F4ED8", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "Singles Ladder Match Night",               club: "Anastasia Tennis Club",     city: "St. Augustine, FL", distance: "2.4 mi", date: "Tue, May 12", duration: "6:30 PM – 9:00 PM", spotsLeft: 3, totalSpots: 8,  taken: 5,  price: "$20",       tags: ["4.0+ DUPR", "Singles", "Ladder"] },
-    { id: "e5", logoMark: "TP", logoBg: "#0F1214", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Kids Pickleball Clinic",                   club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:00 AM", spotsLeft: 5, totalSpots: 10, taken: 5,  price: "Free",      tags: ["Ages 8-12", "Coach-led", "Free"] },
-    { id: "e6", logoMark: "HP", logoBg: "#D6573B", logoFg: "#FFFFFF", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Drop-In Round Robin",                club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Fri, May 15", duration: "7:00 PM – 9:00 PM", spotsLeft: 2, totalSpots: 8,  taken: 6,  price: "$30",       tags: ["3.0 - 4.0 DUPR", "Doubles", "Drop-In"] },
-  ];
   const scrollBy = (dx) => {
     const el = trackRef.current; if (!el) return;
     el.scrollBy({ left: dx, behavior: "smooth" });
@@ -2219,9 +2304,9 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
     return () => obs.disconnect();
   }, [isMobile]);
   return (
-    <div style={{ marginTop: isMobile ? 32 : 16 }}>
+    <div style={{ marginTop: isMobile ? 48 : 56 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
           {title}
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
@@ -2237,19 +2322,29 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               Oakland, CA
             </button>
           )}
-          <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
-            width: 44, height: 44, borderRadius: 8, border: 0,
-            background: "transparent", cursor: "pointer",
-            display: "inline-flex", alignItems: "center", justifyContent: "center"
-          }}>
-            <Icon name="ChevronLeft" size={18} strokeWidth={2} color="#0F1214" />
+          {/* Ghost icon-only nav buttons — matches the section-title
+              layout from Figma spec (node 8057-51707). */}
+          <button onClick={() => scrollBy(-340)} aria-label="Previous"
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            style={{
+              padding: 10, borderRadius: 8, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              transition: "background 120ms ease",
+            }}>
+            <Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />
           </button>
-          <button onClick={() => scrollBy(340)} aria-label="Next" style={{
-            width: 44, height: 44, borderRadius: 8, border: 0,
-            background: "transparent", cursor: "pointer",
-            display: "inline-flex", alignItems: "center", justifyContent: "center"
-          }}>
-            <Icon name="ChevronRight" size={18} strokeWidth={2} color="#0F1214" />
+          <button onClick={() => scrollBy(340)} aria-label="Next"
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            style={{
+              padding: 10, borderRadius: 8, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              transition: "background 120ms ease",
+            }}>
+            <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
           </button>
         </div>
       </div>
@@ -2281,105 +2376,140 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             onMouseEnter={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
             onMouseLeave={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
-            {/* Header — brandmark logo on the left, spots tag opposite
-                on the right. align-items: center vertically centers the
-                tag's text against the logo lockup (both blocks are 22h)
-                so the baselines read aligned. */}
-            <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            {/* Header — bordered "content" block, 12px padding, gap 12.
+                Per Figma spec (node 8049-15861): brandmark on the left,
+                supply pill on the right. The supply pill renders as a
+                vibrant red "X Spots Left" capsule when scarce; for the
+                other variants (DUPR Rated / Filling Fast / Open Spots)
+                it falls back to a neutral chip. */}
+            <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 12, borderBottom: "1px solid #E9EBEC" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <div style={{
+                    width: 22, height: 22, borderRadius: 4,
+                    background: ev.logoBg,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <span style={{ fontSize: 9, fontWeight: 800, color: ev.logoFg, lineHeight: 1 }}>{ev.logoMark}</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+                    <span style={{ fontFamily: theme.display, fontSize: 11, fontWeight: 800, color: ev.logoBg, letterSpacing: 0.4 }}>{ev.logoLine1}</span>
+                    <span style={{ fontFamily: theme.display, fontSize: 9, fontWeight: 700, color: ev.logoBg, letterSpacing: 1.4, marginTop: 2 }}>{ev.logoLine2}</span>
+                  </div>
+                </div>
+                {(() => {
+                  const s = trendingSupplyState(ev);
+                  const isLimited = s.variant === "limited";
+                  // Limited variant uses the spec's subtle error tone
+                  // (#F7ECEB / #860606) at rest. On parent-card hover
+                  // the existing [data-card-hover]:hover [data-tag=
+                  // "warning"] CSS rule inverts it to the vibrant solid
+                  // #DC2626 / white treatment — gives the resting card
+                  // a calmer chip but escalates the urgency cue when
+                  // the player engages with the card.
+                  return (
+                    <span data-tag={isLimited ? "warning" : "default"} style={{
+                      padding: "2px 6px",
+                      borderRadius: 9999,
+                      background: isLimited ? "#F7ECEB" : "#EDF3F3",
+                      color: isLimited ? "#860606" : "#161919",
+                      fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
+                      fontWeight: 400,
+                      display: "inline-flex", alignItems: "center",
+                      whiteSpace: "nowrap",
+                    }}>{isLimited ? `${ev.spotsLeft} Spots Left` : s.text}</span>
+                  );
+                })()}
+              </div>
+              {/* Content stack — title + 3 info rows. Each info row is a
+                  16x16 icon + p3 text, gap 8 between icon and text. */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{
-                  width: 22, height: 22, borderRadius: 4,
-                  background: ev.logoBg,
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  fontFamily: theme.display, fontWeight: 700,
+                  fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+                  color: "#0F1214",
                 }}>
-                  <span style={{ fontSize: 9, fontWeight: 800, color: ev.logoFg, lineHeight: 1 }}>{ev.logoMark}</span>
+                  {ev.title}
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
-                  <span style={{ fontFamily: theme.display, fontSize: 11, fontWeight: 800, color: ev.logoBg, letterSpacing: 0.4 }}>{ev.logoLine1}</span>
-                  <span style={{ fontFamily: theme.display, fontSize: 9, fontWeight: 700, color: ev.logoBg, letterSpacing: 1.4, marginTop: 2 }}>{ev.logoLine2}</span>
-                </div>
-              </div>
-              {(() => {
-                const s = supplyState(ev);
-                return (
-                  <span data-tag={s.urgent ? "warning" : "default"} style={{
-                    height: 22, padding: "0 10px", borderRadius: 6,
-                    background: s.urgent ? "#FEE2E2" : "#F4F5F6",
-                    color: s.urgent ? "#B91C1C" : "#0F1214",
-                    fontSize: 11.5, fontWeight: 600,
-                    display: "inline-flex", alignItems: "center",
-                    whiteSpace: "nowrap",
-                  }}>{s.text}</span>
-                );
-              })()}
-            </div>
-            {/* Content — strict vertical rhythm:
-                  24px → title
-                  12px → location block (pin icon + club / city • distance)
-                   8px → time block (clock icon + date — duration)
-                  24px → tag pills */}
-            <div style={{ padding: "0 16px" }}>
-              <div style={{
-                marginTop: 24,
-                fontFamily: theme.display, fontWeight: 800,
-                fontSize: 18, lineHeight: "22px", letterSpacing: -0.3,
-                color: "#0F1214",
-              }}>
-                {ev.title}
-              </div>
-              {/* Location — pin icon anchored to the first line, stacked
-                  club name + "city · distance" to the right. flex-start so
-                  the icon stays at the top if the club name wraps. */}
-              <div style={{ marginTop: 12, display: "flex", alignItems: "flex-start", gap: 8 }}>
-                <span style={{ display: "inline-flex", marginTop: 2, flexShrink: 0 }}>
-                  <Icon name="MapPin" size={13} strokeWidth={2.2} color="#4B5052" />
-                </span>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13, color: "#0F1214", fontWeight: 500, lineHeight: 1.3 }}>
+                {/* Club row — Buildings icon + club name. */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ display: "inline-flex", marginTop: 0, flexShrink: 0 }}>
+                    <Icon name="Building2" size={16} strokeWidth={1.75} color="#4B5052" />
+                  </span>
+                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
                     {ev.club}
-                  </div>
-                  <div style={{ marginTop: 2, fontSize: 12.5, color: "#4B5052", lineHeight: 1.3 }}>
-                    {ev.city} • {ev.distance}
-                  </div>
+                  </span>
+                </div>
+                {/* Location row — MapPin + "City, FL • N mi away". City
+                    leads so the player anchors on a place name first
+                    (the more recognizable bit) before the precise
+                    distance — Figma reference reads location-then-distance. */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ display: "inline-flex", marginTop: 0, flexShrink: 0 }}>
+                    <Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />
+                  </span>
+                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+                    {ev.city} • {ev.distance} away
+                  </span>
+                </div>
+                {/* Time row — Clock + "Wed, 4/29 • 6:00 PM - 7:00 PM". */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ display: "inline-flex", marginTop: 0, flexShrink: 0 }}>
+                    <Icon name="Clock" size={16} strokeWidth={1.75} color="#4B5052" />
+                  </span>
+                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+                    {ev.date} • {ev.duration}
+                  </span>
                 </div>
               </div>
-              {/* Time — clock icon + date — duration on a single row. */}
-              <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "#4B5052" }}>
-                <Icon name="Clock" size={13} strokeWidth={2.2} color="#4B5052" />
-                <span>{ev.date} — {ev.duration}</span>
-              </div>
-              <div style={{ marginTop: 24, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {/* Tag pills — primary (#EDF3F3) sm chips per Figma spec.
+                  Sized 6/2 padding, 12 caption type, fully rounded. */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {ev.tags.map((tag, i) => (
                   <span key={i} data-tag="default" style={{
-                    height: 22, padding: "0 10px", borderRadius: 6,
-                    background: "#F4F5F6", color: "#0F1214",
-                    fontSize: 11.5, fontWeight: 600,
+                    padding: "2px 6px", borderRadius: 9999,
+                    background: "#EDF3F3", color: "#161919",
+                    fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
+                    fontWeight: 400,
                     display: "inline-flex", alignItems: "center",
+                    whiteSpace: "nowrap",
                   }}>{tag}</span>
                 ))}
               </div>
             </div>
+            {/* Footer — bg #F4F5F6, padding 12, gap 12. Left side stacks
+                $price (display/d6 20/700) over an uppercase overline
+                "X of Y spots Left" caption. Right side is a 40px dark
+                square reserve button. */}
             <div style={{
               marginTop: "auto",
-              padding: "14px 16px",
-              borderTop: "1px solid #E9EBEC",
+              padding: 12,
               background: "#F4F5F6",
               display: "flex", alignItems: "center", justifyContent: "space-between",
+              gap: 12,
             }}>
-              <div>
-                <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214" }}>{ev.price}</div>
-                {/* Spots-remaining caption — unbolded so the price stays
-                    the focal point of the footer. */}
-                <div style={{ marginTop: 2, fontSize: 11.5, fontWeight: 500, color: "#4B5052" }}>
-                  {ev.taken} of {ev.totalSpots} spots remaining
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{
+                  fontFamily: theme.display, fontWeight: 700,
+                  fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+                  color: "#0F1214",
+                }}>{ev.price}</div>
+                <div style={{
+                  marginTop: 2,
+                  fontSize: 10, lineHeight: "12px", letterSpacing: 0.8,
+                  textTransform: "uppercase",
+                  fontWeight: 400, color: "#4B5052",
+                }}>
+                  {ev.taken} of {ev.totalSpots} spots Left
                 </div>
               </div>
               <button onClick={() => onOpenEvent && onOpenEvent(ev.id)} aria-label="Open event" style={{
                 width: 40, height: 40, borderRadius: 8,
-                background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
+                background: "#222424", color: "#fff", border: 0, cursor: "pointer",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 2px 4px rgba(0,0,0,.08)",
               }}>
-                <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
+                <Icon name="ArrowRight" size={20} strokeWidth={1.75} color="#fff" />
               </button>
             </div>
           </div>
@@ -2446,102 +2576,49 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
     { id: "today",    label: "Today, Monday, May 11, 2026",     rows: allRows.slice(0, 4) },
     { id: "tomorrow", label: "Tomorrow, Tuesday, May 12, 2026", rows: allRows.slice(4) },
   ];
-  // Single combo-filter button replacing the three separate pills. Reads
-  // as "<window> · <time> · <location>" and opens an inline dropdown with
-  // all three controls on tap.
-  const [filterOpen, setFilterOpen] = React.useState(false);
-  const [filterWindow, setFilterWindow] = React.useState("This Week");
-  const [filterTime, setFilterTime] = React.useState("Any Time");
-  const [filterLoc, setFilterLoc] = React.useState("Oakland, CA");
-  const filterRef = React.useRef(null);
-  React.useEffect(() => {
-    if (!filterOpen) return;
-    const onDoc = (e) => { if (filterRef.current && !filterRef.current.contains(e.target)) setFilterOpen(false); };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [filterOpen]);
   return (
-    <div style={{ marginTop: isMobile ? 32 : 16 }}>
-      <div style={{
-        display: "flex",
-        // Stack title above combo filter on mobile so the filter has full
-        // row width to itself.
-        flexDirection: isMobile ? "column" : "row",
-        alignItems: isMobile ? "stretch" : "center",
-        justifyContent: "space-between",
-        gap: isMobile ? 12 : 16,
-        marginBottom: 12,
-      }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
+    <div style={{ marginTop: isMobile ? 48 : 56 }}>
+      {/* Header — just the title now. Per Figma spec (node 8057-51747)
+          the section uses a 24px gap between the title row and the
+          date-grouped content rows below; the 3-segment filter chrome
+          stays pulled. */}
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
           {isMobile ? "More Events" : "More events near you"}
         </h2>
-        <div ref={filterRef} style={{ position: "relative", minWidth: 0, maxWidth: "100%" }}>
-          {/* Single-line combo trigger. A leading SlidersHorizontal glyph
-              signals "filters" so the chips read as a button, not as a
-              passive sentence. Hover deepens the border + lightens the
-              fill; open state inverts to dark so it's obvious which row
-              is driving the open popover. */}
-          <button
-            onClick={() => setFilterOpen((o) => !o)}
-            aria-expanded={filterOpen}
-            onMouseEnter={(e) => { if (!filterOpen) { e.currentTarget.style.borderColor = "#0F1214"; e.currentTarget.style.background = "#F4F5F6"; } }}
-            onMouseLeave={(e) => { if (!filterOpen) { e.currentTarget.style.borderColor = "#E9EBEC"; e.currentTarget.style.background = "#fff"; } }}
-            style={{
-              height: 40, padding: "0 14px", borderRadius: 8,
-              border: `1px solid ${filterOpen ? "#0F1214" : "#E9EBEC"}`,
-              background: filterOpen ? "#0F1214" : "#fff",
-              color: filterOpen ? "#fff" : "#0F1214",
-              display: "block",
-              maxWidth: "100%",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              fontFamily: "inherit", fontSize: 13, fontWeight: 500,
-              cursor: "pointer",
-              textAlign: "left",
-              lineHeight: "38px",
-              transition: "background 140ms ease, border-color 140ms ease, color 140ms ease",
-            }}
-          >
-            <span style={{ display: "inline-block", verticalAlign: "-3px", marginRight: 8 }}>
-              <Icon name="SlidersHorizontal" size={14} strokeWidth={2} color={filterOpen ? "#fff" : "#0F1214"} />
-            </span>
-            <span style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}>
-              <Icon name="Calendar" size={14} strokeWidth={2} color={filterOpen ? "#fff" : "#0F1214"} />
-            </span>
-            {filterWindow}
-            <span style={{ color: filterOpen ? "rgba(255,255,255,.4)" : "#C8CDCD", margin: "0 10px" }}>·</span>
-            {filterTime}
-            <span style={{ color: filterOpen ? "rgba(255,255,255,.4)" : "#C8CDCD", margin: "0 10px" }}>·</span>
-            <span style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}>
-              <Icon name="Navigation" size={13} strokeWidth={2.2} color={filterOpen ? "#8AB6FF" : "#5B7CFA"} />
-            </span>
-            {filterLoc}
-          </button>
-          {filterOpen && (
-            <div role="dialog" style={{
-              position: "absolute", top: "100%", right: 0, marginTop: 8,
-              minWidth: 280, padding: 12,
-              background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
-              boxShadow: "0 12px 40px rgba(15,18,20,.12), 0 2px 8px rgba(15,18,20,.06)",
-              zIndex: 30,
-              display: "flex", flexDirection: "column", gap: 10,
-            }}>
-              <FilterSelect label="Window" value={filterWindow} onChange={setFilterWindow} options={["Today", "This Week", "Next 2 Weeks", "This Month"]} />
-              <FilterSelect label="Time" value={filterTime} onChange={setFilterTime} options={["Any Time", "Morning", "Afternoon", "Evening"]} />
-              <FilterSelect label="Location" value={filterLoc} onChange={setFilterLoc} options={["Oakland, CA", "Berkeley, CA", "San Francisco, CA", "St. Augustine, FL"]} />
-            </div>
-          )}
-        </div>
       </div>
-      {groups.map((g) => (
-        <div key={g.id} style={{ marginBottom: 28 }}>
-          {/* Subsection title — smaller weight + a subtle muted badge that
-              auto-reflects the row count instead of a hardcoded number. */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-            <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 12, letterSpacing: 0, color: "#4B5052" }}>{g.label}</span>
+      {groups.map((g, gi) => (
+        <div key={g.id} style={{ marginBottom: gi === groups.length - 1 ? 0 : 32 }}>
+          {/* Date subsection header, per Figma spec (node 8057-51747):
+              padding 12 / 24 — left padding matches the EventRow's 24px
+              padding-left so the date label aligns vertically with the
+              "Time" column below. No negative margin: the date row
+              shares the same content column as the rows it groups, and
+              the border-bottom stretches naturally to the row width.
+
+              Tokens:
+                date label    p3/semiBold 13/0.2ls #0F1214
+                count badge   solid #222424 / white p3/medium
+                              (📛 inline primary sm)
+                divider       border-bottom #BBBFC1 (neutral, NOT subtle)
+                              so the date row reads as a sticky-style
+                              divider line above the list items below */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 12,
+            padding: "12px 24px",
+            borderBottom: "1px solid #BBBFC1",
+            background: "#FFFFFF",
+          }}>
             <span style={{
-              minWidth: 20, height: 20, padding: "0 6px", borderRadius: 6,
-              background: "#F4F5F6", color: "#4B5052",
-              fontSize: 11, fontWeight: 700,
+              fontFamily: "Inter, system-ui, sans-serif",
+              fontWeight: 600, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
+              color: "#0F1214",
+            }}>{g.label}</span>
+            <span style={{
+              minWidth: 16, height: 16, padding: "0 2px", borderRadius: 4,
+              background: "#222424", color: "#FFFFFF",
+              fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
+              fontWeight: 500,
               display: "inline-flex", alignItems: "center", justifyContent: "center",
             }}>{g.rows.length}</span>
           </div>
@@ -2578,29 +2655,6 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
         </button>
       </div>
     </div>
-  );
-}
-
-// ---- FilterSelect — labeled select wrapper used inside the combo dropdown
-// on MoreEventsNearYou. Keeps the layout consistent across the three
-// (window / time / location) sub-controls without prop-drilling theme.
-function FilterSelect({ label, value, onChange, options }) {
-  return (
-    <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#4B5052" }}>{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          height: 36, padding: "0 12px", borderRadius: 8,
-          border: "1px solid #E9EBEC", background: "#fff",
-          fontFamily: "inherit", fontSize: 13, color: "#0F1214",
-          cursor: "pointer",
-        }}
-      >
-        {options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-      </select>
-    </label>
   );
 }
 
@@ -2699,7 +2753,13 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
     );
   }
 
-  // ---- Desktop layout (unchanged) -----------------------------------------
+  // ---- Desktop layout — Figma spec (node 8061-58156) ----------------------
+  // Row tokens: 24px padding all sides, gap 24 between columns. Default
+  // state is white (the rest mode reads as a clean lane); hover swaps in
+  // the soft inset tint (`rgba(0,0,0,.04)`, Figma's
+  // `system/contrast/darken/50` token — used in the spec's "default"
+  // variant). Inverting the two states keeps the resting state cleaner
+  // and gives the row an explicit interactive feedback on hover.
   return (
     <div
       data-card-hover
@@ -2707,74 +2767,114 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
       onMouseLeave={() => setHover(false)}
       onClick={() => onOpenEvent && onOpenEvent()}
       style={{
-        display: "grid",
-        gridTemplateColumns: "96px 1fr auto auto",
-        gap: 20,
-        alignItems: "start",
-        padding: "18px 12px",
-        margin: "0 -12px",
-        borderTop: first ? "1px solid #E9EBEC" : "1px solid #F4F5F6",
-        borderRadius: 10,
-        background: hover ? "#F4F5F6" : "transparent",
+        display: "flex",
+        alignItems: "center",
+        gap: 24,
+        padding: 24,
+        margin: 0,
+        borderBottom: "1px solid #E9EBEC",
+        background: hover ? "rgba(0,0,0,.04)" : "#FFFFFF",
         cursor: "pointer",
         transition: "background 140ms ease",
       }}
     >
-      <div>
-        <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", lineHeight: "21px" }}>{r.time}</div>
-        <div style={{ marginTop: 6 }}>
-          {(() => {
-            const s = supplyState(r);
-            return (
-              <span data-tag={s.urgent ? "warning" : "default"} style={{
-                height: 22, padding: "0 10px", borderRadius: 6,
-                background: s.urgent ? "#FEE2E2" : "#F4F5F6",
-                color: s.urgent ? "#B91C1C" : "#0F1214",
-                fontSize: 11.5, fontWeight: 600,
-                display: "inline-flex", alignItems: "center",
-                whiteSpace: "nowrap",
-              }}>{s.text}</span>
-            );
-          })()}
-        </div>
+      {/* Left column — time + spots tag, gap 8 vertical. */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-start", flexShrink: 0 }}>
+        <div style={{
+          fontFamily: theme.display, fontWeight: 700,
+          fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+          color: "#0F1214",
+          width: 96,
+        }}>{r.time}</div>
+        {(() => {
+          const s = supplyState(r);
+          // Spots pill uses the spec's muted error tone (tagschips/
+          // status/error/bg/default = #F7ECEB / fg = #860606) rather
+          // than the vibrant red — the "more events" list is a long
+          // scan surface and a soft chip reads less alarming than the
+          // saturated variant used on the trending carousel cards.
+          return (
+            <span data-tag={s.urgent ? "warning" : "default"} style={{
+              padding: "2px 6px", borderRadius: 9999,
+              background: s.urgent ? "#F7ECEB" : "#F4F5F6",
+              color: s.urgent ? "#860606" : "#2F3436",
+              fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
+              fontWeight: 400,
+              display: "inline-flex", alignItems: "center",
+              whiteSpace: "nowrap",
+            }}>{s.urgent ? `${r.spotsLeft} Spots Left` : s.text}</span>
+          );
+        })()}
       </div>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", lineHeight: "21px" }}>
-          <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.2 }}>{r.title}</span>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+      {/* No vertical divider between the time column and the info
+          column — per direction, the row reads cleaner without the
+          1px hairline. The 24px column gap carries the separation. */}
+      {/* Info column — title + avatar group on row one, location row,
+          meta row. */}
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <span style={{
+            fontFamily: theme.display, fontWeight: 700,
+            fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+            color: "#0F1214",
+          }}>{r.title}</span>
+          {/* Avatar group + "+N" counter, per spec — three 24px image
+              avatars overlapped by -8px, then a neutral chip showing
+              total attending. */}
+          <div style={{ display: "inline-flex", alignItems: "center" }}>
             <Avatars />
-            <span style={{ fontSize: 13, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
+            <span style={{
+              width: 24, height: 24, marginLeft: -8,
+              borderRadius: 9999,
+              background: "#F4F5F6", color: "#6F7476",
+              border: "2px solid #FFFFFF",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 13, lineHeight: "16px", fontWeight: 600,
+              letterSpacing: 0.2,
+              flexShrink: 0,
+            }}>+{r.attending}</span>
           </div>
         </div>
-        <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#4B5052" }}>
-          <Icon name="MapPin" size={14} strokeWidth={1.75} color="#858F8F" />
-          <span>{r.club} · {r.city} · {r.distance}</span>
+        {/* Location row — pin icon + "Club, City • N mi away". The
+            distance suffix turns the row into a two-fact line: where
+            it is + how far. */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+          <Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />
+          <span>{r.club}, {r.city}{r.distance ? ` • ${r.distance} away` : ""}</span>
         </div>
-        <div style={{ marginTop: 4, fontSize: 12.5, color: "#4B5052" }}>
+        <div style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
           {r.meta}
         </div>
       </div>
-      <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", whiteSpace: "nowrap", alignSelf: "center" }}>{r.price}</div>
+      <div style={{
+        fontFamily: theme.display, fontWeight: 700,
+        fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+        color: "#0F1214", whiteSpace: "nowrap", flexShrink: 0,
+      }}>{r.price}</div>
+      {/* Reserve button — 48×48 icon-only square at rest, expands on
+          row hover to a 132px pill with the "Reserve" label + arrow.
+          Matches the spec's resting state (icon-only #222424 square,
+          rounded-xs 8, elevation/200) and surfaces the explicit verb
+          when the row is being engaged with. */}
       <button
         onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
         aria-label="Reserve event"
         style={{
-          height: 40,
-          width: hover ? 112 : 40,
-          padding: hover ? "0 14px 0 16px" : 0,
+          minWidth: hover ? 132 : 48,
+          height: 48,
+          padding: hover ? "0 16px" : 0,
           borderRadius: 8,
-          background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
-          display: "inline-flex", alignItems: "center",
-          justifyContent: hover ? "space-between" : "center",
+          background: "#222424", color: "#fff", border: 0, cursor: "pointer",
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
           gap: hover ? 8 : 0,
-          alignSelf: "center",
-          fontFamily: "inherit", fontWeight: 700, fontSize: 13,
-          whiteSpace: "nowrap", overflow: "hidden",
-          transition: "width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
+          fontFamily: "inherit", fontWeight: 500, fontSize: 16, lineHeight: "24px",
+          whiteSpace: "nowrap", flexShrink: 0, overflow: "hidden",
+          boxShadow: "0 2px 4px rgba(0,0,0,.08)",
+          transition: "min-width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
         }}
       >
         {hover && <span>Reserve</span>}
-        <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
+        <Icon name="ArrowRight" size={24} strokeWidth={1.75} color="#fff" />
       </button>
     </div>
   );
@@ -2844,11 +2944,33 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             <window.ProShopAlert theme={theme} desktop={!isMobile} onDismiss={() => setRacquetAlertOpen(false)} />
           </div>
         }
-        {/* Page title row — only rendered for the logged-in club home.
-            The logged-out CourtReserve surface drops the H1 entirely so
-            the sticky SearchBar leads the page; chrome → search becomes
-            the primary acquisition path with no decorative greeting. */}
-        {!isCR &&
+        {/* Page title row — two variants:
+            CourtReserve (logged-out): Figma `display/d1` two-line
+            headline ("Welcome to Court Reserve" + muted "Let's Play.")
+            per node 8057-51505. 64/88/-0.8 on desktop, scaled down to
+            40/52/-0.6 on mobile so it fits a 360px column without
+            ellipsing.
+            Branded club home (logged-in): "Hi {name}." + muted
+            "Welcome back to {club}!" with the "More info about {club}"
+            outline button to the right. */}
+        {isCR ?
+        <div style={{ marginBottom: isMobile ? 24 : 32, textAlign: "center" }}>
+          <h1 style={{
+            margin: 0,
+            fontFamily: theme.display, fontWeight: 800,
+            // Stepped down from display/d1 (64/88) → display/d3 (40/48)
+            // on desktop / d4-adjacent 28/36 on mobile. The previous
+            // 64px head consumed ~176px above-fold and outranked the
+            // SearchBar; this size keeps the head as a confident
+            // greeting without stealing the hero's job.
+            fontSize: isMobile ? 28 : 40,
+            lineHeight: isMobile ? "36px" : "48px",
+            letterSpacing: isMobile ? -0.4 : -0.4,
+            color: theme.t.text,
+          }}>
+            This is CourtReserve. Let's Play.
+          </h1>
+        </div> :
         <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
           <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 26 : 56, lineHeight: isMobile ? "32px" : "64px", letterSpacing: isMobile ? -0.4 : -1.4, color: theme.t.text, margin: 0 }}>
             <>Hi {PLAYER.name}.<br /><span style={{ color: theme.t.textSubtle }}>Welcome back to {theme.logoText}!</span></>
@@ -2969,12 +3091,21 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
         <VerifiedPopularClubs theme={theme} viewport={viewport} onOpenClub={onOpenClub} />
         }
         {isCR &&
-        <div style={{ marginTop: isMobile ? 32 : 16 }}>
+        <div style={{ marginTop: isMobile ? 48 : 56 }}>
             <BookNowSegment theme={theme} viewport={viewport} />
           </div>
         }
         {isCR &&
         <PopularEventsNearYou theme={theme} viewport={viewport} title="Trending events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        }
+        {/* Events for Beginners — second carousel using the same
+            PopularEventsNearYou component with a beginner-tuned dataset.
+            Sits between Trending (more advanced / scarce) and More
+            Events (long-tail list) so the page progresses from "for
+            you" to "everything else." Beginner cards are intentionally
+            ≤50% filled so the trending pill never reads as urgent. */}
+        {isCR &&
+        <PopularEventsNearYou theme={theme} viewport={viewport} title="Events for Beginners" events={BEGINNER_EVENTS_DEFAULT} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
         <MoreEventsNearYou theme={theme} viewport={viewport} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
