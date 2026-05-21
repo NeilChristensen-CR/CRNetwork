@@ -2558,15 +2558,34 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
         </h2>
       </div>
       {groups.map((g) => (
-        <div key={g.id} style={{ marginBottom: 28 }}>
-          {/* Subsection title — smaller weight + a subtle muted badge that
-              auto-reflects the row count instead of a hardcoded number. */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-            <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 12, letterSpacing: 0, color: "#4B5052" }}>{g.label}</span>
+        <div key={g.id} style={{ marginBottom: 0 }}>
+          {/* Date subsection header, per Figma spec (node 8057-51747):
+              - 12 / 24 padding, gap 12
+              - border-bottom #BBBFC1 (neutral, NOT subtle) — the date
+                row reads as a sticky-style divider line above the
+                list items below
+              - date label: p3/semiBold 13/0.2ls #0F1214 (was 12/700 muted)
+              - count badge: solid dark #222424 chip with white p3/medium
+                text (was muted #F4F5F6 / #4B5052). Width 16, padding 2,
+                rounded-xs 4. Reads as the spec's "📛 inline primary sm"
+                badge token. */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 12,
+            padding: "12px 24px",
+            margin: "0 -24px",
+            borderBottom: "1px solid #BBBFC1",
+            background: "#FFFFFF",
+          }}>
             <span style={{
-              minWidth: 20, height: 20, padding: "0 6px", borderRadius: 6,
-              background: "#F4F5F6", color: "#4B5052",
-              fontSize: 11, fontWeight: 700,
+              fontFamily: "Inter, system-ui, sans-serif",
+              fontWeight: 600, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
+              color: "#0F1214",
+            }}>{g.label}</span>
+            <span style={{
+              minWidth: 16, height: 16, padding: "0 2px", borderRadius: 4,
+              background: "#222424", color: "#FFFFFF",
+              fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
+              fontWeight: 500,
               display: "inline-flex", alignItems: "center", justifyContent: "center",
             }}>{g.rows.length}</span>
           </div>
