@@ -2844,14 +2844,16 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             <window.ProShopAlert theme={theme} desktop={!isMobile} onDismiss={() => setRacquetAlertOpen(false)} />
           </div>
         }
+        {/* Page title row — only rendered for the logged-in club home.
+            The logged-out CourtReserve surface drops the H1 entirely so
+            the sticky SearchBar leads the page; chrome → search becomes
+            the primary acquisition path with no decorative greeting. */}
+        {!isCR &&
         <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
           <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 26 : 56, lineHeight: isMobile ? "32px" : "64px", letterSpacing: isMobile ? -0.4 : -1.4, color: theme.t.text, margin: 0 }}>
-            {isCR ?
-            <>Welcome to CourtReserve<br /><span style={{ color: "#4B5052" }}>Let's Play.</span></> :
-            <>Hi {PLAYER.name}.<br /><span style={{ color: theme.t.textSubtle }}>Welcome back to {theme.logoText}!</span></>}
+            <>Hi {PLAYER.name}.<br /><span style={{ color: theme.t.textSubtle }}>Welcome back to {theme.logoText}!</span></>
           </h1>
           <div style={{ paddingBottom: 8, display: "inline-flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-            {!isCR &&
             <button onClick={onOpenClub} style={{
               height: 36, padding: "0 14px", borderRadius: 8,
               border: `1px solid ${theme.t.line}`,
@@ -2866,9 +2868,9 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
                 More info about {theme.logoText}
                 <Icon name="ArrowRight" size={12} strokeWidth={2.2} color="currentColor" />
               </button>
-            }
           </div>
         </div>
+        }
         {/* Hero search affordance. On the logged-out CourtReserve surface
             this is the new north-star SearchBar. The sticky wrapper uses
             negative horizontal margins to escape the page's maxWidth and
