@@ -554,7 +554,8 @@
               // anchor to that inner scroller exactly like before, just
               // at viewport height instead of the legacy 1024px card.
               width: "100%", height: "100vh",
-              background: "#fff",
+              background: "var(--pp-bg-default)",
+              color: "var(--pp-fg-default)",
               overflowX: "hidden",
               position: "relative",
               display: "flex", flexDirection: "column",
@@ -570,7 +571,7 @@
                       ? <FindClubs viewport="desktop" theme={theme} app={app} setApp={setApp} onBack={() => setScreen("home")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} />
                       : (screen === "messages"
                           ? (
-                              <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                              <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                 {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} active="Messages" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                 <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 24px 64px" }}>
                                   {window.MessagesScreen && <window.MessagesScreen theme={theme} />}
@@ -581,7 +582,7 @@
                           ? <ClubDetail viewport="desktop" theme={theme} clubId={selectedClubId || app} loggedIn={loggedIn} onBack={() => setScreen("clubs")} onBookCourt={() => setScreen("events")} onBrowseEvents={() => setScreen("events")} />
                           : (screen === "profile"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 24px 80px" }}>
                                       {window.ProfilePage && <window.ProfilePage theme={theme} viewport="desktop" onBack={() => setScreen("home")} />}
@@ -590,42 +591,42 @@
                               )
                           : (screen === "equipment-locker"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.EquipmentLockerPage && <window.EquipmentLockerPage theme={theme} viewport="desktop" onBack={() => setScreen("profile")} />}
                                   </div>
                               )
                           : (screen === "equipment-add"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.EquipmentAddPage && <window.EquipmentAddPage theme={theme} viewport="desktop" onBack={() => setScreen("equipment-locker")} />}
                                   </div>
                               )
                           : (screen === "privacy-security"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.PrivacySecurityPage && <window.PrivacySecurityPage theme={theme} viewport="desktop" onBack={() => setScreen("profile")} />}
                                   </div>
                               )
                           : (screen === "profile-privacy"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.ProfilePrivacyPage && <window.ProfilePrivacyPage theme={theme} viewport="desktop" onBack={() => setScreen("privacy-security")} />}
                                   </div>
                               )
                           : (screen === "password"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.PasswordPage && <window.PasswordPage theme={theme} viewport="desktop" onBack={() => setScreen("privacy-security")} />}
                                   </div>
                               )
                           : (screen === "two-factor"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.TwoFactorPage && <window.TwoFactorPage theme={theme} viewport="desktop" onBack={() => setScreen("privacy-security")} />}
                                   </div>
@@ -654,7 +655,8 @@
             }}>
               <div id="device-frame-inner" style={{
                 width: "100%", height: "100%",
-                background: "#fff",
+                background: "var(--pp-bg-default)",
+                color: "var(--pp-fg-default)",
                 overflowX: "hidden",
                 position: "relative",
                 display: "flex", flexDirection: "column",
