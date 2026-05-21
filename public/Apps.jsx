@@ -2001,9 +2001,10 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
           boxShadow: "0 16px 16px rgba(0,0,0,.16)",
         }}
       >
-        {/* Sliding pill — mint #EDF3F3 capsule that tracks the active
-            item. Top/bottom insets match the new 4px track padding so
-            the pill sits flush against the dark track edges. */}
+        {/* Sliding pill — pure WHITE capsule per the updated Figma spec
+            (buttons/neutral/bg/default = white, was mint #EDF3F3).
+            Top/bottom insets match the 4px track padding so the pill
+            sits flush against the dark track edges. */}
         <div
           aria-hidden="true"
           style={{
@@ -2012,7 +2013,7 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
             left: 0,
             width: pillRect.width,
             transform: `translateX(${pillRect.left}px)`,
-            background: "#EDF3F3",
+            background: "#FFFFFF",
             borderRadius: 999,
             boxShadow: "0 2px 4px rgba(0,0,0,.08)",
             transition: "transform 280ms cubic-bezier(.2,.8,.2,1), width 280ms cubic-bezier(.2,.8,.2,1)",
@@ -2029,42 +2030,39 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
               onClick={it.onClick || undefined}
               onMouseEnter={() => setHovered(idx)}
               style={{
-                // Desktop: 10/12 padding + minWidth 72 + 20px icon
-                // + p2 14/medium label (Figma "🎮 buttons/md*" sizing).
+                // Desktop tokens per the updated Figma spec
+                // (buttons/lg sizing): 12 / 16 padding + minWidth 72
+                // + 24px icon + p1/medium label (16 / 24 lh, 0 ls).
+                // Active text uses buttons/neutral/fg/default = #191D1F.
                 // Mobile keeps tighter horizontal padding so 4 items
                 // remain readable inside the 360px viewport.
                 position: "relative",
                 zIndex: 1,
                 flex: isMobile ? 1 : "0 0 auto",
                 minWidth: isMobile ? 0 : 72,
-                padding: isMobile ? "8px 8px" : "10px 12px",
+                padding: isMobile ? "10px 8px" : "12px 16px",
                 borderRadius: 999, border: 0,
                 background: "transparent",
-                // Active text uses the system primary fg token (#0F1214)
-                // so it matches the page's body type instead of pure
-                // black, which would read harsher against the mint pill.
-                color: isActive ? "#0F1214" : "#EDF3F3",
+                color: isActive ? "#191D1F" : "#EDF3F3",
                 fontFamily: "inherit",
-                // Spec: p2/medium 14/20 letterSpacing 0.1. Mobile drops
-                // to 13/medium so the shortLabel set still fits.
                 fontWeight: 500,
-                fontSize: isMobile ? 13 : 14,
-                lineHeight: isMobile ? "20px" : "20px",
-                letterSpacing: 0.1,
+                fontSize: isMobile ? 13 : 16,
+                lineHeight: isMobile ? "20px" : "24px",
+                letterSpacing: 0,
                 cursor: it.onClick ? "pointer" : "default",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
-                gap: isMobile ? 0 : 6,
+                gap: isMobile ? 0 : 8,
                 whiteSpace: "nowrap",
-                // Only color animates per-button; the mint background is
-                // owned by the sliding pill above.
+                // Only color animates per-button; the white background
+                // is owned by the sliding pill above.
                 transition: "color 200ms ease",
               }}
             >
               {/* Icons appear only on desktop; mobile hides them so labels
-                  fit comfortably across the 4-item row. Per Figma the
-                  icon is 20px and sits left of the label container. */}
+                  fit comfortably across the 4-item row. Per the updated
+                  Figma spec the icon is 24px (was 20). */}
               {!isMobile && (
-                <Icon name={it.icon} size={20} color={isActive ? "#0F1214" : "#EDF3F3"} strokeWidth={1.75} />
+                <Icon name={it.icon} size={24} color={isActive ? "#191D1F" : "#EDF3F3"} strokeWidth={1.75} />
               )}
               {/* Desktop uses the long label per Figma spec ("Book a
                   Court" not "Book Court"); mobile keeps the short label
