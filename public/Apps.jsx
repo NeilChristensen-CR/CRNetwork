@@ -2701,7 +2701,10 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
     );
   }
 
-  // ---- Desktop layout (unchanged) -----------------------------------------
+  // ---- Desktop layout — Figma spec (node 8061-58156) ----------------------
+  // Row tokens: 24px padding all sides, gap 24 between columns. Default
+  // (non-hovered) state carries a soft inset tint (`rgba(0,0,0,.04)` per
+  // spec) so the row reads as a zebra-striped lane; hover lifts to white.
   return (
     <div
       data-card-hover
@@ -2709,74 +2712,105 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
       onMouseLeave={() => setHover(false)}
       onClick={() => onOpenEvent && onOpenEvent()}
       style={{
-        display: "grid",
-        gridTemplateColumns: "96px 1fr auto auto",
-        gap: 20,
-        alignItems: "start",
-        padding: "18px 12px",
-        margin: "0 -12px",
-        borderTop: first ? "1px solid #E9EBEC" : "1px solid #F4F5F6",
-        borderRadius: 10,
-        background: hover ? "#F4F5F6" : "transparent",
+        display: "flex",
+        alignItems: "center",
+        gap: 24,
+        padding: 24,
+        margin: 0,
+        borderBottom: "1px solid #E9EBEC",
+        // Zebra tint per spec — `system/contrast/darken/50` ≈ rgba(0,0,0,.04).
+        background: hover ? "#FFFFFF" : "rgba(0,0,0,.04)",
         cursor: "pointer",
         transition: "background 140ms ease",
       }}
     >
-      <div>
-        <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", lineHeight: "21px" }}>{r.time}</div>
-        <div style={{ marginTop: 6 }}>
-          {(() => {
-            const s = supplyState(r);
-            return (
-              <span data-tag={s.urgent ? "warning" : "default"} style={{
-                height: 22, padding: "0 10px", borderRadius: 6,
-                background: s.urgent ? "#FEE2E2" : "#F4F5F6",
-                color: s.urgent ? "#B91C1C" : "#0F1214",
-                fontSize: 11.5, fontWeight: 600,
-                display: "inline-flex", alignItems: "center",
-                whiteSpace: "nowrap",
-              }}>{s.text}</span>
-            );
-          })()}
-        </div>
+      {/* Left column — time + spots tag, gap 8 vertical. */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-start", flexShrink: 0 }}>
+        <div style={{
+          fontFamily: theme.display, fontWeight: 700,
+          fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+          color: "#0F1214",
+          width: 96,
+        }}>{r.time}</div>
+        {(() => {
+          const s = supplyState(r);
+          return (
+            <span data-tag={s.urgent ? "warning" : "default"} style={{
+              padding: "2px 6px", borderRadius: 9999,
+              background: s.urgent ? "#DA0B0B" : "#F4F5F6",
+              color: s.urgent ? "#FFFFFF" : "#2F3436",
+              fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
+              fontWeight: 400,
+              display: "inline-flex", alignItems: "center",
+              whiteSpace: "nowrap",
+            }}>{s.urgent ? `${r.spotsLeft} Spots Left` : s.text}</span>
+          );
+        })()}
       </div>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", lineHeight: "21px" }}>
-          <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", letterSpacing: -0.2 }}>{r.title}</span>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+      {/* Vertical divider between the time column and the info column —
+          1px hairline matching the segment dividers in the hero
+          SearchBar. */}
+      <div style={{ alignSelf: "stretch", width: 1, background: "#E9EBEC", flexShrink: 0 }} />
+      {/* Info column — title + avatar group on row one, location row,
+          meta row. */}
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <span style={{
+            fontFamily: theme.display, fontWeight: 700,
+            fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+            color: "#0F1214",
+          }}>{r.title}</span>
+          {/* Avatar group + "+N" counter, per spec — three 24px image
+              avatars overlapped by -8px, then a neutral chip showing
+              total attending. */}
+          <div style={{ display: "inline-flex", alignItems: "center" }}>
             <Avatars />
-            <span style={{ fontSize: 13, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
+            <span style={{
+              width: 24, height: 24, marginLeft: -8,
+              borderRadius: 9999,
+              background: "#F4F5F6", color: "#6F7476",
+              border: "2px solid #FFFFFF",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 13, lineHeight: "16px", fontWeight: 600,
+              letterSpacing: 0.2,
+              flexShrink: 0,
+            }}>+{r.attending}</span>
           </div>
         </div>
-        <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#4B5052" }}>
-          <Icon name="MapPin" size={14} strokeWidth={1.75} color="#858F8F" />
-          <span>{r.club} · {r.city} · {r.distance}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+          <Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />
+          <span>{r.club}, {r.city}</span>
         </div>
-        <div style={{ marginTop: 4, fontSize: 12.5, color: "#4B5052" }}>
+        <div style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
           {r.meta}
         </div>
       </div>
-      <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, color: "#0F1214", whiteSpace: "nowrap", alignSelf: "center" }}>{r.price}</div>
+      <div style={{
+        fontFamily: theme.display, fontWeight: 700,
+        fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+        color: "#0F1214", whiteSpace: "nowrap", flexShrink: 0,
+      }}>{r.price}</div>
+      {/* Reserve button — per spec the default state is the full pill
+          (icon + "Reserve" label + ArrowRight icon), 16/12 padding,
+          minWidth 72, fontSize 16 medium. No hover-reveal — the
+          affordance is always discoverable. */}
       <button
         onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
         aria-label="Reserve event"
         style={{
-          height: 40,
-          width: hover ? 112 : 40,
-          padding: hover ? "0 14px 0 16px" : 0,
+          minWidth: 72,
+          padding: "12px 16px",
           borderRadius: 8,
-          background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
-          display: "inline-flex", alignItems: "center",
-          justifyContent: hover ? "space-between" : "center",
-          gap: hover ? 8 : 0,
-          alignSelf: "center",
-          fontFamily: "inherit", fontWeight: 700, fontSize: 13,
-          whiteSpace: "nowrap", overflow: "hidden",
-          transition: "width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
+          background: "#222424", color: "#fff", border: 0, cursor: "pointer",
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          gap: 8,
+          fontFamily: "inherit", fontWeight: 500, fontSize: 16, lineHeight: "24px",
+          whiteSpace: "nowrap", flexShrink: 0,
+          boxShadow: "0 2px 4px rgba(0,0,0,.08)",
         }}
       >
-        {hover && <span>Reserve</span>}
-        <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
+        Reserve
+        <Icon name="ArrowRight" size={20} strokeWidth={1.75} color="#fff" />
       </button>
     </div>
   );
