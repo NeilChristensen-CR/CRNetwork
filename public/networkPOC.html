@@ -442,12 +442,12 @@
               <RadioRow on={device === "wide"}    onClick={() => setDeviceManual("wide")}     icon="Tv"         label="Wide desktop" />
             </Group>
             <Group label="Mode">
-              {/* Mode wiring is stubbed — light is the only theme the
-                  prototype currently surfaces fully. Dark/branded
-                  toggles flip the state for future plumbing. */}
-              <RadioRow on={mode === "light"}    onClick={() => setMode("light")}    icon="Sun"     label="Light" />
-              <RadioRow on={mode === "dark"}     onClick={() => setMode("dark")}     icon="Moon"    label="Dark" />
-              <RadioRow on={mode === "branded"}  onClick={() => setMode("branded")}  icon="Palette" label="Branded" />
+              {/* Brand/club theming is handled by the Club section
+                  below, so Mode collapses to the two true color modes:
+                  Light + Dark. Dark wiring is staged for the upcoming
+                  pickle-pixels dark token layer. */}
+              <RadioRow on={mode === "light"} onClick={() => setMode("light")} icon="Sun"  label="Light" />
+              <RadioRow on={mode === "dark"}  onClick={() => setMode("dark")}  icon="Moon" label="Dark" />
             </Group>
             <Group label="Session">
               <RadioRow on={loggedIn}  onClick={() => setLoggedIn(true)}  icon="UserCheck" label="Logged in" />
