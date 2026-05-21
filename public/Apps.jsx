@@ -2954,16 +2954,21 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             "Welcome back to {club}!" with the "More info about {club}"
             outline button to the right. */}
         {isCR ?
-        <div style={{ marginBottom: isMobile ? 32 : 48, textAlign: "center" }}>
+        <div style={{ marginBottom: isMobile ? 24 : 32, textAlign: "center" }}>
           <h1 style={{
             margin: 0,
             fontFamily: theme.display, fontWeight: 800,
-            fontSize: isMobile ? 40 : 64,
-            lineHeight: isMobile ? "52px" : "88px",
-            letterSpacing: isMobile ? -0.6 : -0.8,
+            // Stepped down from display/d1 (64/88) → display/d3 (40/48)
+            // on desktop / d4-adjacent 28/36 on mobile. The previous
+            // 64px head consumed ~176px above-fold and outranked the
+            // SearchBar; this size keeps the head as a confident
+            // greeting without stealing the hero's job.
+            fontSize: isMobile ? 28 : 40,
+            lineHeight: isMobile ? "36px" : "48px",
+            letterSpacing: isMobile ? -0.4 : -0.4,
             color: theme.t.text,
           }}>
-            Welcome to CourtReserve
+            This is CourtReserve. Let's Play.
           </h1>
         </div> :
         <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
