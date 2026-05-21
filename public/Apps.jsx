@@ -2900,8 +2900,8 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           paddingBottom: isMobile ? 16 : 4,
         }}>
             {isMobile && window.SearchBarCompact
-              ? <window.SearchBarCompact theme={theme} viewport={viewport} onSubmit={() => onBookCourt && onBookCourt()} />
-              : <window.SearchBar theme={theme} viewport={viewport} onSubmit={() => onBookCourt && onBookCourt()} />}
+              ? <window.SearchBarCompact theme={theme} viewport={viewport} onSubmit={(prefill) => onBookCourt && onBookCourt(prefill)} />
+              : <window.SearchBar theme={theme} viewport={viewport} onSubmit={(prefill) => onBookCourt && onBookCourt(prefill)} />}
           </div>
         }
         {/* Location blurb — sits BELOW the sticky SearchBar shelf (not

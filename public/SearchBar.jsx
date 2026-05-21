@@ -796,19 +796,83 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
       );
     }
     if (active === "who") {
+      // Desktop Who popover — uses the same contained pill stepper as
+      // the mobile sheet's Who row. Single grey rounded capsule holding
+      // [− N players +]; minus and plus glyphs sit inside without their
+      // own strokes.
+      const whoCount = v.whoCount || 1;
+      const setWhoCount = (n) => {
+        const next = Math.max(1, Math.min(8, n));
+        const label = next === 1 ? "1 Player" : `${next} Players`;
+        if (values && onChange) onChange({ ...values, who: label, whoCount: next });
+        else setInternal((prev) => ({ ...prev, who: label, whoCount: next }));
+        setTouched((prev) => ({ ...prev, who: true }));
+      };
       return (
-        <SBPopover anchorRef={anchorRef}>
-          <SBStepper
-            value={v.whoCount || 1}
-            min={1}
-            max={8}
-            label="Players"
-            onChange={(n) => {
-              const label = n === 1 ? "1 Player" : `${n} Players`;
-              if (values && onChange) onChange({ ...values, who: label, whoCount: n });
-              else setInternal((prev) => ({ ...prev, who: label, whoCount: n }));
-            }}
-          />
+        <SBPopover anchorRef={anchorRef} minWidth={260}>
+          <div style={{ padding: "10px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
+            Players
+          </div>
+          <div style={{
+            padding: "8px 12px 12px 12px",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: 12,
+          }}>
+            <span style={{
+              fontFamily: "Inter, system-ui, sans-serif",
+              fontSize: 14, fontWeight: 500, color: "#0F1214",
+            }}>1–8 players</span>
+            <div style={{
+              display: "inline-flex", alignItems: "center",
+              background: "#F4F5F6",
+              borderRadius: 999,
+              padding: 4,
+              height: 44,
+            }}>
+              <button
+                type="button"
+                onClick={() => setWhoCount(whoCount - 1)}
+                disabled={whoCount <= 1}
+                aria-label="Fewer players"
+                style={{
+                  width: 36, height: 36, borderRadius: 999,
+                  border: 0, background: "transparent",
+                  color: "#0F1214",
+                  cursor: whoCount <= 1 ? "not-allowed" : "pointer",
+                  opacity: whoCount <= 1 ? 0.35 : 1,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  padding: 0,
+                }}
+              >
+                {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="#0F1214" />}
+              </button>
+              <span style={{
+                minWidth: 80, textAlign: "center",
+                fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+                fontWeight: 700, fontSize: 14, color: "#0F1214",
+                fontVariantNumeric: "tabular-nums",
+                padding: "0 6px",
+                whiteSpace: "nowrap",
+              }}>{whoCount} {whoCount === 1 ? "player" : "players"}</span>
+              <button
+                type="button"
+                onClick={() => setWhoCount(whoCount + 1)}
+                disabled={whoCount >= 8}
+                aria-label="More players"
+                style={{
+                  width: 36, height: 36, borderRadius: 999,
+                  border: 0, background: "transparent",
+                  color: "#0F1214",
+                  cursor: whoCount >= 8 ? "not-allowed" : "pointer",
+                  opacity: whoCount >= 8 ? 0.35 : 1,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  padding: 0,
+                }}
+              >
+                {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#0F1214" />}
+              </button>
+            </div>
+          </div>
         </SBPopover>
       );
     }
@@ -858,10 +922,19 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
           open={resultsOpen}
           onClose={() => setResultsOpen(false)}
           values={v}
-          onSelectClub={(clubName) => {
-            window.__searchPrefill = { ...(window.__searchPrefill || {}), club: clubName };
+          onSelectClub={(clubName, clubId) => {
+            // Stash both human-readable club + the canonical id on the
+            // prefill payload. The parent's onBookCourt(prefill) is then
+            // expected to setSelectedClubId(prefill.clubId) before
+            // routing to the reserve-court screen, so the user lands
+            // directly on the picked club's booking flow.
+            window.__searchPrefill = {
+              ...(window.__searchPrefill || {}),
+              club: clubName,
+              clubId,
+            };
             setResultsOpen(false);
-            onSubmit && onSubmit({ ...v, club: clubName });
+            onSubmit && onSubmit({ ...v, club: clubName, clubId });
           }}
           theme={theme}
         />
@@ -1528,12 +1601,12 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
     : null;
   if (!portalTarget) return null;
 
-  // For the prototype, all clubs in SB_WHERE_SUGGESTIONS are considered
+  // For the prototype, all clubs in SB_RESULTS_CLUBS are considered
   // "matched" — real filtering against where/activity/when isn't wired
-  // through to the data corpus. The filter pills at the top show what
-  // the user picked so the connection between input and output is
-  // visible.
-  const clubs = SB_WHERE_SUGGESTIONS.filter((s) => s.kind === "club");
+  // through. SB_RESULTS_CLUBS carries the canonical `id` field so the
+  // booking flow downstream can set selectedClubId from the prefill
+  // payload after the user picks one.
+  const clubs = SB_RESULTS_CLUBS;
   const v = values || {};
   const filterChips = [v.where, v.activity, v.when, v.who].filter(Boolean);
 
@@ -1622,9 +1695,9 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
         <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 16px 16px" }}>
           {clubs.map((c) => (
             <button
-              key={c.name}
+              key={c.id}
               type="button"
-              onClick={() => onSelectClub && onSelectClub(c.name)}
+              onClick={() => onSelectClub && onSelectClub(c.name, c.id)}
               style={{
                 display: "flex", alignItems: "center", gap: 12,
                 width: "100%",
@@ -1650,7 +1723,7 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
                   fontSize: 13, color: "#4B5052", lineHeight: 1.3,
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                 }}>
-                  {(c.sub || "").replace(/\s·\s\d{5}.*$/, "")}
+                  {c.city}{c.state ? `, ${c.state}` : ""}
                   {c.distance ? ` · ${c.distance} mi` : ""}
                 </span>
               </span>
@@ -1665,13 +1738,103 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
   return ReactDOM.createPortal(sheet, portalTarget);
 }
 
+// ---- Carousel section ---------------------------------------------------
+// Used inside SearchResultsModal to render a themed strip of club cards.
+// Title + sub copy header (h2-style, smaller than the modal title) with
+// optional Prev/Next arrows when more than 2 cards exist.
+function SBResultsCarousel({ title, sub, clubs, theme, onSelectClub }) {
+  const trackRef = useRefSB(null);
+  if (!clubs || clubs.length === 0) return null;
+  const scroll = (dx) => {
+    const el = trackRef.current; if (!el) return;
+    el.scrollBy({ left: dx, behavior: "smooth" });
+  };
+  return (
+    <section style={{ padding: "0 0 16px 0" }}>
+      <div style={{
+        display: "flex", alignItems: "flex-end", justifyContent: "space-between",
+        padding: "16px 24px 8px 24px", gap: 16,
+      }}>
+        <div style={{ minWidth: 0 }}>
+          <h3 style={{
+            margin: 0,
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+            fontWeight: 800, fontSize: 17, letterSpacing: -0.3,
+            color: "#0F1214", lineHeight: 1.2,
+          }}>{title}</h3>
+          {sub && (
+            <div style={{
+              marginTop: 2, fontSize: 12.5, color: "#4B5052", lineHeight: 1.3,
+            }}>{sub}</div>
+          )}
+        </div>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <button
+            type="button"
+            onClick={() => scroll(-340)}
+            aria-label="Previous"
+            style={{
+              width: 36, height: 36, borderRadius: 999, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            {window.Icon && <window.Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => scroll(340)}
+            aria-label="Next"
+            style={{
+              width: 36, height: 36, borderRadius: 999, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            {window.Icon && <window.Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />}
+          </button>
+        </div>
+      </div>
+      <div
+        ref={trackRef}
+        style={{
+          display: "flex", gap: 16,
+          overflowX: "auto", scrollSnapType: "x mandatory",
+          padding: "8px 24px 16px 24px",
+          scrollbarWidth: "none",
+        }}
+      >
+        {clubs.map((c) => (
+          <div
+            key={c.id}
+            onClick={() => onSelectClub && onSelectClub(c.name, c.id)}
+            style={{
+              flex: "0 0 280px", scrollSnapAlign: "start",
+              cursor: "pointer", display: "flex",
+            }}
+          >
+            {window.BookNowCard && (
+              <window.BookNowCard
+                v={c}
+                theme={theme}
+                viewport="desktop"
+                onPickSlot={() => onSelectClub && onSelectClub(c.name, c.id)}
+                onOpenClub={() => onSelectClub && onSelectClub(c.name, c.id)}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // ---- Desktop results modal -----------------------------------------------
 // Centered modal that opens after the user taps Search in the desktop
 // SearchBar (or any "Find a club" / event-list trigger that calls
-// window.__openResultsModal). Renders the same SB_RESULTS_CLUBS dataset
-// as the mobile results sheet, but using the full BookNowCard layout
-// from the logged-out home so the user picks a club from the same
-// visual primitive they've already seen.
+// window.__openResultsModal). Renders SB_RESULTS_CLUBS in themed
+// carousel sections (Popular near you, Ready to book today, Closest)
+// using the BookNowCard from the logged-out home.
 //
 // Picking a card stashes the club on window.__searchPrefill and calls
 // onSelectClub (parent routes into the booking flow).
@@ -1714,10 +1877,12 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           zIndex: 200,
         }}
       />
-      {/* Modal — centered, 800px wide, capped at 88vh so the body
-          scrolls when the club list overflows. Same header anatomy as
-          the mobile sheet (24/800 title + ghost X) so the two surfaces
-          read as one design. */}
+      {/* Modal — capped at 920px wide so it sits inside the desktop's
+          1200px content column with breathing room on each side, and
+          75vh tall so it doesn't push past the visible viewport even
+          on shorter desktop windows. With carousel sections the body
+          doesn't need to grow vertically — horizontal scroll absorbs
+          the volume per section. */}
       <div
         role="dialog"
         aria-modal="true"
@@ -1727,8 +1892,8 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           left: "50%", top: "50%",
           transform: open ? "translate(-50%, -50%) scale(1)" : "translate(-50%, -50%) scale(.96)",
           opacity: open ? 1 : 0,
-          width: "min(800px, calc(100vw - 48px))",
-          maxHeight: "88vh",
+          width: "min(920px, calc(100vw - 48px))",
+          maxHeight: "min(75vh, 720px)",
           background: "#FFFFFF",
           borderRadius: 16,
           boxShadow: "0 24px 64px rgba(15,18,20,.32), 0 4px 16px rgba(15,18,20,.16)",
@@ -1784,37 +1949,39 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           </div>
         )}
 
-        {/* Scrollable club grid — 2 columns of BookNowCards. Each card's
-            footer "See Events & Info" is wired to onSelectClub so any
-            tap inside the card body or footer commits the pick. */}
+        {/* Scrollable body — broken into themed carousel sections so
+            the list reads as curated picks rather than a single grid. */}
         <div style={{
           flex: 1,
           overflowY: "auto",
-          padding: "0 24px 24px 24px",
+          padding: "0 0 24px 0",
         }}>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 16,
-          }}>
-            {SB_RESULTS_CLUBS.map((c) => (
-              <div
-                key={c.id}
-                onClick={() => onSelectClub && onSelectClub(c.name)}
-                style={{ cursor: "pointer", display: "flex" }}
-              >
-                {window.BookNowCard && (
-                  <window.BookNowCard
-                    v={c}
-                    theme={theme}
-                    viewport="desktop"
-                    onPickSlot={() => onSelectClub && onSelectClub(c.name)}
-                    onOpenClub={() => onSelectClub && onSelectClub(c.name)}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+          {[
+            {
+              title: "Popular near you",
+              sub: "Most booked clubs in your area",
+              clubs: SB_RESULTS_CLUBS.filter((c) => c.booked >= 20),
+            },
+            {
+              title: "Ready to book today",
+              sub: "Open courts in the next few hours",
+              clubs: SB_RESULTS_CLUBS.filter((c) => c.times && c.times.length >= 4).slice(0, 5),
+            },
+            {
+              title: "Closest to you",
+              sub: "Under 5 miles away",
+              clubs: SB_RESULTS_CLUBS.filter((c) => parseFloat(c.distance) <= 5),
+            },
+          ].map((section, sIdx) => (
+            <SBResultsCarousel
+              key={sIdx}
+              title={section.title}
+              sub={section.sub}
+              clubs={section.clubs}
+              theme={theme}
+              onSelectClub={onSelectClub}
+            />
+          ))}
         </div>
       </div>
     </>
@@ -1935,12 +2102,16 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
       open={resultsOpen}
       onClose={() => setResultsOpen(false)}
       values={v}
-      onSelectClub={(clubName) => {
-        // Stash the selected club on the prefill payload so the
-        // booking screen can pick it up, then navigate.
-        window.__searchPrefill = { ...(window.__searchPrefill || {}), club: clubName };
+      onSelectClub={(clubName, clubId) => {
+        // Stash club + canonical id so the booking flow can route the
+        // user directly to that club's reservation screen.
+        window.__searchPrefill = {
+          ...(window.__searchPrefill || {}),
+          club: clubName,
+          clubId,
+        };
         setResultsOpen(false);
-        onSubmit && onSubmit({ ...v, club: clubName });
+        onSubmit && onSubmit({ ...v, club: clubName, clubId });
       }}
       theme={theme}
     />

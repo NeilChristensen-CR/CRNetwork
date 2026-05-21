@@ -104,25 +104,28 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
           type="button"
           onClick={() => onNav && onNav("Sign In")}
           style={{
-            height: desktop ? 44 : 30,
-            padding: desktop ? "0 18px 0 14px" : "0 12px 0 10px",
+            // Desktop trimmed 44 → 36 so the CTA sits as a chip in the
+            // chrome rather than a primary button — leaves the green
+            // brandmark + page as the focal point.
+            height: desktop ? 36 : 30,
+            padding: desktop ? "0 14px 0 12px" : "0 12px 0 10px",
             borderRadius: 999,
             background: C.pillBg,
             color: C.pillFg,
             border: 0,
             display: "inline-flex",
             alignItems: "center",
-            gap: desktop ? 8 : 5,
+            gap: desktop ? 6 : 5,
             cursor: "pointer",
             fontFamily: "Inter, system-ui, sans-serif",
             fontWeight: 600,
-            fontSize: desktop ? 13 : 11.5,
+            fontSize: desktop ? 12.5 : 11.5,
             flexShrink: 0,
             whiteSpace: "nowrap",
           }}
         >
           {window.Icon && (
-            <window.Icon name="User" size={desktop ? 16 : 12} strokeWidth={2} color={C.pillFg} />
+            <window.Icon name="User" size={desktop ? 14 : 12} strokeWidth={2} color={C.pillFg} />
           )}
           Create Account
         </button>
