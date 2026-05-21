@@ -2159,23 +2159,35 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
   return (
     <div style={{ marginTop: 8 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 24 : 32, lineHeight: isMobile ? "32px" : "44px", letterSpacing: -0.2, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
           Clubs near me
         </h2>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-          <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
-            width: 44, height: 44, borderRadius: 8, border: 0,
-            background: "transparent", cursor: "pointer",
-            display: "inline-flex", alignItems: "center", justifyContent: "center"
-          }}>
-            <Icon name="ChevronLeft" size={18} strokeWidth={2} color="#0F1214" />
+        {/* Section nav — ghost icon-only buttons per Figma spec
+            (node 8057-51707). 40×40 clickable area (p-10 + 20px inner
+            container holding the 16px Caret glyph), rounded-xs 8px, no
+            background. Hover lifts to surfaceSoft for clear feedback. */}
+        <div style={{ display: "inline-flex", alignItems: "center" }}>
+          <button onClick={() => scrollBy(-340)} aria-label="Previous"
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            style={{
+              padding: 10, borderRadius: 8, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              transition: "background 120ms ease",
+            }}>
+            <Icon name="CaretLeft" size={16} strokeWidth={2} color="#0F1214" />
           </button>
-          <button onClick={() => scrollBy(340)} aria-label="Next" style={{
-            width: 44, height: 44, borderRadius: 8, border: 0,
-            background: "transparent", cursor: "pointer",
-            display: "inline-flex", alignItems: "center", justifyContent: "center"
-          }}>
-            <Icon name="ChevronRight" size={18} strokeWidth={2} color="#0F1214" />
+          <button onClick={() => scrollBy(340)} aria-label="Next"
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            style={{
+              padding: 10, borderRadius: 8, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              transition: "background 120ms ease",
+            }}>
+            <Icon name="CaretRight" size={16} strokeWidth={2} color="#0F1214" />
           </button>
         </div>
       </div>
@@ -2289,7 +2301,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
   return (
     <div style={{ marginTop: isMobile ? 48 : 56 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 24 : 32, lineHeight: isMobile ? "32px" : "44px", letterSpacing: -0.2, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
           {title}
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
@@ -2305,19 +2317,29 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               Oakland, CA
             </button>
           )}
-          <button onClick={() => scrollBy(-340)} aria-label="Previous" style={{
-            width: 44, height: 44, borderRadius: 8, border: 0,
-            background: "transparent", cursor: "pointer",
-            display: "inline-flex", alignItems: "center", justifyContent: "center"
-          }}>
-            <Icon name="ChevronLeft" size={18} strokeWidth={2} color="#0F1214" />
+          {/* Ghost icon-only nav buttons — matches the section-title
+              layout from Figma spec (node 8057-51707). */}
+          <button onClick={() => scrollBy(-340)} aria-label="Previous"
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            style={{
+              padding: 10, borderRadius: 8, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              transition: "background 120ms ease",
+            }}>
+            <Icon name="CaretLeft" size={16} strokeWidth={2} color="#0F1214" />
           </button>
-          <button onClick={() => scrollBy(340)} aria-label="Next" style={{
-            width: 44, height: 44, borderRadius: 8, border: 0,
-            background: "transparent", cursor: "pointer",
-            display: "inline-flex", alignItems: "center", justifyContent: "center"
-          }}>
-            <Icon name="ChevronRight" size={18} strokeWidth={2} color="#0F1214" />
+          <button onClick={() => scrollBy(340)} aria-label="Next"
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            style={{
+              padding: 10, borderRadius: 8, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              transition: "background 120ms ease",
+            }}>
+            <Icon name="CaretRight" size={16} strokeWidth={2} color="#0F1214" />
           </button>
         </div>
       </div>
@@ -2553,7 +2575,7 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
           hero SearchBar already covers. Filtering returns when there's
           a strong reason to repeat the controls here. */}
       <div style={{ marginBottom: 12 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 24 : 32, lineHeight: isMobile ? "32px" : "44px", letterSpacing: -0.2, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
           {isMobile ? "More Events" : "More events near you"}
         </h2>
       </div>

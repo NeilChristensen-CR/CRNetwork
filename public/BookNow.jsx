@@ -203,7 +203,7 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
         <h2 style={{
           margin: 0,
           fontFamily: theme.display, fontWeight: 700,
-          fontSize: isMobile ? 24 : 32, lineHeight: isMobile ? "32px" : "44px", letterSpacing: -0.2,
+          fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0,
           color: t.text,
           minWidth: 0,
           flex: "0 1 auto",
@@ -225,12 +225,31 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
               WHEN / WHO), so this section now stays clean and the carousel
               arrows sit alone on the right. */}
           {!isMobile &&
-          <div style={{ display: "inline-flex", gap: 8 }}>
-              <button onClick={() => scrollBy(-1)} aria-label="Previous" style={{ width: 44, height: 44, borderRadius: 8, border: 0, background: "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                <Icon name="ChevronLeft" size={18} strokeWidth={2} />
+          <div style={{ display: "inline-flex" }}>
+              {/* Ghost icon-only nav buttons — matches the section-title
+                  layout from Figma spec (node 8057-51707). 40×40 hit
+                  area, 16px Caret glyph, hover lifts to surfaceSoft. */}
+              <button onClick={() => scrollBy(-1)} aria-label="Previous"
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                style={{
+                  padding: 10, borderRadius: 8, border: 0,
+                  background: "transparent", cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  transition: "background 120ms ease",
+                }}>
+                <Icon name="CaretLeft" size={16} strokeWidth={2} color="#0F1214" />
               </button>
-              <button onClick={() => scrollBy(1)} aria-label="Next" style={{ width: 44, height: 44, borderRadius: 8, border: 0, background: "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                <Icon name="ChevronRight" size={18} strokeWidth={2} />
+              <button onClick={() => scrollBy(1)} aria-label="Next"
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                style={{
+                  padding: 10, borderRadius: 8, border: 0,
+                  background: "transparent", cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  transition: "background 120ms ease",
+                }}>
+                <Icon name="CaretRight" size={16} strokeWidth={2} color="#0F1214" />
               </button>
             </div>
           }
