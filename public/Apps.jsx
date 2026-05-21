@@ -1893,18 +1893,23 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
   };
   // Each action carries a long label (desktop) and a short label (mobile) so
   // the 4-action bar fits inside the 410px device frame without truncating.
+  // Icons map to the Figma spec semantics (Calendar / Trophy /
+  // PingPong / GraduationCap). Lucide ships Calendar, Trophy, and
+  // GraduationCap natively; PingPong (paddle sport) doesn't exist in
+  // Lucide so "Find a Club" uses `Building2` — the closest semantic
+  // glyph available (club venue / building).
   const items = isCR ?
   [
-  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: openResults, primary: true },
-  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: openResults },
-  { icon: "MapPin",    label: "Find a Club",   shortLabel: "Find Club",  onClick: onFindClubs },
-  { icon: "User",      label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }] :
+  { icon: "Calendar",       label: "Book a Court",  shortLabel: "Book Court", onClick: openResults, primary: true },
+  { icon: "Trophy",         label: "Find an Event", shortLabel: "Find Event", onClick: openResults },
+  { icon: "Building2",      label: "Find a Club",   shortLabel: "Find Club",  onClick: onFindClubs },
+  { icon: "GraduationCap",  label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }] :
 
   [
-  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: openResults, primary: true },
-  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: openResults },
-  { icon: "Users",     label: "Open Play",     shortLabel: "Open Play",  onClick: null },
-  { icon: "User",      label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }];
+  { icon: "Calendar",       label: "Book a Court",  shortLabel: "Book Court", onClick: openResults, primary: true },
+  { icon: "Trophy",         label: "Find an Event", shortLabel: "Find Event", onClick: openResults },
+  { icon: "Users",          label: "Open Play",     shortLabel: "Open Play",  onClick: null },
+  { icon: "GraduationCap",  label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }];
 
   // On the logged-out CourtReserve home the floater is persistent — it acts
   // as the primary action selector pinned to the bottom of the viewport
@@ -2568,13 +2573,11 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
   ];
   return (
     <div style={{ marginTop: isMobile ? 48 : 56 }}>
-      {/* Header — just the title now. The 3-segment filter row
-          (WINDOW / TIME / LOCATION) was pulled per product feedback:
-          More Events sits below Trending + Beginners which are already
-          tighter feeds; the filter chrome was repeating affordances the
-          hero SearchBar already covers. Filtering returns when there's
-          a strong reason to repeat the controls here. */}
-      <div style={{ marginBottom: 12 }}>
+      {/* Header — just the title now. Per Figma spec (node 8057-51747)
+          the section uses a 24px gap between the title row and the
+          date-grouped content rows below; the 3-segment filter chrome
+          stays pulled. */}
+      <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
           {isMobile ? "More Events" : "More events near you"}
         </h2>
@@ -2840,28 +2843,25 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         fontSize: 20, lineHeight: "28px", letterSpacing: 0,
         color: "#0F1214", whiteSpace: "nowrap", flexShrink: 0,
       }}>{r.price}</div>
-      {/* Reserve button — icon-only square at rest (40×40 with a
-          single ArrowRight glyph), expands on hover to the full pill
-          with the "Reserve" label so the affordance is discoverable
-          without competing for label space in the resting list state. */}
+      {/* Reserve button — icon-only square per Figma spec
+          (node 8057-51747): 48×48, p-12 padding, 24px ArrowRight glyph,
+          rounded-xs 8px, #222424 bg with elevation/200 shadow. The full
+          row is itself clickable (onClick at the row level opens the
+          event), so the dark square reads as the visual affordance
+          without needing a label. */}
       <button
         onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
         aria-label="Reserve event"
         style={{
-          minWidth: hover ? 112 : 48,
-          height: 48,
-          padding: hover ? "0 16px" : 0,
+          width: 48, height: 48,
+          padding: 12,
           borderRadius: 8,
           background: "#222424", color: "#fff", border: 0, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
-          gap: hover ? 8 : 0,
-          fontFamily: "inherit", fontWeight: 500, fontSize: 16, lineHeight: "24px",
-          whiteSpace: "nowrap", flexShrink: 0, overflow: "hidden",
+          flexShrink: 0,
           boxShadow: "0 2px 4px rgba(0,0,0,.08)",
-          transition: "min-width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
         }}
       >
-        {hover && <span>Reserve</span>}
         <Icon name="ArrowRight" size={24} strokeWidth={1.75} color="#fff" />
       </button>
     </div>
@@ -2932,11 +2932,29 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             <window.ProShopAlert theme={theme} desktop={!isMobile} onDismiss={() => setRacquetAlertOpen(false)} />
           </div>
         }
-        {/* Page title row — only rendered for the logged-in club home.
-            The logged-out CourtReserve surface drops the H1 entirely so
-            the sticky SearchBar leads the page; chrome → search becomes
-            the primary acquisition path with no decorative greeting. */}
-        {!isCR &&
+        {/* Page title row — two variants:
+            CourtReserve (logged-out): Figma `display/d1` two-line
+            headline ("Welcome to Court Reserve" + muted "Let's Play.")
+            per node 8057-51505. 64/88/-0.8 on desktop, scaled down to
+            40/52/-0.6 on mobile so it fits a 360px column without
+            ellipsing.
+            Branded club home (logged-in): "Hi {name}." + muted
+            "Welcome back to {club}!" with the "More info about {club}"
+            outline button to the right. */}
+        {isCR ?
+        <div style={{ marginBottom: isMobile ? 32 : 48 }}>
+          <h1 style={{
+            margin: 0,
+            fontFamily: theme.display, fontWeight: 800,
+            fontSize: isMobile ? 40 : 64,
+            lineHeight: isMobile ? "52px" : "88px",
+            letterSpacing: isMobile ? -0.6 : -0.8,
+            color: theme.t.text,
+          }}>
+            <span style={{ display: "block" }}>Welcome to Court Reserve</span>
+            <span style={{ display: "block", color: "#6F7476" }}>Let's Play.</span>
+          </h1>
+        </div> :
         <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
           <h1 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 26 : 56, lineHeight: isMobile ? "32px" : "64px", letterSpacing: isMobile ? -0.4 : -1.4, color: theme.t.text, margin: 0 }}>
             <>Hi {PLAYER.name}.<br /><span style={{ color: theme.t.textSubtle }}>Welcome back to {theme.logoText}!</span></>
