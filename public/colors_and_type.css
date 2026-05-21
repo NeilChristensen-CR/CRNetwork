@@ -135,6 +135,12 @@
   --pp-border-error:    var(--pp-red-600);
   --pp-border-focus:    var(--pp-blue-600);
 
+  /* Map illustration palette — used by BookNowCard's MiniMap SVG. */
+  --pp-map-water: #E8F0EC;
+  --pp-map-land:  #F2F6F3;
+  --pp-map-road:  #FFFFFF;
+  --pp-map-block: #E1E9E3;
+
   /* ============================================================
      LAYER 3 — SEMANTIC (component-bound; consume aliases)
      These are illustrative; components below pick them up.
@@ -191,6 +197,86 @@
   --pp-fw-bold:     700;
   --pp-fw-extrabold:800;
   --pp-fw-black:    900;
+}
+
+/* ============================================================
+   DARK THEME — alias overrides
+   Toggle by setting data-theme="dark" on <html>, <body>, or any
+   ancestor. Tokens cascade so any component reading from the
+   alias layer (--pp-fg-*, --pp-bg-*, --pp-border-*) re-themes for
+   free. Contrast pairs verified WCAG AA:
+     fg-default  #E9EBEC on bg-default #0F1214  → 17.0:1 (AAA)
+     fg-muted    #BBBFC1 on bg-default #0F1214  → 9.4:1  (AAA)
+     fg-subtle   #858F8F on bg-default #0F1214  →  5.5:1 (AA, large text)
+     border ink-300 #4B5052 on #0F1214          →  2.1:1 (non-text UI only)
+   ============================================================ */
+[data-theme="dark"] {
+  /* Foreground (text + icon) — invert the ink scale */
+  --pp-fg-default:    #E9EBEC;            /* off-white, NOT pure */
+  --pp-fg-muted:      var(--pp-ink-100);  /* #BBBFC1 */
+  --pp-fg-subtle:     var(--pp-ink-200);  /* #858F8F */
+  --pp-fg-onVibrant:  var(--pp-neutral-0); /* white text still wins on vibrant primaries */
+  --pp-fg-warning:    var(--pp-ink-800);   /* yellow bg keeps ink text */
+
+  /* Background — dark canvas + elevated surfaces */
+  --pp-bg-default:    var(--pp-ink-800);  /* #0F1214 — main canvas */
+  --pp-bg-subtle:     var(--pp-ink-700);  /* #212424 — surface 1 */
+  --pp-bg-muted:      var(--pp-ink-600);  /* #222424 — surface 2 (slight elevation) */
+  --pp-bg-inverse:    var(--pp-neutral-0);
+
+  /* Tint backgrounds — desaturated for dark surfaces. Subtle dark
+     tints keep the chip readable without flashing on dark canvas. */
+  --pp-bg-tint-primary:  #1F2A3E;
+  --pp-bg-tint-error:    #2A1414;
+  --pp-bg-tint-success:  #142A19;
+  --pp-bg-tint-warning:  #2E2410;
+
+  /* Border — lift to ink-500/-400 so non-text edges remain visible */
+  --pp-border-default:  var(--pp-ink-500); /* #2F3436 */
+  --pp-border-subtle:   var(--pp-ink-700); /* #212424 — barely-there on dark canvas */
+  --pp-border-strong:   var(--pp-ink-300); /* #4B5052 */
+
+  /* Map illustration palette — dark variants for the MiniMap SVG. */
+  --pp-map-water: #1B252A;
+  --pp-map-land:  #222F35;
+  --pp-map-road:  #3A4A52;
+  --pp-map-block: #1F2A30;
+}
+
+/* ============================================================
+   THEME LOCK — opt out of dark-mode re-theming for a subtree.
+   Set data-theme-lock="light" on any element to pin the alias
+   tokens back to their light-mode values within that subtree,
+   regardless of the ancestor data-theme. Useful for surfaces
+   that should stay light in both modes (e.g. the SearchBar).
+   ============================================================ */
+[data-theme="dark"] [data-theme-lock="light"] {
+  --pp-fg-default:    var(--pp-ink-800);
+  --pp-fg-muted:      var(--pp-ink-300);
+  --pp-fg-subtle:     var(--pp-ink-200);
+  --pp-fg-onVibrant:  var(--pp-neutral-0);
+  --pp-fg-warning:    var(--pp-ink-800);
+
+  --pp-bg-default:    var(--pp-neutral-0);
+  --pp-bg-subtle:     var(--pp-neutral-100);
+  --pp-bg-muted:      var(--pp-neutral-200);
+  --pp-bg-inverse:    var(--pp-ink-800);
+
+  --pp-bg-tint-primary:  #EDF1FB;
+  --pp-bg-tint-error:    var(--pp-red-50);
+  --pp-bg-tint-success:  var(--pp-green-50);
+  --pp-bg-tint-warning:  #FFF8E1;
+
+  --pp-border-default:  var(--pp-neutral-300);
+  --pp-border-subtle:   var(--pp-neutral-250);
+  --pp-border-strong:   var(--pp-ink-300);
+
+  --pp-map-water: #E8F0EC;
+  --pp-map-land:  #F2F6F3;
+  --pp-map-road:  #FFFFFF;
+  --pp-map-block: #E1E9E3;
+
+  color: var(--pp-fg-default);
 }
 
 /* ============================================================

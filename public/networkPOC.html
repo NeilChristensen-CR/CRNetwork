@@ -4,21 +4,31 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CourtReserve · Events Discovery</title>
-<link rel="stylesheet" href="colors_and_type.css">
+<link rel="stylesheet" href="colors_and_type.css?v=20260521al">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   html, body {
     margin: 0; padding: 0;
-    background: #F4F5F6;
-    font-family: "Inter", system-ui, sans-serif;
+    /* Reads the Pickle Pixels alias token so [data-theme="dark"] on
+       <html> automatically re-themes the page background. Falls back
+       to #F4F5F6 if the token CSS hasn't loaded yet. */
+    background: var(--pp-bg-subtle, #F4F5F6);
+    color: var(--pp-fg-default, #0F1214);
+    font-family: var(--pp-font-body, "Inter", system-ui, sans-serif);
     /* The prototype renders flush to the viewport now (no device-frame
        card to clip overflow). Hiding horizontal overflow at the page
        level prevents extended sticky shelves and negative-margin tracks
        (SearchBar, action bar, MoreEventsNearYou) from triggering a
        horizontal scrollbar on the body. Vertical scroll stays default. */
     overflow-x: hidden;
+  }
+  /* When dark mode is active, the body lands on the canvas tone
+     directly (no subtle surface tint behind app content). */
+  [data-theme="dark"], [data-theme="dark"] body {
+    background: var(--pp-bg-default);
+    color: var(--pp-fg-default);
   }
   * { box-sizing: border-box; }
   /* Focus-visible rings — keyboard users get an obvious blue ring on
@@ -89,27 +99,27 @@
 <!-- Cache-buster — bump ?v= when iterating on a .jsx file so the browser
      refetches it instead of serving the previously-compiled version.
      Babel-standalone has no module hashing of its own. -->
-<script type="text/babel" src="Components.jsx?v=20260521t"></script>
-<script type="text/babel" src="SearchBar.jsx?v=20260521t"></script>
-<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521t"></script>
-<script type="text/babel" src="data.jsx?v=20260521t"></script>
-<script type="text/babel" src="EventCard.jsx?v=20260521t"></script>
-<script type="text/babel" src="BrowseDesktop.jsx?v=20260521t"></script>
-<script type="text/babel" src="FilterDesktop.jsx?v=20260521t"></script>
-<script type="text/babel" src="Mobile.jsx?v=20260521t"></script>
-<script type="text/babel" src="FilterBarD.jsx?v=20260521t"></script>
-<script type="text/babel" src="RecurringCarousel.jsx?v=20260521t"></script>
-<script type="text/babel" src="EventDetails.jsx?v=20260521t"></script>
-<script type="text/babel" src="EventRegistration.jsx?v=20260521t"></script>
-<script type="text/babel" src="BookNow.jsx?v=20260521t"></script>
-<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521t"></script>
-<script type="text/babel" src="BookCourtWidget.jsx?v=20260521t"></script>
-<script type="text/babel" src="Apps.jsx?v=20260521t"></script>
-<script type="text/babel" src="ClubDetail.jsx?v=20260521t"></script>
-<script type="text/babel" src="FindClubs.jsx?v=20260521t"></script>
-<script type="text/babel" src="Profile.jsx?v=20260521t"></script>
-<script type="text/babel" src="ReserveCourt.jsx?v=20260521t"></script>
-<script type="text/babel" src="design-canvas.jsx?v=20260521t"></script>
+<script type="text/babel" src="Components.jsx?v=20260521al"></script>
+<script type="text/babel" src="SearchBar.jsx?v=20260521al"></script>
+<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521al"></script>
+<script type="text/babel" src="data.jsx?v=20260521al"></script>
+<script type="text/babel" src="EventCard.jsx?v=20260521al"></script>
+<script type="text/babel" src="BrowseDesktop.jsx?v=20260521al"></script>
+<script type="text/babel" src="FilterDesktop.jsx?v=20260521al"></script>
+<script type="text/babel" src="Mobile.jsx?v=20260521al"></script>
+<script type="text/babel" src="FilterBarD.jsx?v=20260521al"></script>
+<script type="text/babel" src="RecurringCarousel.jsx?v=20260521al"></script>
+<script type="text/babel" src="EventDetails.jsx?v=20260521al"></script>
+<script type="text/babel" src="EventRegistration.jsx?v=20260521al"></script>
+<script type="text/babel" src="BookNow.jsx?v=20260521al"></script>
+<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521al"></script>
+<script type="text/babel" src="BookCourtWidget.jsx?v=20260521al"></script>
+<script type="text/babel" src="Apps.jsx?v=20260521al"></script>
+<script type="text/babel" src="ClubDetail.jsx?v=20260521al"></script>
+<script type="text/babel" src="FindClubs.jsx?v=20260521al"></script>
+<script type="text/babel" src="Profile.jsx?v=20260521al"></script>
+<script type="text/babel" src="ReserveCourt.jsx?v=20260521al"></script>
+<script type="text/babel" src="design-canvas.jsx?v=20260521al"></script>
 <script type="text/babel">
   const { useState } = React;
 
@@ -210,6 +220,19 @@
     // canvas reads as the finished prototype until the user pops the
     // panel for state changes.
     const [controlsOpen, setControlsOpen] = useState(false);
+
+    // Color mode — light / dark. Toggling Mode = Dark writes
+    // data-theme="dark" onto <html>, which re-points the Pickle
+    // Pixels alias layer (--pp-fg-*, --pp-bg-*, --pp-border-*) to
+    // their dark equivalents in colors_and_type.css. Any component
+    // reading from those tokens re-themes without prop drilling.
+    const [mode, setMode] = useState("light");
+    React.useEffect(() => {
+      const root = document.documentElement;
+      if (mode === "dark") root.setAttribute("data-theme", "dark");
+      else root.removeAttribute("data-theme");
+      return () => { root.removeAttribute("data-theme"); };
+    }, [mode]);
 
     const theme = window.THEMES[app];
 
@@ -337,6 +360,30 @@
       </div>
     );
 
+    // Nested sub-item row — indented under a parent RadioRow. Smaller
+    // type, lighter inactive color. Used for the Area sub-views
+    // (Club/Event/Profile breakdowns).
+    const NestedRow = ({ on, onClick, label }) => (
+      <button onClick={onClick} style={{
+        width: "100%", display: "flex", alignItems: "center", gap: 8,
+        padding: "6px 10px 6px 32px", borderRadius: 8, border: 0,
+        background: on ? "#F4F5F6" : "transparent",
+        cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+        transition: "background 120ms",
+      }}
+        onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = "#F4F5F6"; }}
+        onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = "transparent"; }}>
+        <span style={{
+          width: 8, height: 8, borderRadius: 999,
+          background: on ? "#0F1214" : "transparent",
+          border: on ? "0" : "1.5px solid #BBBFC1",
+          flexShrink: 0,
+          transition: "background 140ms, border 140ms",
+        }} />
+        <span style={{ fontSize: 12, fontWeight: on ? 600 : 500, color: on ? "#0F1214" : "#4B5052" }}>{label}</span>
+      </button>
+    );
+
     // Reusable switcher panel — flyout anchored center-right of the
     // viewport, opened by the gear button. Settings live behind one
     // affordance so they don't compete with the prototype canvas.
@@ -350,7 +397,12 @@
           onClick={() => setControlsOpen(o => !o)}
           style={{
             position: "fixed", right: 20, top: "50%", transform: "translateY(-50%)",
-            zIndex: 60,
+            // 9999 keeps the gear above every other surface in the
+            // prototype — sticky chrome (50), bottom action bar (30),
+            // SearchResultsModal (200/201), MobileSearchSheet portals,
+            // etc. The panel is a dev affordance; it should never get
+            // hidden by app content.
+            zIndex: 9999,
             width: 44, height: 44, borderRadius: 999,
             background: controlsOpen ? "#0F1214" : "#fff",
             color: controlsOpen ? "#fff" : "#0F1214",
@@ -367,7 +419,10 @@
         {controlsOpen && (
           <div style={{
             position: "fixed", right: 72, top: "50%", transform: "translateY(-50%)",
-            zIndex: 55,
+            // 9998 sits one below the gear (9999) but above every
+            // app surface so the flyout floats on top of modals + the
+            // mobile bottom sheet portal target.
+            zIndex: 9998,
             width: 240, maxHeight: "calc(100vh - 40px)",
             display: "flex", flexDirection: "column", gap: 18,
             background: "#fff",
@@ -393,39 +448,89 @@
               </button>
             </div>
             <Group label="Device">
-              <RadioRow on={device === "desktop"} onClick={() => setDeviceManual("desktop")} icon="Monitor" label="Desktop" />
-              <RadioRow on={device === "mobile"}  onClick={() => setDeviceManual("mobile")}  icon="Smartphone" label="Mobile" />
+              {/* Tablet + Wide desktop are visual labels for now — the
+                  prototype renders all desktop-class widths through the
+                  same viewport="desktop" code path. Mobile uniquely
+                  triggers viewport="mobile" + 410-cap layout. */}
+              <RadioRow on={device === "mobile"}  onClick={() => setDeviceManual("mobile")}   icon="Smartphone" label="Mobile" />
+              <RadioRow on={device === "tablet"}  onClick={() => setDeviceManual("tablet")}   icon="Tablet"     label="Tablet" />
+              <RadioRow on={device === "desktop"} onClick={() => setDeviceManual("desktop")}  icon="Monitor"    label="Desktop" />
+              <RadioRow on={device === "wide"}    onClick={() => setDeviceManual("wide")}     icon="Tv"         label="Wide desktop" />
+            </Group>
+            <Group label="Mode">
+              {/* Brand/club theming is handled by the Club section
+                  below, so Mode collapses to the two true color modes:
+                  Light + Dark. Dark wiring is staged for the upcoming
+                  pickle-pixels dark token layer. */}
+              <RadioRow on={mode === "light"} onClick={() => setMode("light")} icon="Sun"  label="Light" />
+              <RadioRow on={mode === "dark"}  onClick={() => setMode("dark")}  icon="Moon" label="Dark" />
             </Group>
             <Group label="Session">
-              <RadioRow on={!loggedIn} onClick={() => setLoggedIn(false)} icon="LogIn" label="Logged out" />
               <RadioRow on={loggedIn}  onClick={() => setLoggedIn(true)}  icon="UserCheck" label="Logged in" />
+              <RadioRow on={!loggedIn} onClick={() => setLoggedIn(false)} icon="LogIn"     label="Logged out" />
             </Group>
             <Group label="Club">
-              <RadioRow on={app === "cr"} onClick={() => setApp("cr")} label="CourtReserve" />
-              <RadioRow on={app === "oc"} onClick={() => setApp("oc")} label="Old Coast" />
+              <RadioRow on={app === "cr"} onClick={() => setApp("cr")} label="CourtReserve (agnostic)" />
+              <RadioRow on={app === "oc"} onClick={() => setApp("oc")} label="Old Coast Pickleball" />
               <RadioRow on={app === "dd"} onClick={() => setApp("dd")} label="Dill Dinkers" />
             </Group>
-            <Group label="Area">
-              <RadioRow on={screen === "home" && !forceType} onClick={() => { setScreen("home"); setForceType(null); }} label="Home" />
-              <RadioRow on={(screen === "clubs" || screen === "club")} onClick={() => { setScreen("clubs"); setForceType(null); }} label="Club" />
-              <RadioRow on={!!forceType || screen === "events"} onClick={() => { setScreen("events"); setForceType(null); }} label="Event" />
-              <RadioRow on={screen === "reserve-court"} onClick={() => { setScreen("reserve-court"); setForceType(null); }} label="Reserve a court" />
-              <RadioRow on={screen === "profile"} onClick={() => { setScreen("profile"); setForceType(null); }} label="My profile" />
+            <Group label="Areas">
+              {/* Areas are nested. Each parent jumps to its default
+                  sub-view; the nested rows below pick a specific
+                  sub-view. Player profile / Coach profile route to
+                  the existing profile screen until dedicated routes
+                  exist. */}
+              <RadioRow
+                on={screen === "home" && !forceType}
+                onClick={() => { setScreen("home"); setForceType(null); }}
+                label="Home"
+              />
+              <RadioRow
+                on={(screen === "clubs" || screen === "club")}
+                onClick={() => { setScreen("clubs"); setForceType(null); }}
+                label="Club"
+              />
+              {(screen === "clubs" || screen === "club") && (
+                <React.Fragment>
+                  <NestedRow on={screen === "clubs"} onClick={() => { setScreen("clubs"); setForceType(null); }} label="List" />
+                  <NestedRow on={screen === "club"}  onClick={() => { setScreen("club");  setForceType(null); }} label="Detail" />
+                  {/* On the CourtReserve (brand-agnostic) surface,
+                      booking is a *public* booking experience — any
+                      visitor can land here and book without a club
+                      membership. Other branded clubs (Old Coast, Dill
+                      Dinkers) just say "Book" because the booking flow
+                      lives inside that club's context. */}
+                  <NestedRow on={screen === "reserve-court"} onClick={() => { setScreen("reserve-court"); setForceType(null); }} label={app === "cr" ? "Public booking" : "Book"} />
+                </React.Fragment>
+              )}
+              <RadioRow
+                on={!!forceType || screen === "events"}
+                onClick={() => { setScreen("events"); setForceType(null); }}
+                label="Event"
+              />
+              {(screen === "events" || !!forceType) && (
+                <React.Fragment>
+                  <NestedRow on={screen === "events" && !forceType} onClick={() => { setScreen("events"); setForceType(null); }} label="List" />
+                  <NestedRow on={!!forceType && forceType !== "register"} onClick={() => { setForceType(lastDetailType || "hybrid"); }} label="Detail" />
+                  <NestedRow on={forceType === "register"} onClick={() => { setForceType("register"); }} label="Book" />
+                </React.Fragment>
+              )}
+              <RadioRow
+                on={screen === "profile"}
+                onClick={() => { setScreen("profile"); setForceType(null); }}
+                label="Profile"
+              />
+              {screen === "profile" && (
+                <React.Fragment>
+                  <NestedRow on={true} onClick={() => { setScreen("profile"); }} label="Personal" />
+                  {/* Player profile (not you) + Coach profile don't
+                      have dedicated screens yet — fall through to the
+                      personal profile so the toggle is non-destructive. */}
+                  <NestedRow on={false} onClick={() => { setScreen("profile"); }} label="Player profile (not you)" />
+                  <NestedRow on={false} onClick={() => { setScreen("profile"); }} label="Coach profile" />
+                </React.Fragment>
+              )}
             </Group>
-            {(screen === "clubs" || screen === "club") && (
-              <Group label="Club view">
-                <RadioRow on={screen === "clubs"} onClick={() => setScreen("clubs")} label="List" />
-                <RadioRow on={screen === "club"}  onClick={() => setScreen("club")}  label="Detail" />
-                <RadioRow on={false} onClick={() => { setScreen("events"); }} label="Book" />
-              </Group>
-            )}
-            {(screen === "events" || !!forceType) && (
-              <Group label="Event view">
-                <RadioRow on={screen === "events" && !forceType} onClick={() => { setScreen("events"); setForceType(null); }} label="List" />
-                <RadioRow on={!!forceType && forceType !== "register"} onClick={() => { setForceType(lastDetailType || "hybrid"); }} label="Detail" />
-                <RadioRow on={forceType === "register"} onClick={() => { setForceType("register"); }} label="Book" />
-              </Group>
-            )}
           </div>
         )}
       </React.Fragment>
@@ -440,7 +545,7 @@
       // for consistency (portal lookups return whichever node mounts).
       <div style={{ background: "#F4F5F6", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
         <div style={{ display: "flex", justifyContent: "center" }}>
-          {device === "desktop" ? (
+          {device !== "mobile" ? (
             <div id="device-frame-inner" ref={deviceFrameRef} style={{
               // Fills the viewport edge-to-edge — `height: 100vh` (not
               // just minHeight) so the nested `flex: 1 overflowY: auto`
@@ -449,7 +554,8 @@
               // anchor to that inner scroller exactly like before, just
               // at viewport height instead of the legacy 1024px card.
               width: "100%", height: "100vh",
-              background: "#fff",
+              background: "var(--pp-bg-default)",
+              color: "var(--pp-fg-default)",
               overflowX: "hidden",
               position: "relative",
               display: "flex", flexDirection: "column",
@@ -465,7 +571,7 @@
                       ? <FindClubs viewport="desktop" theme={theme} app={app} setApp={setApp} onBack={() => setScreen("home")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} />
                       : (screen === "messages"
                           ? (
-                              <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                              <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                 {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} active="Messages" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                 <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 24px 64px" }}>
                                   {window.MessagesScreen && <window.MessagesScreen theme={theme} />}
@@ -476,7 +582,7 @@
                           ? <ClubDetail viewport="desktop" theme={theme} clubId={selectedClubId || app} loggedIn={loggedIn} onBack={() => setScreen("clubs")} onBookCourt={() => setScreen("events")} onBrowseEvents={() => setScreen("events")} />
                           : (screen === "profile"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 24px 80px" }}>
                                       {window.ProfilePage && <window.ProfilePage theme={theme} viewport="desktop" onBack={() => setScreen("home")} />}
@@ -485,42 +591,42 @@
                               )
                           : (screen === "equipment-locker"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.EquipmentLockerPage && <window.EquipmentLockerPage theme={theme} viewport="desktop" onBack={() => setScreen("profile")} />}
                                   </div>
                               )
                           : (screen === "equipment-add"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.EquipmentAddPage && <window.EquipmentAddPage theme={theme} viewport="desktop" onBack={() => setScreen("equipment-locker")} />}
                                   </div>
                               )
                           : (screen === "privacy-security"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.PrivacySecurityPage && <window.PrivacySecurityPage theme={theme} viewport="desktop" onBack={() => setScreen("profile")} />}
                                   </div>
                               )
                           : (screen === "profile-privacy"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.ProfilePrivacyPage && <window.ProfilePrivacyPage theme={theme} viewport="desktop" onBack={() => setScreen("privacy-security")} />}
                                   </div>
                               )
                           : (screen === "password"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.PasswordPage && <window.PasswordPage theme={theme} viewport="desktop" onBack={() => setScreen("privacy-security")} />}
                                   </div>
                               )
                           : (screen === "two-factor"
                               ? (
-                                  <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
+                                  <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
                                     {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     {window.TwoFactorPage && <window.TwoFactorPage theme={theme} viewport="desktop" onBack={() => setScreen("privacy-security")} />}
                                   </div>
@@ -549,7 +655,8 @@
             }}>
               <div id="device-frame-inner" style={{
                 width: "100%", height: "100%",
-                background: "#fff",
+                background: "var(--pp-bg-default)",
+                color: "var(--pp-fg-default)",
                 overflowX: "hidden",
                 position: "relative",
                 display: "flex", flexDirection: "column",

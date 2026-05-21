@@ -5,16 +5,16 @@ const { useState: useStateAP, useMemo: useMemoAP } = React;
 
 // ---- Themes ----
 const LIGHT_TOKENS = {
-  bg: "#fff",
-  surface: "#fff",
-  surfaceSoft: "#F4F5F6",
-  text: "#0F1214",
-  textMuted: "#4B5052",
-  textSubtle: "#858F8F",
-  textInverted: "#fff",
-  line: "#E9EBEC",
-  rule: "#0F1214",
-  chip: "#F4F5F6"
+  bg: "var(--pp-bg-default)",
+  surface: "var(--pp-bg-default)",
+  surfaceSoft: "var(--pp-bg-subtle)",
+  text: "var(--pp-fg-default)",
+  textMuted: "var(--pp-fg-muted)",
+  textSubtle: "var(--pp-fg-subtle)",
+  textInverted: "var(--pp-bg-default)",
+  line: "var(--pp-border-subtle)",
+  rule: "var(--pp-fg-default)",
+  chip: "var(--pp-bg-subtle)"
 };
 const DARK_TOKENS = {
   bg: "#0a0a0c",
@@ -23,7 +23,7 @@ const DARK_TOKENS = {
   text: "#f5f5f7",
   textMuted: "#a8adb5",
   textSubtle: "#71757d",
-  textInverted: "#0F1214",
+  textInverted: "var(--pp-fg-default)",
   line: "rgba(255,255,255,.08)",
   rule: "rgba(255,255,255,.45)",
   chip: "#14171b"
@@ -32,10 +32,10 @@ const THEMES = {
   cr: {
     id: "cr",
     name: "CourtReserve",
-    primary: "#0F1214",
+    primary: "var(--pp-fg-default)",
     accent: "#FFDA44",
-    surface: "#fff",
-    softTint: "#F4F5F6",
+    surface: "var(--pp-bg-default)",
+    softTint: "var(--pp-bg-subtle)",
     display: "Axiforma",
     logoMark: "▲",
     logoText: "All Locations",
@@ -49,7 +49,7 @@ const THEMES = {
     name: "Old Coast Pickleball",
     primary: "#2E5D52",
     accent: "#F2A93B",
-    surface: "#fff",
+    surface: "var(--pp-bg-default)",
     softTint: "#F1EFE9",
     display: "Axiforma",
     logoMark: "OC",
@@ -87,7 +87,7 @@ const PLAYER = {
   clubsPlayedAt: [
   { id: "oc", name: "Old Coast Pickleball", logoMark: "OC", color: "#2E5D52", miles: 2.1, sessions: 22, joined: true, tier: "Diamond", tierColor: "#2E5D52", courts: 8 },
   { id: "dd", name: "Dill Dinkers Jacksonville", logoMark: "DD", color: "#8E5BE8", miles: 8.4, sessions: 7, joined: true, tier: "Gold", tierColor: "#8E5BE8", courts: 14 },
-  { id: "sa", name: "South St. Augustine Tennis", logoMark: "SA", color: "#1F4ED8", miles: 3.6, sessions: 4, joined: false, tier: "Guest", tierColor: "#1F4ED8", courts: 6 }],
+  { id: "sa", name: "South St. Augustine Tennis", logoMark: "SA", color: "var(--pp-blue-600)", miles: 3.6, sessions: 4, joined: false, tier: "Guest", tierColor: "var(--pp-blue-600)", courts: 6 }],
 
   upNext: {
     name: "Thursday Round Robin · 3.0–3.5",
@@ -96,24 +96,24 @@ const PLAYER = {
   },
   network: [
   { id: "p1", name: "Mia Castellanos", avatar: "MC", color: "#D6573B", dupr: 4.3, club: "Old Coast", clubColor: "#2E5D52", reason: "4 wins together", proof: "Last played 3 days ago at Old Coast", action: "Rebook" },
-  { id: "p2", name: "Reese Tanaka", avatar: "RT", color: "#1F4ED8", dupr: 4.1, club: "Old Coast", clubColor: "#2E5D52", reason: "Same skill, same weeknights", proof: "You’d be a balanced doubles team for Apr 6 tournament", action: "Invite to tournament" },
-  { id: "p3", name: "Sam Becker", avatar: "SB", color: "#0F1214", dupr: 4.2, club: "Old Coast", clubColor: "#2E5D52", reason: "Plays Old Coast at your time", proof: "Mia recommends Sam — friend of a friend", action: "Send hello" },
+  { id: "p2", name: "Reese Tanaka", avatar: "RT", color: "var(--pp-blue-600)", dupr: 4.1, club: "Old Coast", clubColor: "#2E5D52", reason: "Same skill, same weeknights", proof: "You’d be a balanced doubles team for Apr 6 tournament", action: "Invite to tournament" },
+  { id: "p3", name: "Sam Becker", avatar: "SB", color: "var(--pp-fg-default)", dupr: 4.2, club: "Old Coast", clubColor: "#2E5D52", reason: "Plays Old Coast at your time", proof: "Mia recommends Sam — friend of a friend", action: "Send hello" },
   { id: "p4", name: "Priya Shah", avatar: "PS", color: "#8E5BE8", dupr: 4.4, club: "Dill Dinkers", clubColor: "#8E5BE8", reason: "Stretch partner — closes your gap to 4.4", proof: "Beat you 11-9 in last open play", action: "Challenge" }],
 
   recentMatches: [
   { id: "m1", result: "W", score: "11-7, 11-9", partner: "Mia C.", partnerInit: "MC", partnerColor: "#D6573B", oppA: "Tom B.", oppB: "Priya S.", oppAColor: "#C77700", oppBColor: "#8E5BE8", when: "3d ago", duprDelta: +0.08, club: "Old Coast", headline: "Closed it out 11-9", blurb: "Mia’s third-shot drops kept Tom out of the kitchen.", highlight: "Best dink rally: 23 shots", rated: false },
-  { id: "m2", result: "D", score: "11-9, 9-11", partner: "Reese T.", partnerInit: "RT", partnerColor: "#1F4ED8", oppA: "Sam B.", oppB: "Jane W.", oppAColor: "#0F1214", oppBColor: "#2E7D32", when: "5d ago", duprDelta: +0.01, club: "Old Coast", headline: "Split — couldn't break serve", blurb: "Time ran out at 1-1. Stayed within 2 points the whole night.", highlight: "First match with Reese", rated: true },
+  { id: "m2", result: "D", score: "11-9, 9-11", partner: "Reese T.", partnerInit: "RT", partnerColor: "var(--pp-blue-600)", oppA: "Sam B.", oppB: "Jane W.", oppAColor: "var(--pp-fg-default)", oppBColor: "var(--pp-green-700)", when: "5d ago", duprDelta: +0.01, club: "Old Coast", headline: "Split — couldn't break serve", blurb: "Time ran out at 1-1. Stayed within 2 points the whole night.", highlight: "First match with Reese", rated: true },
   { id: "m3", result: "L", score: "9-11, 11-7, 7-11", partner: "Mia C.", partnerInit: "MC", partnerColor: "#D6573B", oppA: "Priya S.", oppB: "Coach Reid", oppAColor: "#8E5BE8", oppBColor: "#2E5D52", when: "1w ago", duprDelta: -0.02, club: "Dill Dinkers", headline: "Tight 3-game battle", blurb: "Your serves stayed in 92% — the kind of game you learn from.", highlight: "Most rallies over 10 shots: 7", rated: false },
-  { id: "m4", result: "W", score: "11-3, 11-5", partner: "Sam B.", partnerInit: "SB", partnerColor: "#0F1214", oppA: "Ana R.", oppB: "Marcus L.", oppAColor: "#1F4ED8", oppBColor: "#8E5BE8", when: "9d ago", duprDelta: +0.12, club: "Old Coast", headline: "Cleanest win of the month", blurb: "Sam's volley game shut down the lobs. You held the line.", highlight: "Won 11 of last 12 points", rated: true, kind: "Tournament · Round 1" },
-  { id: "m5", result: "L", score: "10-12, 6-11", partner: "Solo", partnerInit: "JB", partnerColor: "#0F1214", oppA: "Coach Reid", oppAColor: "#2E5D52", when: "11d ago", duprDelta: -0.06, club: "Old Coast", headline: "Coaching session vs. Reid", blurb: "Lost the close one then ran out of gas. Backhand returns to drill.", highlight: "Singles practice match", rated: true, kind: "Singles" },
-  { id: "m6", result: "D", score: "8-11, 11-7", partner: "Mia C.", partnerInit: "MC", partnerColor: "#D6573B", oppA: "Priya S.", oppB: "Sam B.", oppAColor: "#8E5BE8", oppBColor: "#0F1214", when: "2w ago", duprDelta: +0.00, club: "Old Coast", headline: "Even at the buzzer", blurb: "Daylight ran out — you took game 2, they took game 1.", highlight: "First match together this season", rated: false },
-  { id: "m7", result: "W", score: "11-8, 11-6", partner: "Reese T.", partnerInit: "RT", partnerColor: "#1F4ED8", oppA: "Tom B.", oppB: "Mike A.", oppAColor: "#C77700", oppBColor: "#1F4ED8", when: "2w ago", duprDelta: +0.04, club: "Dill Dinkers", headline: "Locked in from point one", blurb: "Reese set, you closed. Cleanest doubles execution all month.", highlight: "Zero unforced errors in game 2", rated: true },
+  { id: "m4", result: "W", score: "11-3, 11-5", partner: "Sam B.", partnerInit: "SB", partnerColor: "var(--pp-fg-default)", oppA: "Ana R.", oppB: "Marcus L.", oppAColor: "var(--pp-blue-600)", oppBColor: "#8E5BE8", when: "9d ago", duprDelta: +0.12, club: "Old Coast", headline: "Cleanest win of the month", blurb: "Sam's volley game shut down the lobs. You held the line.", highlight: "Won 11 of last 12 points", rated: true, kind: "Tournament · Round 1" },
+  { id: "m5", result: "L", score: "10-12, 6-11", partner: "Solo", partnerInit: "JB", partnerColor: "var(--pp-fg-default)", oppA: "Coach Reid", oppAColor: "#2E5D52", when: "11d ago", duprDelta: -0.06, club: "Old Coast", headline: "Coaching session vs. Reid", blurb: "Lost the close one then ran out of gas. Backhand returns to drill.", highlight: "Singles practice match", rated: true, kind: "Singles" },
+  { id: "m6", result: "D", score: "8-11, 11-7", partner: "Mia C.", partnerInit: "MC", partnerColor: "#D6573B", oppA: "Priya S.", oppB: "Sam B.", oppAColor: "#8E5BE8", oppBColor: "var(--pp-fg-default)", when: "2w ago", duprDelta: +0.00, club: "Old Coast", headline: "Even at the buzzer", blurb: "Daylight ran out — you took game 2, they took game 1.", highlight: "First match together this season", rated: false },
+  { id: "m7", result: "W", score: "11-8, 11-6", partner: "Reese T.", partnerInit: "RT", partnerColor: "var(--pp-blue-600)", oppA: "Tom B.", oppB: "Mike A.", oppAColor: "#C77700", oppBColor: "var(--pp-blue-600)", when: "2w ago", duprDelta: +0.04, club: "Dill Dinkers", headline: "Locked in from point one", blurb: "Reese set, you closed. Cleanest doubles execution all month.", highlight: "Zero unforced errors in game 2", rated: true },
   { id: "m8", result: "L", score: "5-11, 8-11", partner: "Priya S.", partnerInit: "PS", partnerColor: "#8E5BE8", oppA: "Coach Reid", oppB: "Lena P.", oppAColor: "#2E5D52", oppBColor: "#D6573B", when: "3w ago", duprDelta: -0.09, club: "South St. Augustine", headline: "Outpaced by the pros", blurb: "Stretch match against higher-rated team. Lots to learn from the tape.", highlight: "Stretch match · +0.6 DUPR opponents", rated: true, kind: "Stretch" }],
 
   friendActivity: [
   { id: "a1", who: "Mia C.", avatar: "MC", color: "#D6573B", verb: "is on court at", what: "Open Play", where: "Court 2", club: "Old Coast", clubColor: "#2E5D52", when: "on court now", live: true, action: "Join" },
-  { id: "a2", who: "Reese T.", avatar: "RT", color: "#1F4ED8", verb: "registered for", what: "Spring Doubles Bracket", where: "Apr 6", club: "Old Coast", clubColor: "#2E5D52", when: "2h ago", action: "Team up" },
-  { id: "a3", who: "Sam B.", avatar: "SB", color: "#0F1214", verb: "hit a new DUPR", what: "4.3", where: "+0.15 this week", club: "Old Coast", clubColor: "#2E5D52", when: "yesterday", action: "Congratulate" },
+  { id: "a2", who: "Reese T.", avatar: "RT", color: "var(--pp-blue-600)", verb: "registered for", what: "Spring Doubles Bracket", where: "Apr 6", club: "Old Coast", clubColor: "#2E5D52", when: "2h ago", action: "Team up" },
+  { id: "a3", who: "Sam B.", avatar: "SB", color: "var(--pp-fg-default)", verb: "hit a new DUPR", what: "4.3", where: "+0.15 this week", club: "Old Coast", clubColor: "#2E5D52", when: "yesterday", action: "Congratulate" },
   { id: "a4", who: "Priya S.", avatar: "PS", color: "#8E5BE8", verb: "opened a slot for", what: "Wed 6 PM doubles", where: "Looking for a partner", club: "Dill Dinkers", clubColor: "#8E5BE8", when: "3h ago", action: "Offer to play" }],
 
   drills: [
@@ -140,7 +140,7 @@ function ExperienceSwitcher({ theme, app, setApp, compact = false }) {
   { id: "cr", name: "CourtReserve", tagline: "Universal experience",
     sub: "Across every club you play at",
     pitch: "Your player profile, DUPR, matches and growth — wherever you play.",
-    logoMark: "▲", color: "#0F1214", universal: true },
+    logoMark: "▲", color: "var(--pp-fg-default)", universal: true },
   { id: "oc", name: "Old Coast Pickleball", tagline: "Diamond member",
     sub: "Their courts, events & community",
     pitch: "Focused on the Old Coast experience — bookings, regulars and events.",
@@ -163,7 +163,7 @@ function ExperienceSwitcher({ theme, app, setApp, compact = false }) {
       }}>
         <span style={{
           width: compact ? 28 : 40, height: compact ? 28 : 40, borderRadius: compact ? 8 : 10,
-          background: current.color, color: "#fff",
+          background: current.color, color: "var(--pp-neutral-0)",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           fontFamily: theme.display, fontWeight: 800, fontSize: compact ? current.universal ? 13 : 10 : current.universal ? 18 : 13,
           flexShrink: 0
@@ -202,9 +202,9 @@ function ExperienceSwitcher({ theme, app, setApp, compact = false }) {
             onMouseLeave={(e) => {if (!on) e.currentTarget.style.background = "transparent";}}>
                 <span style={{
                 width: 40, height: 40, borderRadius: 8,
-                background: o.universal ? "#fff" : o.color,
-                color: "#fff",
-                border: o.universal ? "1px solid #E9EBEC" : 0,
+                background: o.universal ? "var(--pp-bg-default)" : o.color,
+                color: "var(--pp-bg-default)",
+                border: o.universal ? "1px solid var(--pp-border-subtle)" : 0,
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 fontFamily: theme.display, fontWeight: 800, fontSize: o.universal ? 18 : 13,
                 flexShrink: 0
@@ -268,15 +268,15 @@ function CRVerifiedMark({ size = 22 }) {
       {/* Outer green silhouette */}
       <g fill="#5BD16D">{buildSeal(11.2, 4.4)}</g>
       {/* Inset white silhouette — produces a ~1.6px green outline */}
-      <g fill="#fff">{buildSeal(9.6, 2.8)}</g>
+      <g fill="var(--pp-bg-default)">{buildSeal(9.6, 2.8)}</g>
       {/* Black check on top */}
-      <path d="M9.5 16.8 l 3.6 3.6 L 22.5 11.6" stroke="#0F1214" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M9.5 16.8 l 3.6 3.6 L 22.5 11.6" stroke="var(--pp-fg-default)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>);
 
 }
 
 function ClubSwitcher({ theme, app, setApp, onFindClubs }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const [open, setOpen] = useStateAP(false);
   const ref = React.useRef(null);
   React.useEffect(() => {
@@ -286,7 +286,7 @@ function ClubSwitcher({ theme, app, setApp, onFindClubs }) {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
   const options = [
-  { id: "cr", name: "All Locations", sub: "CourtReserve Verified", logoMark: "▲", color: "#0F1214", universal: true },
+  { id: "cr", name: "All Locations", sub: "CourtReserve Verified", logoMark: "▲", color: "var(--pp-fg-default)", universal: true },
   { id: "oc", name: "Old Coast Pickleball", sub: "Diamond member · 2.1 mi", logoMark: "OC", color: "#2E5D52" },
   { id: "dd", name: "Dill Dinkers Jacksonville", sub: "Gold member · 8.4 mi", logoMark: "DD", color: "#8E5BE8" }];
 
@@ -329,45 +329,45 @@ function ClubSwitcher({ theme, app, setApp, onFindClubs }) {
       {open &&
       <div style={{
         position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
-        width: 320, background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
+        width: 320, background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)", borderRadius: 8,
         boxShadow: "0 18px 50px rgba(15,18,20,.16), 0 2px 8px rgba(15,18,20,.06)",
         padding: 6
       }}>
-          <div style={{ padding: "8px 12px 6px", fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>Switch view</div>
+          <div style={{ padding: "8px 12px 6px", fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--pp-fg-muted)" }}>Switch view</div>
           {options.map((o) => {
           const on = app === o.id;
           return (
             <button key={o.id} onClick={() => {setApp(o.id);setOpen(false);}} style={{
               width: "100%", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 12, alignItems: "center",
               padding: "10px 12px", borderRadius: 8, border: 0,
-              background: on ? "#F4F5F6" : "transparent",
+              background: on ? "var(--pp-bg-subtle)" : "transparent",
               cursor: "pointer", fontFamily: "inherit", textAlign: "left"
             }}
             onMouseEnter={(e) => {if (!on) e.currentTarget.style.background = "#FAFAFA";}}
             onMouseLeave={(e) => {if (!on) e.currentTarget.style.background = "transparent";}}>
                 <span style={{
                 width: 36, height: 36, borderRadius: 8,
-                background: o.id === "cr" ? "#fff" : o.color,
-                color: "#fff",
-                border: o.id === "cr" ? "1px solid #E9EBEC" : 0,
+                background: o.id === "cr" ? "var(--pp-bg-default)" : o.color,
+                color: "var(--pp-bg-default)",
+                border: o.id === "cr" ? "1px solid var(--pp-border-subtle)" : 0,
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 fontFamily: theme.display, fontWeight: 800, fontSize: o.id === "cr" ? 16 : 12
               }}>{o.id === "cr" ? <CRVerifiedMark size={26} /> : o.logoMark}</span>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "#0F1214", letterSpacing: -0.1 }}>{o.name}</div>
-                  <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 1 }}>{o.sub}</div>
+                  <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "var(--pp-fg-default)", letterSpacing: -0.1 }}>{o.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--pp-fg-muted)", fontWeight: 500, marginTop: 1 }}>{o.sub}</div>
                 </div>
-                {on && <Icon name="Check" size={14} strokeWidth={2.5} color="#0F1214" />}
+                {on && <Icon name="Check" size={14} strokeWidth={2.5} color="var(--pp-fg-default)" />}
               </button>);
 
         })}
-          <div style={{ height: 1, background: "#F4F5F6", margin: "4px 0" }} />
+          <div style={{ height: 1, background: "var(--pp-bg-subtle)", margin: "4px 0" }} />
           <button onClick={() => {setOpen(false);onFindClubs && onFindClubs();}} style={{
           width: "100%", display: "flex", alignItems: "center", gap: 10,
           padding: "10px 12px", borderRadius: 8, border: 0, background: "transparent",
-          cursor: "pointer", fontFamily: "inherit", textAlign: "left", color: "#4B5052", fontSize: 12, fontWeight: 600
+          cursor: "pointer", fontFamily: "inherit", textAlign: "left", color: "var(--pp-fg-muted)", fontSize: 12, fontWeight: 600
         }}>
-            <Icon name="Search" size={14} strokeWidth={2} color="#4B5052" /> Find a location
+            <Icon name="Search" size={14} strokeWidth={2} color="var(--pp-fg-muted)" /> Find a location
           </button>
         </div>
       }
@@ -376,7 +376,7 @@ function ClubSwitcher({ theme, app, setApp, onFindClubs }) {
 }
 
 function ChromeBar({ theme, viewport, app, setApp, onOpenQR, onFindClubs, onOpenProfile, active = "Home", onNav }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const desktop = viewport === "desktop";
   const [profileOpen, setProfileOpen] = useStateAP(false);
   // ----- Logged-out branch -----
@@ -422,7 +422,7 @@ function ChromeBar({ theme, viewport, app, setApp, onOpenQR, onFindClubs, onOpen
               onClick={() => !disabled && onNav && onNav(l)} style={{
                 background: "transparent", border: 0, padding: "6px 0",
                 cursor: disabled ? "not-allowed" : "pointer",
-                color: on ? t.text : disabled ? "#BBBFC1" : t.textSubtle,
+                color: on ? t.text : disabled ? "var(--pp-fg-subtle)" : t.textSubtle,
                 fontFamily: "inherit", fontSize: 14, fontWeight: on ? 700 : 500,
                 position: "relative",
                 letterSpacing: -0.1,
@@ -456,7 +456,7 @@ function ChromeBar({ theme, viewport, app, setApp, onOpenQR, onFindClubs, onOpen
         </button>
         <div data-profile-trigger style={{ position: "relative" }}>
           <button onClick={() => setProfileOpen((o) => !o)} aria-label="Profile menu" aria-expanded={profileOpen} style={{
-            width: 32, height: 32, borderRadius: 999, background: theme.primary, color: "#fff",
+            width: 32, height: 32, borderRadius: 999, background: theme.primary, color: "var(--pp-neutral-0)",
             display: "inline-flex", alignItems: "center", justifyContent: "center",
             fontFamily: theme.display, fontWeight: 800, fontSize: 12,
             border: 0, padding: 0, cursor: "pointer",
@@ -500,7 +500,7 @@ function ChromeBar({ theme, viewport, app, setApp, onOpenQR, onFindClubs, onOpen
 // (rather than the scrollable dashboard root, which extends past the card's
 // clipped viewport).
 function MemberQRSheet({ theme, onClose }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const anchorRef = React.useRef(null);
   const [mount, setMount] = React.useState(null);
   // Pick the player's primary membership for the pass — match the active
@@ -586,7 +586,7 @@ function MemberQRSheet({ theme, onClose }) {
       {/* Card — centered modal with the check-in code as its hero. */}
       <div role="dialog" aria-label="Check-in code" style={{
       width: "100%", maxWidth: 420,
-      background: "#fff", color: t.text,
+      background: "var(--pp-bg-default)", color: t.text,
       borderRadius: 24,
       padding: "24px 24px 28px",
       boxShadow: "0 32px 80px rgba(15,18,20,.32), 0 8px 24px rgba(15,18,20,.18)",
@@ -613,7 +613,7 @@ function MemberQRSheet({ theme, onClose }) {
         padding: "8px 8px 12px"
       }}>
           <div style={{
-          background: "#fff", borderRadius: 16, padding: 12,
+          background: "var(--pp-bg-default)", borderRadius: 16, padding: 12,
           display: "inline-flex", alignItems: "center", justifyContent: "center"
         }}>
             <QrCodeArt size={300} />
@@ -678,15 +678,15 @@ function QrCodeArt({ size = 220 }) {
   const cell = size / N;
   const Finder = ({ x, y }) =>
   <g transform={`translate(${x * cell} ${y * cell})`}>
-      <rect width={cell * 7} height={cell * 7} fill="#0F1214" rx={cell * 0.6} />
-      <rect x={cell} y={cell} width={cell * 5} height={cell * 5} fill="#fff" rx={cell * 0.4} />
-      <rect x={cell * 2} y={cell * 2} width={cell * 3} height={cell * 3} fill="#0F1214" rx={cell * 0.3} />
+      <rect width={cell * 7} height={cell * 7} fill="var(--pp-fg-default)" rx={cell * 0.6} />
+      <rect x={cell} y={cell} width={cell * 5} height={cell * 5} fill="var(--pp-bg-default)" rx={cell * 0.4} />
+      <rect x={cell * 2} y={cell * 2} width={cell * 3} height={cell * 3} fill="var(--pp-fg-default)" rx={cell * 0.3} />
     </g>;
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Member QR code">
       {cells.map((row, y) => row.map((v, x) => v ?
-      <rect key={`${x}-${y}`} x={x * cell + cell * 0.1} y={y * cell + cell * 0.1} width={cell * 0.8} height={cell * 0.8} fill="#0F1214" rx={cell * 0.15} /> :
+      <rect key={`${x}-${y}`} x={x * cell + cell * 0.1} y={y * cell + cell * 0.1} width={cell * 0.8} height={cell * 0.8} fill="var(--pp-fg-default)" rx={cell * 0.15} /> :
       null))}
       <Finder x={0} y={0} />
       <Finder x={N - 7} y={0} />
@@ -698,7 +698,7 @@ function QrCodeArt({ size = 220 }) {
 
 // ---- Mobile hero carousel — desktop UpNextHero, multiplied & swipeable ----
 function MobileHeroCarousel({ theme, isCR }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const u = PLAYER.upNext;
   const slides = [
   {
@@ -707,7 +707,7 @@ function MobileHeroCarousel({ theme, isCR }) {
     meta: `${u.time} · ${u.court}`,
     footer: `with ${u.partner} · 14 more going`,
     cta: "Check in",
-    bg: isCR ? "#0F1214" : theme.primary,
+    bg: isCR ? "var(--pp-fg-default)" : theme.primary,
     accent: theme.accent
   },
   {
@@ -717,7 +717,7 @@ function MobileHeroCarousel({ theme, isCR }) {
     meta: "Court 2 · Old Coast · 2 spots left",
     footer: "Walk-in welcome until 7 PM",
     cta: "Join",
-    bg: "#0F1214",
+    bg: "var(--pp-fg-default)",
     accent: "#E11D2A"
   },
   {
@@ -748,7 +748,7 @@ function MobileHeroCarousel({ theme, isCR }) {
         {slides.map((s, i) =>
         <div key={i} style={{
           flex: "0 0 calc(100% - 36px)", scrollSnapAlign: "center",
-          background: s.bg, color: "#fff", borderRadius: 8,
+          background: s.bg, color: "var(--pp-bg-default)", borderRadius: 8,
           padding: "20px 22px 22px", minHeight: 192,
           display: "flex", flexDirection: "column", justifyContent: "space-between",
           position: "relative", overflow: "hidden"
@@ -759,7 +759,7 @@ function MobileHeroCarousel({ theme, isCR }) {
                 {s.live && <span style={{ width: 6, height: 6, borderRadius: 999, background: "#E11D2A", display: "inline-block" }} />}
                 {s.eyebrow}
               </div>
-              <h3 style={{ margin: 0, fontFamily: theme.display, fontWeight: 800, fontSize: 24, lineHeight: "26px", letterSpacing: -0.7, color: "#fff" }}>{s.title}</h3>
+              <h3 style={{ margin: 0, fontFamily: theme.display, fontWeight: 800, fontSize: 24, lineHeight: "26px", letterSpacing: -0.7, color: "var(--pp-bg-default)" }}>{s.title}</h3>
               <div style={{ marginTop: 8, fontSize: 12, color: "rgba(255,255,255,.7)", fontWeight: 500 }}>{s.meta}</div>
             </div>
             <div style={{ position: "relative", marginTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -777,7 +777,7 @@ function MobileHeroCarousel({ theme, isCR }) {
         {slides.map((_, i) =>
         <span key={i} style={{
           width: i === idx ? 18 : 6, height: 6, borderRadius: 8,
-          background: i === idx ? "#0F1214" : t.line, transition: "all 140ms"
+          background: i === idx ? "var(--pp-fg-default)" : t.line, transition: "all 140ms"
         }} />
         )}
       </div>
@@ -787,7 +787,7 @@ function MobileHeroCarousel({ theme, isCR }) {
 
 // ---- Mobile KPI strip — matches desktop's hairline grid, scaled down ----
 function MobileKPIStrip({ theme }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const kpis = [
   { k: PLAYER.dupr.toFixed(2), v: "DUPR", delta: `↑ +${PLAYER.duprDelta.toFixed(1)}` },
   { k: PLAYER.wl, v: "W / L", delta: "75% win" },
@@ -814,11 +814,11 @@ function MobileKPIStrip({ theme }) {
 function PlayerSlab({ theme }) {
   return (
     <div style={{
-      background: "#0F1214", color: "#fff", borderRadius: 8,
+      background: "var(--pp-fg-default)", color: "var(--pp-bg-default)", borderRadius: 8,
       padding: "20px 22px"
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 999, background: "#fff", color: "#0F1214", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 14, flexShrink: 0 }}>{PLAYER.avatar}</div>
+        <div style={{ width: 44, height: 44, borderRadius: 999, background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 14, flexShrink: 0 }}>{PLAYER.avatar}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 18, letterSpacing: -0.3 }}>{PLAYER.name}</div>
           <div style={{ fontSize: 12, color: "rgba(255,255,255,.6)", marginTop: 2 }}>Plays at {PLAYER.clubsPlayedAt.length} clubs · {PLAYER.clubsPlayedAt.filter((c) => c.joined).length} memberships</div>
@@ -844,7 +844,7 @@ function PlayerSlab({ theme }) {
 
 // ---- Primary tiles — minimal hairline rows, not chunky cards ----
 function PrimaryRows({ theme, isCR, onOpenEventList, onFindClubs, onBookCourt }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   // Match the desktop PrimaryActionGrid action set so mobile has the same 4
   // entry points. CR universal swaps "Open play" for "Find clubs near me"
   // since the player isn't tied to a single venue.
@@ -886,15 +886,15 @@ function PrimaryRows({ theme, isCR, onOpenEventList, onFindClubs, onBookCourt })
 
 function SectionHeader({ title, action, theme }) {
   return (
-    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", paddingTop: 36, paddingBottom: 14, borderBottom: "1px solid #0F1214" }}>
-      <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, letterSpacing: 1.2, textTransform: "uppercase", color: "#0F1214", margin: 0 }}>{title}</h2>
-      {action && <a href="#" style={{ fontSize: 12, color: "#4B5052", fontWeight: 600, textDecoration: "none" }}>{action} ›</a>}
+    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", paddingTop: 36, paddingBottom: 14, borderBottom: "1px solid var(--pp-fg-default)" }}>
+      <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--pp-fg-default)", margin: 0 }}>{title}</h2>
+      {action && <a href="#" style={{ fontSize: 12, color: "var(--pp-fg-muted)", fontWeight: 600, textDecoration: "none" }}>{action} ›</a>}
     </div>);
 
 }
 
 function ClubsRow({ theme, isCR, onOpenClub, items }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const list = items || PLAYER.clubsPlayedAt;
   return (
     <div>
@@ -905,13 +905,13 @@ function ClubsRow({ theme, isCR, onOpenClub, items }) {
         borderBottom: `1px solid ${t.line}`,
         cursor: "pointer", fontFamily: "inherit", textAlign: "left"
       }}>
-          <span style={{ width: 32, height: 32, borderRadius: 8, background: c.color, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11 }}>{c.logoMark}</span>
+          <span style={{ width: 32, height: 32, borderRadius: 8, background: c.color, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11 }}>{c.logoMark}</span>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: t.text, letterSpacing: -0.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
             <div style={{ fontSize: 11, color: t.textMuted, fontWeight: 500, marginTop: 2 }}>{c.miles} mi · {c.sessions} sessions · {c.courts} courts</div>
           </div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: c.joined ? c.tierColor : "#858F8F", letterSpacing: 0.3, textTransform: "uppercase" }}>{c.tier}</div>
-          <Icon name="ChevronRight" size={14} color="#858F8F" strokeWidth={2} />
+          <div style={{ fontSize: 11, fontWeight: 700, color: c.joined ? c.tierColor : "var(--pp-fg-subtle)", letterSpacing: 0.3, textTransform: "uppercase" }}>{c.tier}</div>
+          <Icon name="ChevronRight" size={14} color="var(--pp-fg-subtle)" strokeWidth={2} />
         </button>
       )}
     </div>);
@@ -920,7 +920,7 @@ function ClubsRow({ theme, isCR, onOpenClub, items }) {
 
 function DiscoverClubsRow({ theme }) {
   const nearby = [
-  { id: "wc", name: "Wrightsville Courts", logoMark: "WC", color: "#0F1214", miles: 2.4, courts: 6 },
+  { id: "wc", name: "Wrightsville Courts", logoMark: "WC", color: "var(--pp-fg-default)", miles: 2.4, courts: 6 },
   { id: "cv", name: "Cape Valley Club", logoMark: "CV", color: "#D6573B", miles: 5.1, courts: 4 }];
 
   return (
@@ -929,15 +929,15 @@ function DiscoverClubsRow({ theme }) {
       <button key={c.id} style={{
         width: "100%", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 14, alignItems: "center",
         padding: "16px 4px", background: "transparent", border: 0,
-        borderBottom: "1px solid #E9EBEC",
+        borderBottom: "1px solid var(--pp-border-subtle)",
         cursor: "pointer", fontFamily: "inherit", textAlign: "left"
       }}>
-          <span style={{ width: 32, height: 32, borderRadius: 8, background: c.color, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11 }}>{c.logoMark}</span>
+          <span style={{ width: 32, height: 32, borderRadius: 8, background: c.color, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11 }}>{c.logoMark}</span>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "#0F1214", letterSpacing: -0.2 }}>{c.name}</div>
-            <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 2 }}>{c.miles} mi · {c.courts} courts · <span style={{ color: "#2E7D32", fontWeight: 600 }}>Booking open</span></div>
+            <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>{c.name}</div>
+            <div style={{ fontSize: 11, color: "var(--pp-fg-muted)", fontWeight: 500, marginTop: 2 }}>{c.miles} mi · {c.courts} courts · <span style={{ color: "var(--pp-green-700)", fontWeight: 600 }}>Booking open</span></div>
           </div>
-          <Icon name="ChevronRight" size={14} color="#858F8F" strokeWidth={2} />
+          <Icon name="ChevronRight" size={14} color="var(--pp-fg-subtle)" strokeWidth={2} />
         </button>
       )}
     </div>);
@@ -965,17 +965,17 @@ function MobileForYouUpcoming({ theme }) {
 
 function ForYouRow({ theme }) {
   return (
-    <div style={{ padding: "18px 4px", borderBottom: "1px solid #E9EBEC", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 16, alignItems: "center" }}>
+    <div style={{ padding: "18px 4px", borderBottom: "1px solid var(--pp-border-subtle)", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 16, alignItems: "center" }}>
       <span style={{ width: 32, height: 32, borderRadius: 999, background: theme.softTint, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
         <Icon name="Sparkles" size={14} color={theme.primary} strokeWidth={2} />
       </span>
       <div>
-        <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>Your dink game is improving fast</div>
-        <div style={{ fontSize: 12, color: "#4B5052", fontWeight: 500, marginTop: 4, lineHeight: 1.45 }}>
+        <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>Your dink game is improving fast</div>
+        <div style={{ fontSize: 12, color: "var(--pp-fg-muted)", fontWeight: 500, marginTop: 4, lineHeight: 1.45 }}>
           Try the Intermediate Drilling session at Club Pickleball USA — targets exactly where you're growing.
         </div>
       </div>
-      <a href="#" style={{ fontSize: 12, color: "#0F1214", fontWeight: 600, textDecoration: "underline" }}>View</a>
+      <a href="#" style={{ fontSize: 12, color: "var(--pp-fg-default)", fontWeight: 600, textDecoration: "underline" }}>View</a>
     </div>);
 
 }
@@ -992,23 +992,23 @@ function MyUpcomingList({ theme }) {
       <button key={i} style={{
         width: "100%", display: "grid", gridTemplateColumns: "92px 1fr auto", gap: 16, alignItems: "center",
         padding: "18px 4px", background: "transparent", border: 0,
-        borderBottom: "1px solid #E9EBEC",
+        borderBottom: "1px solid var(--pp-border-subtle)",
         cursor: "pointer", fontFamily: "inherit", textAlign: "left"
       }}>
           <div>
-            <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "#0F1214", letterSpacing: -0.2 }}>{it.time.split(" · ")[0]}</div>
-            <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 2 }}>{it.time.split(" · ")[1]}</div>
+            <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>{it.time.split(" · ")[0]}</div>
+            <div style={{ fontSize: 11, color: "var(--pp-fg-muted)", fontWeight: 500, marginTop: 2 }}>{it.time.split(" · ")[1]}</div>
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>{it.title}</div>
+            <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>{it.title}</div>
             <div style={{ marginTop: 6 }}>
               <ClubTag club={it.club} color={it.clubColor} size="sm" variant="tag" />
             </div>
-            <div style={{ fontSize: 12, color: "#4B5052", fontWeight: 500, marginTop: 4 }}>
+            <div style={{ fontSize: 12, color: "var(--pp-fg-muted)", fontWeight: 500, marginTop: 4 }}>
               {it.meta}
             </div>
           </div>
-          <Icon name="ChevronRight" size={14} color="#858F8F" strokeWidth={2} />
+          <Icon name="ChevronRight" size={14} color="var(--pp-fg-subtle)" strokeWidth={2} />
         </button>
       )}
     </div>);
@@ -1021,7 +1021,7 @@ function MyUpcomingList({ theme }) {
 // message preview, last-activity date, unread badge). Group threads
 // stack two mini avatars in the same slot.
 function MessagesScreen({ theme }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const [query, setQuery] = useStateAP("");
   const [view, setView] = useStateAP("list"); // "list" | "compose" | "thread"
   const [activeThread, setActiveThread] = useStateAP(null);
@@ -1098,7 +1098,7 @@ function MessagesScreen({ theme }) {
     const avatar = isGroup ?
     contacts.slice(0, 2).map((c) => c.name[0]).join("").toUpperCase() :
     contacts[0].avatar;
-    const avatarColor = isGroup ? "#0F1214" : contacts[0].color;
+    const avatarColor = isGroup ? "var(--pp-fg-default)" : contacts[0].color;
     const thread = {
       id, who, avatar, avatarColor,
       preview: "", date: "Now", unread: 0,
@@ -1182,7 +1182,7 @@ function MessagesScreen({ theme }) {
                 <div style={{ width: 48, height: 48, position: "relative" }}>
                   <span style={{
                 width: 48, height: 48, borderRadius: 999,
-                background: th.avatarColor || "#0F1214", color: "#fff",
+                background: th.avatarColor || "var(--pp-fg-default)", color: "var(--pp-bg-default)",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 fontFamily: theme.display, fontWeight: 800, fontSize: 14
               }}>{th.avatar}</span>
@@ -1200,7 +1200,7 @@ function MessagesScreen({ theme }) {
                   {th.unread > 0 &&
               <span style={{
                 minWidth: 18, height: 18, padding: "0 6px",
-                borderRadius: 999, background: "#E11D2A", color: "#fff",
+                borderRadius: 999, background: "#E11D2A", color: "var(--pp-neutral-0)",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 fontFamily: theme.display, fontWeight: 800, fontSize: 10
               }}>{th.unread}</span>
@@ -1229,7 +1229,7 @@ function MessagesScreen({ theme }) {
 // → "Read at 2:14 PM". Newly sent messages simulate this progression with
 // timers; seeded messages render their final state immediately.
 function ConversationView({ theme, thread, onBack, onMessageSent, onUpdateMessage }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const [draft, setDraft] = useStateAP("");
   const scrollerRef = React.useRef(null);
   const messages = thread.messages || [];
@@ -1297,14 +1297,14 @@ function ConversationView({ theme, thread, onBack, onMessageSent, onUpdateMessag
         </button>
         <span style={{
           width: 40, height: 40, borderRadius: 999, flexShrink: 0,
-          background: thread.avatarColor || "#0F1214", color: "#fff",
+          background: thread.avatarColor || "var(--pp-fg-default)", color: "var(--pp-bg-default)",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           fontFamily: theme.display, fontWeight: 800, fontSize: 12
         }}>{thread.avatar}</span>
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 17, letterSpacing: -0.2, color: t.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{thread.who}</div>
           <div style={{ marginTop: 1, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: t.textSubtle, fontWeight: 500 }}>
-            <span style={{ width: 6, height: 6, borderRadius: 999, background: thread.online ? "#1F8A5B" : "#BBBFC1", flexShrink: 0 }} />
+            <span style={{ width: 6, height: 6, borderRadius: 999, background: thread.online ? "#1F8A5B" : "var(--pp-fg-subtle)", flexShrink: 0 }} />
             {thread.online ? "Online" : thread.lastSeen || "Offline"}
           </div>
         </div>
@@ -1342,7 +1342,7 @@ function ConversationView({ theme, thread, onBack, onMessageSent, onUpdateMessag
               {!me &&
               <span style={{
                 width: 28, height: 28, borderRadius: 999, flexShrink: 0,
-                background: thread.avatarColor || "#0F1214", color: "#fff",
+                background: thread.avatarColor || "var(--pp-fg-default)", color: "var(--pp-bg-default)",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 fontFamily: theme.display, fontWeight: 800, fontSize: 10,
                 // Hide the avatar for back-to-back messages from the same
@@ -1361,8 +1361,8 @@ function ConversationView({ theme, thread, onBack, onMessageSent, onUpdateMessag
                 }
                 <div style={{
                   padding: "12px 16px", borderRadius: 18,
-                  background: me ? "#0F1214" : t.surface,
-                  color: me ? "#fff" : t.text,
+                  background: me ? "var(--pp-fg-default)" : t.surface,
+                  color: me ? "var(--pp-bg-default)" : t.text,
                   border: me ? 0 : `1px solid ${t.line}`,
                   borderBottomRightRadius: me ? 6 : 18,
                   borderBottomLeftRadius: me ? 18 : 6,
@@ -1399,13 +1399,13 @@ function ConversationView({ theme, thread, onBack, onMessageSent, onUpdateMessag
         <button onClick={send} disabled={!canSend} aria-label="Send" style={{
           width: 40, height: 40, borderRadius: 999, border: 0,
           background: canSend ? theme.primary : t.surfaceSoft,
-          color: canSend ? "#fff" : t.textSubtle,
+          color: canSend ? "var(--pp-bg-default)" : t.textSubtle,
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           cursor: canSend ? "pointer" : "not-allowed",
           transition: "background 160ms, color 160ms",
           flexShrink: 0
         }}>
-          <Icon name="Send" size={16} color={canSend ? "#fff" : t.textSubtle} strokeWidth={2.2} />
+          <Icon name="Send" size={16} color={canSend ? "var(--pp-bg-default)" : t.textSubtle} strokeWidth={2.2} />
         </button>
       </div>
     </div>);
@@ -1418,7 +1418,7 @@ function ConversationView({ theme, thread, onBack, onMessageSent, onUpdateMessag
 // existing thread: typing happens in the bottom composer, sending appends
 // to the conversation with simulated Delivered / Read receipts.
 function ComposeMessage({ theme, onBack, onPicked }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const [recipientQuery, setRecipientQuery] = useStateAP("");
   const inputRef = React.useRef(null);
 
@@ -1496,7 +1496,7 @@ function ComposeMessage({ theme, onBack, onPicked }) {
           onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
                 <span style={{
               width: 40, height: 40, borderRadius: 999,
-              background: c.color || "#0F1214", color: "#fff",
+              background: c.color || "var(--pp-fg-default)", color: "var(--pp-neutral-0)",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               fontFamily: theme.display, fontWeight: 800, fontSize: 12
             }}>{c.avatar}</span>
@@ -1515,7 +1515,7 @@ function ComposeMessage({ theme, onBack, onPicked }) {
 }
 
 function MobileBottomNav({ theme, flow = false, active = "home", onChange }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const [sheetOpen, setSheetOpen] = useStateAP(false);
   // Five-slot nav: home / activity / add (called-out FAB) / messages / profile.
   // Icons only — no labels — to keep the bar lean and let the center action
@@ -1545,7 +1545,7 @@ function MobileBottomNav({ theme, flow = false, active = "home", onChange }) {
         style={{
           justifySelf: "center",
           width: 56, height: 56, borderRadius: 999,
-          background: theme.primary, color: "#fff",
+          background: theme.primary, color: "var(--pp-neutral-0)",
           border: 0, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           // Stronger lift shadow — sells the "raised" affordance against
@@ -1556,7 +1556,7 @@ function MobileBottomNav({ theme, flow = false, active = "home", onChange }) {
           transform: sheetOpen ? "translateY(-20px) rotate(45deg)" : "translateY(-20px)",
           transition: "transform 180ms cubic-bezier(.2,.8,.2,1)"
         }}>
-            <Icon name={item.icon} size={26} color="#fff" strokeWidth={2.6} />
+            <Icon name={item.icon} size={26} color="var(--pp-bg-default)" strokeWidth={2.6} />
           </button> :
 
         <button key={item.label} aria-label={item.label}
@@ -1567,9 +1567,9 @@ function MobileBottomNav({ theme, flow = false, active = "home", onChange }) {
           padding: "4px 0", position: "relative"
         }}>
             <span style={{ position: "relative", display: "inline-flex" }}>
-              <Icon name={item.icon} size={22} color={active === item.key ? theme.primary : "#858F8F"} strokeWidth={active === item.key ? 2.4 : 1.8} />
+              <Icon name={item.icon} size={22} color={active === item.key ? theme.primary : "var(--pp-fg-subtle)"} strokeWidth={active === item.key ? 2.4 : 1.8} />
               {item.badge &&
-            <span style={{ position: "absolute", top: -4, right: -8, minWidth: 16, height: 16, padding: "0 4px", borderRadius: 8, background: "#E11D2A", color: "#fff", fontSize: 9, fontWeight: 800, fontFamily: theme.display, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{item.badge}</span>
+            <span style={{ position: "absolute", top: -4, right: -8, minWidth: 16, height: 16, padding: "0 4px", borderRadius: 8, background: "#E11D2A", color: "var(--pp-neutral-0)", fontSize: 9, fontWeight: 800, fontFamily: theme.display, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{item.badge}</span>
             }
             </span>
           </button>
@@ -1584,7 +1584,7 @@ function MobileBottomNav({ theme, flow = false, active = "home", onChange }) {
 // is tapped. Anchored to the bottom of the dashboard root (the nav's parent
 // is position:relative), so the scrim covers the artboard, not the whole page.
 function MobileAddSheet({ theme, onClose }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   React.useEffect(() => {
     const onKey = (e) => {if (e.key === "Escape") onClose();};
     window.addEventListener("keydown", onKey);
@@ -1664,7 +1664,7 @@ function MobileAddSheet({ theme, onClose }) {
 // the PrimaryRows block so the 3 main actions stay reachable. Sits above
 // the absolute-positioned MobileBottomNav. Fades in/slides up on activation.
 function MobilePrimaryFloater({ theme, visible, onOpenEventList, onFindClubs, onBookCourt, isCR }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   // 4 actions matching PrimaryRows + the desktop PrimaryActionGrid. First is
   // brand-primary; the rest are quiet icon-only-ish pills sized small so the
   // floater stays narrow enough for the phone frame.
@@ -1706,13 +1706,13 @@ function MobilePrimaryFloater({ theme, visible, onOpenEventList, onFindClubs, on
       <button key={it.label} aria-label={it.aria} onClick={it.onClick} style={{
         flex: it.primary ? 1.3 : 1, height: 40, padding: "0 10px", borderRadius: 999,
         border: 0,
-        background: it.primary ? "#fff" : "transparent",
-        color: it.primary ? isCR ? "#0F1214" : theme.primary : "#fff",
+        background: it.primary ? "var(--pp-bg-default)" : "transparent",
+        color: it.primary ? isCR ? "var(--pp-fg-default)" : theme.primary : "var(--pp-bg-default)",
         fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer",
         display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5,
         whiteSpace: "nowrap", minWidth: 0
       }}>
-          <Icon name={it.icon} size={13} color={it.primary ? isCR ? "#0F1214" : theme.primary : "#fff"} strokeWidth={2.2} />
+          <Icon name={it.icon} size={13} color={it.primary ? isCR ? "var(--pp-fg-default)" : theme.primary : "var(--pp-bg-default)"} strokeWidth={2.2} />
           {it.label}
         </button>
       )}
@@ -1768,8 +1768,8 @@ function Dashboard({ theme, viewport, onOpenEventList, onOpenClub, onFindClubs, 
 
   return (
     <div data-dark={theme.dark ? "true" : undefined} style={{
-      background: theme.t.bg, fontFamily: "Inter, system-ui, sans-serif",
-      color: theme.t.text,
+      background: "var(--pp-bg-default)", fontFamily: "Inter, system-ui, sans-serif",
+      color: "var(--pp-fg-default)",
       // Lock the dashboard to the artboard's viewport so the bottom nav
       // and primary floater can pin to the bottom edge instead of sitting
       // at the end of the scrolling content. Content scrolls inside the
@@ -1980,7 +1980,7 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
       // Gradient on mobile so the page content visibly fades into the
       // sticky action shelf instead of cutting at a hard edge.
       background: isMobile
-        ? "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 35%, #FFFFFF 100%)"
+        ? "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 35%, var(--pp-bg-default) 100%)"
         : "transparent",
       transform: shown ? "translateY(0)" : "translateY(28px)",
       opacity: shown ? 1 : 0,
@@ -1990,18 +1990,20 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
         ref={trackRef}
         onMouseLeave={() => setHovered(null)}
         style={{
-          // Track tokens per updated Figma spec (node 8059-57685):
-          // bg #0B0E0E (system/bg/neutrals/card on dark),
-          // pad 4 + gap 4 (compact, was 8/8),
-          // fully rounded, elevation/500 drop shadow.
+          // Track tokens — bg uses --pp-bg-inverse so the bar flips
+          // automatically between modes: dark track in light mode,
+          // light track in dark mode (the active pill, text, and
+          // inactive text all flip together via the alias layer
+          // below, keeping contrast pairs intact in both themes).
+          // Padding 4 + gap 4 (compact), fully rounded, elevation/500.
           pointerEvents: "auto",
           position: "relative",
           display: isMobile ? "flex" : "inline-flex",
           width: isMobile ? "100%" : "auto",
           alignItems: "center",
           gap: 4,
-          background: "#0B0E0E",
-          color: "#EDF3F3",
+          background: "var(--pp-bg-inverse)",
+          color: "var(--pp-bg-muted)",
           padding: 4, borderRadius: 999,
           boxShadow: "0 16px 16px rgba(0,0,0,.16)",
         }}
@@ -2018,7 +2020,7 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
             left: 0,
             width: pillRect.width,
             transform: `translateX(${pillRect.left}px)`,
-            background: "#FFFFFF",
+            background: "var(--pp-bg-default)",
             borderRadius: 999,
             boxShadow: "0 2px 4px rgba(0,0,0,.08)",
             transition: "transform 280ms cubic-bezier(.2,.8,.2,1), width 280ms cubic-bezier(.2,.8,.2,1)",
@@ -2048,7 +2050,14 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
                 padding: isMobile ? "10px 8px" : "12px 16px",
                 borderRadius: 999, border: 0,
                 background: "transparent",
-                color: isActive ? "#191D1F" : "#EDF3F3",
+                // Active text on the white-in-light/dark-in-dark pill:
+                //   --pp-bg-inverse is dark in light mode, white in
+                //   dark mode — the perfect contrast against the pill.
+                // Inactive text on the dark-in-light/light-in-dark
+                // track: --pp-bg-muted is mid-grey that flips with
+                // theme (light grey on dark, dark grey on light),
+                // giving us a readable secondary in both modes.
+                color: isActive ? "var(--pp-bg-inverse)" : "var(--pp-bg-muted)",
                 fontFamily: "inherit",
                 fontWeight: 500,
                 fontSize: isMobile ? 13 : 16,
@@ -2067,7 +2076,7 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
                   fit comfortably across the 4-item row. Per the updated
                   Figma spec the icon is 24px (was 20). */}
               {!isMobile && (
-                <Icon name={it.icon} size={24} color={isActive ? "#191D1F" : "#EDF3F3"} strokeWidth={1.75} />
+                <Icon name={it.icon} size={24} color={isActive ? "var(--pp-bg-inverse)" : "var(--pp-bg-muted)"} strokeWidth={1.75} />
               )}
               {/* Desktop uses the long label per Figma spec ("Book a
                   Court" not "Book Court"); mobile keeps the short label
@@ -2128,7 +2137,7 @@ const TRENDING_PILL = {
   limited: { bg: "#FEE2E2", fg: "#B91C1C" },
   dupr:    { bg: "#DBEAFE", fg: "#1E3A8A" },
   filling: { bg: "#FEF3C7", fg: "#92400E" },
-  open:    { bg: "#F4F5F6", fg: "#0F1214" },
+  open:    { bg: "var(--pp-bg-subtle)", fg: "var(--pp-fg-default)" },
 };
 
 // ---- Verified popular clubs near you — horizontal carousel of map-image
@@ -2173,7 +2182,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
             background. Hover lifts to surfaceSoft for clear feedback. */}
         <div style={{ display: "inline-flex", alignItems: "center" }}>
           <button onClick={() => scrollBy(-340)} aria-label="Previous"
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             style={{
               padding: 10, borderRadius: 8, border: 0,
@@ -2181,10 +2190,10 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               transition: "background 120ms ease",
             }}>
-            <Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />
+            <Icon name="ChevronLeft" size={16} strokeWidth={2} color="var(--pp-fg-default)" />
           </button>
           <button onClick={() => scrollBy(340)} aria-label="Next"
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             style={{
               padding: 10, borderRadius: 8, border: 0,
@@ -2192,7 +2201,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               transition: "background 120ms ease",
             }}>
-            <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
+            <Icon name="ChevronRight" size={16} strokeWidth={2} color="var(--pp-fg-default)" />
           </button>
         </div>
       </div>
@@ -2250,9 +2259,9 @@ const POPULAR_EVENTS_DEFAULT = [
   { id: "e1", logoMark: "OC", logoBg: "#2E5D52", logoFg: "#F2A93B", logoLine1: "OLD COAST",  logoLine2: "PICKLEBALL", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", date: "Wed, May 13", duration: "6:00 PM – 7:00 PM",  spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 DUPR", "Men's Only", "Ages 12-15"] },
   { id: "e2", logoMark: "VB", logoBg: "#7C3AED", logoFg: "#FBBF24", logoLine1: "VILANO",     logoLine2: "BEACH",      title: "Saturday Morning Doubles League",          club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", date: "Sat, May 16", duration: "8:00 AM – 10:00 AM", spotsLeft: 4, totalSpots: 24, taken: 20, price: "$25",       tags: ["3.5 - 4.0 DUPR", "Mixed", "League"] },
   { id: "e3", logoMark: "DD", logoBg: "#8E5BE8", logoFg: "#FFD166", logoLine1: "DILL",       logoLine2: "DINKERS",    title: "Beginner-Friendly Open Play",              club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", date: "Thu, May 14", duration: "5:30 PM – 7:00 PM", spotsLeft: 6, totalSpots: 12, taken: 6,  price: "$10",       tags: ["2.5 - 3.0 DUPR", "All Ages", "Open Play"] },
-  { id: "e4", logoMark: "AT", logoBg: "#1F4ED8", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "Singles Ladder Match Night",               club: "Anastasia Tennis Club",     city: "St. Augustine, FL", distance: "2.4 mi", date: "Tue, May 12", duration: "6:30 PM – 9:00 PM", spotsLeft: 3, totalSpots: 8,  taken: 5,  price: "$20",       tags: ["4.0+ DUPR", "Singles", "Ladder"] },
-  { id: "e5", logoMark: "TP", logoBg: "#0F1214", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Kids Pickleball Clinic",                   club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:00 AM", spotsLeft: 5, totalSpots: 10, taken: 5,  price: "Free",      tags: ["Ages 8-12", "Coach-led", "Free"] },
-  { id: "e6", logoMark: "HP", logoBg: "#D6573B", logoFg: "#FFFFFF", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Drop-In Round Robin",                club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Fri, May 15", duration: "7:00 PM – 9:00 PM", spotsLeft: 2, totalSpots: 8,  taken: 6,  price: "$30",       tags: ["3.0 - 4.0 DUPR", "Doubles", "Drop-In"] },
+  { id: "e4", logoMark: "AT", logoBg: "var(--pp-blue-600)", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "Singles Ladder Match Night",               club: "Anastasia Tennis Club",     city: "St. Augustine, FL", distance: "2.4 mi", date: "Tue, May 12", duration: "6:30 PM – 9:00 PM", spotsLeft: 3, totalSpots: 8,  taken: 5,  price: "$20",       tags: ["4.0+ DUPR", "Singles", "Ladder"] },
+  { id: "e5", logoMark: "TP", logoBg: "var(--pp-fg-default)", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Kids Pickleball Clinic",                   club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:00 AM", spotsLeft: 5, totalSpots: 10, taken: 5,  price: "Free",      tags: ["Ages 8-12", "Coach-led", "Free"] },
+  { id: "e6", logoMark: "HP", logoBg: "#D6573B", logoFg: "var(--pp-bg-default)", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Drop-In Round Robin",                club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Fri, May 15", duration: "7:00 PM – 9:00 PM", spotsLeft: 2, totalSpots: 8,  taken: 6,  price: "$30",       tags: ["3.0 - 4.0 DUPR", "Doubles", "Drop-In"] },
 ];
 
 // Beginner-focused carousel data — low DUPR ranges (≤3.0), "All Levels"
@@ -2262,11 +2271,11 @@ const POPULAR_EVENTS_DEFAULT = [
 // urgency — beginners shouldn't see scarcity-heavy framing.
 const BEGINNER_EVENTS_DEFAULT = [
   { id: "b1", logoMark: "OC", logoBg: "#2E5D52", logoFg: "#F2A93B", logoLine1: "OLD COAST",  logoLine2: "PICKLEBALL", title: "Intro to Pickleball — 60-Minute Clinic",   club: "Old Coast Pickleball",      city: "St. Augustine, FL",  distance: "2.1 mi", date: "Sun, May 17", duration: "9:00 AM – 10:00 AM",  spotsLeft: 8,  totalSpots: 12, taken: 4,  price: "$15",  tags: ["2.0 - 2.5 DUPR", "Beginner", "Coach-led"] },
-  { id: "b2", logoMark: "TP", logoBg: "#0F1214", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Beginner Bootcamp — Skills + Match Play", club: "Treaty Park Tennis",        city: "St. Augustine, FL",  distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:30 AM", spotsLeft: 6,  totalSpots: 10, taken: 4,  price: "$25",  tags: ["2.5 - 3.0 DUPR", "Beginner", "Doubles"] },
+  { id: "b2", logoMark: "TP", logoBg: "var(--pp-fg-default)", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Beginner Bootcamp — Skills + Match Play", club: "Treaty Park Tennis",        city: "St. Augustine, FL",  distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:30 AM", spotsLeft: 6,  totalSpots: 10, taken: 4,  price: "$25",  tags: ["2.5 - 3.0 DUPR", "Beginner", "Doubles"] },
   { id: "b3", logoMark: "DD", logoBg: "#8E5BE8", logoFg: "#FFD166", logoLine1: "DILL",       logoLine2: "DINKERS",    title: "Newcomer Open Play — All Welcome",         club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",   distance: "8.4 mi", date: "Thu, May 14", duration: "5:30 PM – 7:00 PM",  spotsLeft: 10, totalSpots: 16, taken: 6,  price: "$10",  tags: ["All Levels", "Open Play", "Casual"] },
   { id: "b4", logoMark: "VB", logoBg: "#7C3AED", logoFg: "#FBBF24", logoLine1: "VILANO",     logoLine2: "BEACH",      title: "Tennis 101 — Rules, Grip & Rally",         club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",   distance: "2.6 mi", date: "Mon, May 18", duration: "6:00 PM – 7:30 PM",  spotsLeft: 7,  totalSpots: 8,  taken: 1,  price: "$30",  tags: ["Beginner", "Coach-led", "Adult"] },
-  { id: "b5", logoMark: "HP", logoBg: "#D6573B", logoFg: "#FFFFFF", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Intro — Try the Sport for $5",       club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Wed, May 13", duration: "7:00 PM – 8:00 PM",  spotsLeft: 9,  totalSpots: 12, taken: 3,  price: "$5",   tags: ["Beginner", "Drop-In", "Free Loaner Gear"] },
-  { id: "b6", logoMark: "AT", logoBg: "#1F4ED8", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "First Serve — New Player Social",          club: "Anastasia Tennis Club",     city: "St. Augustine, FL",  distance: "2.4 mi", date: "Fri, May 15", duration: "5:00 PM – 6:30 PM",  spotsLeft: 8,  totalSpots: 10, taken: 2,  price: "Free", tags: ["2.0 - 2.5 DUPR", "Social", "All Ages"] },
+  { id: "b5", logoMark: "HP", logoBg: "#D6573B", logoFg: "var(--pp-bg-default)", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Intro — Try the Sport for $5",       club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Wed, May 13", duration: "7:00 PM – 8:00 PM",  spotsLeft: 9,  totalSpots: 12, taken: 3,  price: "$5",   tags: ["Beginner", "Drop-In", "Free Loaner Gear"] },
+  { id: "b6", logoMark: "AT", logoBg: "var(--pp-blue-600)", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "First Serve — New Player Social",          club: "Anastasia Tennis Club",     city: "St. Augustine, FL",  distance: "2.4 mi", date: "Fri, May 15", duration: "5:00 PM – 6:30 PM",  spotsLeft: 8,  totalSpots: 10, taken: 2,  price: "Free", tags: ["2.0 - 2.5 DUPR", "Social", "All Ages"] },
 ];
 
 function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false, viewport = "desktop", events = POPULAR_EVENTS_DEFAULT }) {
@@ -2313,9 +2322,9 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
           {showLocationFilter && (
             <button style={{
               height: 40, padding: "0 14px", borderRadius: 8,
-              border: "1px solid #E9EBEC", background: "#fff",
+              border: "1px solid var(--pp-border-subtle)", background: "var(--pp-bg-default)",
               display: "inline-flex", alignItems: "center", gap: 8,
-              fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: "#0F1214",
+              fontFamily: "inherit", fontSize: 13, fontWeight: 500, color: "var(--pp-fg-default)",
               cursor: "pointer"
             }}>
               <Icon name="Navigation" size={13} strokeWidth={2.2} color="#5B7CFA" />
@@ -2325,7 +2334,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
           {/* Ghost icon-only nav buttons — matches the section-title
               layout from Figma spec (node 8057-51707). */}
           <button onClick={() => scrollBy(-340)} aria-label="Previous"
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             style={{
               padding: 10, borderRadius: 8, border: 0,
@@ -2333,10 +2342,10 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               transition: "background 120ms ease",
             }}>
-            <Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />
+            <Icon name="ChevronLeft" size={16} strokeWidth={2} color="var(--pp-fg-default)" />
           </button>
           <button onClick={() => scrollBy(340)} aria-label="Next"
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             style={{
               padding: 10, borderRadius: 8, border: 0,
@@ -2344,7 +2353,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               transition: "background 120ms ease",
             }}>
-            <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
+            <Icon name="ChevronRight" size={16} strokeWidth={2} color="var(--pp-fg-default)" />
           </button>
         </div>
       </div>
@@ -2363,7 +2372,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             data-card-hover
             style={{
               flex: "0 0 320px", scrollSnapAlign: "start",
-              background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
+              background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)", borderRadius: 8,
               overflow: "hidden",
               display: "flex", flexDirection: "column",
               transition: "box-shadow 160ms, transform 160ms",
@@ -2382,7 +2391,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                 vibrant red "X Spots Left" capsule when scarce; for the
                 other variants (DUPR Rated / Filling Fast / Open Spots)
                 it falls back to a neutral chip. */}
-            <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 12, borderBottom: "1px solid #E9EBEC" }}>
+            <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 12, borderBottom: "1px solid var(--pp-border-subtle)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                   <div style={{
@@ -2411,8 +2420,8 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                     <span data-tag={isLimited ? "warning" : "default"} style={{
                       padding: "2px 6px",
                       borderRadius: 9999,
-                      background: isLimited ? "#F7ECEB" : "#EDF3F3",
-                      color: isLimited ? "#860606" : "#161919",
+                      background: isLimited ? "var(--pp-bg-tint-error)" : "var(--pp-bg-muted)",
+                      color: isLimited ? "var(--pp-fg-error)" : "#161919",
                       fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
                       fontWeight: 400,
                       display: "inline-flex", alignItems: "center",
@@ -2427,16 +2436,16 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                 <div style={{
                   fontFamily: theme.display, fontWeight: 700,
                   fontSize: 20, lineHeight: "28px", letterSpacing: 0,
-                  color: "#0F1214",
+                  color: "var(--pp-fg-default)",
                 }}>
                   {ev.title}
                 </div>
                 {/* Club row — Buildings icon + club name. */}
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                   <span style={{ display: "inline-flex", marginTop: 0, flexShrink: 0 }}>
-                    <Icon name="Building2" size={16} strokeWidth={1.75} color="#4B5052" />
+                    <Icon name="Building2" size={16} strokeWidth={1.75} color="var(--pp-fg-muted)" />
                   </span>
-                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "var(--pp-fg-muted)" }}>
                     {ev.club}
                   </span>
                 </div>
@@ -2446,18 +2455,18 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                     distance — Figma reference reads location-then-distance. */}
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                   <span style={{ display: "inline-flex", marginTop: 0, flexShrink: 0 }}>
-                    <Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />
+                    <Icon name="MapPin" size={16} strokeWidth={1.75} color="var(--pp-fg-muted)" />
                   </span>
-                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "var(--pp-fg-muted)" }}>
                     {ev.city} • {ev.distance} away
                   </span>
                 </div>
                 {/* Time row — Clock + "Wed, 4/29 • 6:00 PM - 7:00 PM". */}
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                   <span style={{ display: "inline-flex", marginTop: 0, flexShrink: 0 }}>
-                    <Icon name="Clock" size={16} strokeWidth={1.75} color="#4B5052" />
+                    <Icon name="Clock" size={16} strokeWidth={1.75} color="var(--pp-fg-muted)" />
                   </span>
-                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "var(--pp-fg-muted)" }}>
                     {ev.date} • {ev.duration}
                   </span>
                 </div>
@@ -2468,7 +2477,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                 {ev.tags.map((tag, i) => (
                   <span key={i} data-tag="default" style={{
                     padding: "2px 6px", borderRadius: 9999,
-                    background: "#EDF3F3", color: "#161919",
+                    background: "var(--pp-bg-muted)", color: "var(--pp-fg-default)",
                     fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
                     fontWeight: 400,
                     display: "inline-flex", alignItems: "center",
@@ -2484,7 +2493,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             <div style={{
               marginTop: "auto",
               padding: 12,
-              background: "#F4F5F6",
+              background: "var(--pp-bg-subtle)",
               display: "flex", alignItems: "center", justifyContent: "space-between",
               gap: 12,
             }}>
@@ -2492,24 +2501,24 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                 <div style={{
                   fontFamily: theme.display, fontWeight: 700,
                   fontSize: 20, lineHeight: "28px", letterSpacing: 0,
-                  color: "#0F1214",
+                  color: "var(--pp-fg-default)",
                 }}>{ev.price}</div>
                 <div style={{
                   marginTop: 2,
                   fontSize: 10, lineHeight: "12px", letterSpacing: 0.8,
                   textTransform: "uppercase",
-                  fontWeight: 400, color: "#4B5052",
+                  fontWeight: 400, color: "var(--pp-fg-muted)",
                 }}>
                   {ev.taken} of {ev.totalSpots} spots Left
                 </div>
               </div>
               <button onClick={() => onOpenEvent && onOpenEvent(ev.id)} aria-label="Open event" style={{
                 width: 40, height: 40, borderRadius: 8,
-                background: "#222424", color: "#fff", border: 0, cursor: "pointer",
+                background: "var(--pp-bg-inverse)", color: "var(--pp-bg-default)", border: 0, cursor: "pointer",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 boxShadow: "0 2px 4px rgba(0,0,0,.08)",
               }}>
-                <Icon name="ArrowRight" size={20} strokeWidth={1.75} color="#fff" />
+                <Icon name="ArrowRight" size={20} strokeWidth={1.75} color="var(--pp-bg-default)" />
               </button>
             </div>
           </div>
@@ -2584,7 +2593,7 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
           stays pulled. */}
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
-          {isMobile ? "More Events" : "More events near you"}
+          {isMobile ? "Advanced players" : "Events for advanced players"}
         </h2>
       </div>
       {groups.map((g, gi) => (
@@ -2607,16 +2616,16 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
             display: "flex", alignItems: "center", gap: 12,
             padding: "12px 24px",
             borderBottom: "1px solid #BBBFC1",
-            background: "#FFFFFF",
+            background: "var(--pp-bg-default)",
           }}>
             <span style={{
               fontFamily: "Inter, system-ui, sans-serif",
               fontWeight: 600, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
-              color: "#0F1214",
+              color: "var(--pp-fg-default)",
             }}>{g.label}</span>
             <span style={{
               minWidth: 16, height: 16, padding: "0 2px", borderRadius: 4,
-              background: "#222424", color: "#FFFFFF",
+              background: "var(--pp-bg-inverse)", color: "var(--pp-bg-default)",
               fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
               fontWeight: 500,
               display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -2638,20 +2647,20 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
       }}>
         <button style={{
           height: 40, padding: "0 18px", borderRadius: 8,
-          border: "1px solid #E9EBEC", background: "#fff",
+          border: "1px solid var(--pp-border-subtle)", background: "var(--pp-bg-default)",
           display: "inline-flex", alignItems: "center",
           justifyContent: "center", gap: 8,
-          fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: "#0F1214",
+          fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: "var(--pp-fg-default)",
           cursor: "pointer",
           transition: "background 120ms",
           // Mobile: bar stretches to the row width so it reads as the
           // section terminator. Desktop keeps its content-hugged pill.
           width: isMobile ? "100%" : "auto",
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "#fff"; }}>
+        onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "var(--pp-bg-default)"; }}>
           Show more
-          <Icon name="ChevronDown" size={14} strokeWidth={2} color="#0F1214" />
+          <Icon name="ChevronDown" size={14} strokeWidth={2} color="var(--pp-fg-default)" />
         </button>
       </div>
     </div>
@@ -2680,16 +2689,16 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         style={{
           display: "flex", flexDirection: "column", gap: 6,
           padding: "16px 0",
-          borderTop: first ? "1px solid #E9EBEC" : "1px solid #F4F5F6",
+          borderTop: first ? "1px solid var(--pp-border-subtle)" : "1px solid var(--pp-border-subtle)",
           cursor: "pointer",
         }}
       >
-        <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214", letterSpacing: -0.2, lineHeight: 1.25 }}>
+        <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "var(--pp-fg-default)", letterSpacing: -0.2, lineHeight: 1.25 }}>
           {r.title}
         </div>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <Avatars />
-          <span style={{ fontSize: 13, color: "#4B5052", fontWeight: 600 }}>+{r.attending} attending</span>
+          <span style={{ fontSize: 13, color: "var(--pp-fg-muted)", fontWeight: 600 }}>+{r.attending} attending</span>
         </div>
         {/* Single location+meta line — mobile collapses what was two
             stacked rows on the desktop layout into one truncated row so
@@ -2697,10 +2706,10 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
             format, coach) is still available on tap-through. */}
         <div style={{
           display: "flex", alignItems: "center", gap: 6,
-          fontSize: 13, color: "#4B5052",
+          fontSize: 13, color: "var(--pp-fg-muted)",
           minWidth: 0,
         }}>
-          <Icon name="MapPin" size={13} strokeWidth={1.75} color="#858F8F" />
+          <Icon name="MapPin" size={13} strokeWidth={1.75} color="var(--pp-fg-subtle)" />
           <span style={{
             flex: 1, minWidth: 0,
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -2713,14 +2722,14 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
           display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
         }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, color: "#0F1214" }}>{r.time}</span>
+            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, color: "var(--pp-fg-default)" }}>{r.time}</span>
             {(() => {
               const s = supplyState(r);
               return (
                 <span data-tag={s.urgent ? "warning" : "default"} style={{
                   height: 22, padding: "0 10px", borderRadius: 6,
-                  background: s.urgent ? "#FEE2E2" : "#F4F5F6",
-                  color: s.urgent ? "#B91C1C" : "#0F1214",
+                  background: s.urgent ? "#FEE2E2" : "var(--pp-bg-subtle)",
+                  color: s.urgent ? "#B91C1C" : "var(--pp-fg-default)",
                   fontSize: 11.5, fontWeight: 600,
                   display: "inline-flex", alignItems: "center",
                   whiteSpace: "nowrap",
@@ -2729,7 +2738,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
             })()}
           </div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 15, color: "#0F1214", whiteSpace: "nowrap" }}>{r.price}</span>
+            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 15, color: "var(--pp-fg-default)", whiteSpace: "nowrap" }}>{r.price}</span>
             {/* Mobile: arrow-only square button — the row itself is the
                 primary tap target (whole card opens the event), so the
                 trailing pill collapses to an icon affordance instead of
@@ -2740,12 +2749,12 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
               style={{
                 width: 40, height: 40, padding: 0,
                 borderRadius: 8,
-                background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
+                background: "var(--pp-fg-default)", color: "var(--pp-bg-default)", border: 0, cursor: "pointer",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 flexShrink: 0,
               }}
             >
-              <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
+              <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="var(--pp-bg-default)" />
             </button>
           </div>
         </div>
@@ -2772,8 +2781,8 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         gap: 24,
         padding: 24,
         margin: 0,
-        borderBottom: "1px solid #E9EBEC",
-        background: hover ? "rgba(0,0,0,.04)" : "#FFFFFF",
+        borderBottom: "1px solid var(--pp-border-subtle)",
+        background: hover ? "rgba(0,0,0,.04)" : "var(--pp-bg-default)",
         cursor: "pointer",
         transition: "background 140ms ease",
       }}
@@ -2783,7 +2792,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         <div style={{
           fontFamily: theme.display, fontWeight: 700,
           fontSize: 20, lineHeight: "28px", letterSpacing: 0,
-          color: "#0F1214",
+          color: "var(--pp-fg-default)",
           width: 96,
         }}>{r.time}</div>
         {(() => {
@@ -2796,8 +2805,8 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
           return (
             <span data-tag={s.urgent ? "warning" : "default"} style={{
               padding: "2px 6px", borderRadius: 9999,
-              background: s.urgent ? "#F7ECEB" : "#F4F5F6",
-              color: s.urgent ? "#860606" : "#2F3436",
+              background: s.urgent ? "var(--pp-bg-tint-error)" : "var(--pp-bg-subtle)",
+              color: s.urgent ? "var(--pp-fg-error)" : "#2F3436",
               fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
               fontWeight: 400,
               display: "inline-flex", alignItems: "center",
@@ -2816,7 +2825,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
           <span style={{
             fontFamily: theme.display, fontWeight: 700,
             fontSize: 20, lineHeight: "28px", letterSpacing: 0,
-            color: "#0F1214",
+            color: "var(--pp-fg-default)",
           }}>{r.title}</span>
           {/* Avatar group + "+N" counter, per spec — three 24px image
               avatars overlapped by -8px, then a neutral chip showing
@@ -2826,8 +2835,8 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
             <span style={{
               width: 24, height: 24, marginLeft: -8,
               borderRadius: 9999,
-              background: "#F4F5F6", color: "#6F7476",
-              border: "2px solid #FFFFFF",
+              background: "var(--pp-bg-subtle)", color: "var(--pp-fg-muted)",
+              border: "2px solid var(--pp-bg-default)",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               fontSize: 13, lineHeight: "16px", fontWeight: 600,
               letterSpacing: 0.2,
@@ -2838,18 +2847,18 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         {/* Location row — pin icon + "Club, City • N mi away". The
             distance suffix turns the row into a two-fact line: where
             it is + how far. */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
-          <Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "var(--pp-fg-muted)" }}>
+          <Icon name="MapPin" size={16} strokeWidth={1.75} color="var(--pp-fg-muted)" />
           <span>{r.club}, {r.city}{r.distance ? ` • ${r.distance} away` : ""}</span>
         </div>
-        <div style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+        <div style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "var(--pp-fg-muted)" }}>
           {r.meta}
         </div>
       </div>
       <div style={{
         fontFamily: theme.display, fontWeight: 700,
         fontSize: 20, lineHeight: "28px", letterSpacing: 0,
-        color: "#0F1214", whiteSpace: "nowrap", flexShrink: 0,
+        color: "var(--pp-fg-default)", whiteSpace: "nowrap", flexShrink: 0,
       }}>{r.price}</div>
       {/* Reserve button — 48×48 icon-only square at rest, expands on
           row hover to a 132px pill with the "Reserve" label + arrow.
@@ -2864,7 +2873,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
           height: 48,
           padding: hover ? "0 16px" : 0,
           borderRadius: 8,
-          background: "#222424", color: "#fff", border: 0, cursor: "pointer",
+          background: "var(--pp-bg-inverse)", color: "var(--pp-bg-default)", border: 0, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           gap: hover ? 8 : 0,
           fontFamily: "inherit", fontWeight: 500, fontSize: 16, lineHeight: "24px",
@@ -2874,7 +2883,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         }}
       >
         {hover && <span>Reserve</span>}
-        <Icon name="ArrowRight" size={24} strokeWidth={1.75} color="#fff" />
+        <Icon name="ArrowRight" size={24} strokeWidth={1.75} color="var(--pp-bg-default)" />
       </button>
     </div>
   );
@@ -2914,7 +2923,13 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
   }, []);
   return (
     <div data-dark={theme.dark ? "true" : undefined} style={{
-      background: theme.t.bg,
+      // Read from Pickle Pixels alias so dark mode (data-theme="dark"
+      // on <html>) propagates through. Branded clubs (Old Coast, Dill
+      // Dinkers) lose their tinted bg in light mode here — that
+      // theme.t.bg per-club tinting will return after the broader
+      // multi-theme refactor (S5 work, in progress).
+      background: "var(--pp-bg-default)",
+      color: "var(--pp-fg-default)",
       // On mobile the device frame's inner container has overflow: hidden,
       // so DashboardDesktop has to be its own scroll context for sticky to
       // function and for the page to actually scroll vertically. On desktop
@@ -2968,7 +2983,12 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             letterSpacing: isMobile ? -0.4 : -0.4,
             color: theme.t.text,
           }}>
-            This is CourtReserve. Let's Play.
+            This is CourtReserve.{" "}
+            {/* "Let's Play." picks up the brand green (#2E7D32) so the
+                tagline reads as the CourtReserve voice instead of a
+                second beat in the headline. Same hex as the brandmark
+                check and the Active-players dot. */}
+            <span style={{ color: "var(--pp-green-700)" }}>Let's Play.</span>
           </h1>
         </div> :
         <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
@@ -3015,7 +3035,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           marginRight: isMobile ? -16 : -120,
           paddingLeft: isMobile ? 16 : 120,
           paddingRight: isMobile ? 16 : 120,
-          background: "linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 80%, rgba(255,255,255,0) 100%)",
+          background: "linear-gradient(to bottom, var(--pp-bg-default) 0%, var(--pp-bg-default) 80%, rgba(255,255,255,0) 100%)",
           marginBottom: isMobile ? 0 : 8,
           // Mobile: 24px shelf top padding + 8px H1 marginBottom = 32px
           // total gap from title to search bar (per spec). Desktop unchanged.
@@ -3044,7 +3064,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           columnGap: 6,
           rowGap: 4,
           fontSize: 13,
-          color: "#4B5052",
+          color: "var(--pp-fg-muted)",
           // Mobile: 24px blurb-marginBottom + 8px section-marginTop = 32px
           // gap into Popular Clubs (per spec).
           marginBottom: isMobile ? 24 : 24,
@@ -3052,7 +3072,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           fontFamily: "Inter, system-ui, sans-serif",
         }}>
           <span>
-            It looks like you're in the <b style={{ color: "#0F1214", fontWeight: 700 }}>East Bay</b>. Not Correct?
+            It looks like you're in the <b style={{ color: "var(--pp-fg-default)", fontWeight: 700 }}>East Bay</b>. Not Correct?
           </span>
           <button
             type="button"
@@ -3068,7 +3088,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
               fontFamily: "inherit",
               fontSize: 13,
               fontWeight: 700,
-              color: "#1F4ED8",
+              color: "var(--pp-blue-600)",
               display: "inline-flex",
               alignItems: "center",
               gap: 4,
@@ -3076,7 +3096,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
               textUnderlineOffset: 3,
             }}
           >
-            <Icon name="Navigation" size={13} strokeWidth={2.4} color="#1F4ED8" />
+            <Icon name="Navigation" size={13} strokeWidth={2.4} color="var(--pp-blue-600)" />
             Get Current Location
           </button>
         </div>
@@ -3105,7 +3125,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             you" to "everything else." Beginner cards are intentionally
             ≤50% filled so the trending pill never reads as urgent. */}
         {isCR &&
-        <PopularEventsNearYou theme={theme} viewport={viewport} title="Events for Beginners" events={BEGINNER_EVENTS_DEFAULT} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <PopularEventsNearYou theme={theme} viewport={viewport} title="Events for beginners" events={BEGINNER_EVENTS_DEFAULT} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
         <MoreEventsNearYou theme={theme} viewport={viewport} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
@@ -3160,10 +3180,10 @@ function UpNextHero({ theme, onOpenEventList, isCR }) {
     weather: { temp: "76°", cond: "Sunny", icon: "Sun" },
     proof: "Mia, Reese + 14 more going · 3 from your network",
     avatars: [
-    { i: "MC", c: "#D6573B" }, { i: "RT", c: "#1F4ED8" },
-    { i: "SB", c: "#0F1214" }, { i: "PS", c: "#8E5BE8" }],
+    { i: "MC", c: "#D6573B" }, { i: "RT", c: "var(--pp-blue-600)" },
+    { i: "SB", c: "var(--pp-fg-default)" }, { i: "PS", c: "#8E5BE8" }],
 
-    bg: isCR ? "#0F1214" : theme.primary
+    bg: isCR ? "var(--pp-fg-default)" : theme.primary
   },
   {
     title: "Saturday open play",
@@ -3176,8 +3196,8 @@ function UpNextHero({ theme, onOpenEventList, isCR }) {
     venue: "Anastasia Tennis Club",
     weather: { temp: "72°", cond: "Partly cloudy", icon: "CloudSun" },
     proof: "Mia + 7 others on the list · 2 friends going",
-    avatars: [{ i: "MC", c: "#D6573B" }, { i: "TS", c: "#0F1214" }, { i: "RT", c: "#1F4ED8" }],
-    bg: "#0F1214"
+    avatars: [{ i: "MC", c: "#D6573B" }, { i: "TS", c: "var(--pp-fg-default)" }, { i: "RT", c: "var(--pp-blue-600)" }],
+    bg: "var(--pp-fg-default)"
   },
   {
     title: "Spring Doubles Bracket",
@@ -3190,8 +3210,8 @@ function UpNextHero({ theme, onOpenEventList, isCR }) {
     venue: "Old Coast Pickleball",
     weather: { temp: "74°", cond: "Sunny", icon: "Sun" },
     proof: "You & Reese seeded #5 of 32 · 8 friends registered",
-    avatars: [{ i: "RT", c: "#1F4ED8" }, { i: "JB", c: theme.primary }, { i: "MC", c: "#D6573B" }],
-    bg: isCR ? "#0F1214" : theme.primary
+    avatars: [{ i: "RT", c: "var(--pp-blue-600)" }, { i: "JB", c: theme.primary }, { i: "MC", c: "#D6573B" }],
+    bg: isCR ? "var(--pp-fg-default)" : theme.primary
   }];
 
   const [idx, setIdx] = useStateAP(0);
@@ -3206,7 +3226,7 @@ function UpNextHero({ theme, onOpenEventList, isCR }) {
     <div
       onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
       style={{
-        background: slides[idx].bg, color: "#fff", borderRadius: 8,
+        background: slides[idx].bg, color: "var(--pp-bg-default)", borderRadius: 8,
         /* No inner padding on the card — content uses absolute inset:40
            below so it can fully fill the box top-to-bottom. */
         padding: 0,
@@ -3248,7 +3268,7 @@ function UpNextHero({ theme, onOpenEventList, isCR }) {
               }} />
               <span>Upcoming sessions</span>
             </div>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 22, padding: "0 10px", borderRadius: 8, background: "rgba(255,255,255,.14)", color: "#fff", fontFamily: theme.display, fontSize: 10, fontWeight: 800, letterSpacing: 0.8, textTransform: "uppercase" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 22, padding: "0 10px", borderRadius: 8, background: "rgba(255,255,255,.14)", color: "var(--pp-bg-default)", fontFamily: theme.display, fontSize: 10, fontWeight: 800, letterSpacing: 0.8, textTransform: "uppercase" }}>
               {slides[idx].day}
             </span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,.85)" }}>
@@ -3259,7 +3279,7 @@ function UpNextHero({ theme, onOpenEventList, isCR }) {
               50%      { box-shadow: 0 0 0 5px ${theme.accent}26, 0 0 16px ${theme.accent}ee; }
             }`}</style>
           </div>
-          <h2 style={{ margin: 0, fontFamily: theme.display, fontWeight: 800, fontSize: 40, lineHeight: "44px", letterSpacing: -1.2, color: "#fff" }}>{slides[idx].title}</h2>
+          <h2 style={{ margin: 0, fontFamily: theme.display, fontWeight: 800, fontSize: 40, lineHeight: "44px", letterSpacing: -1.2, color: "var(--pp-bg-default)" }}>{slides[idx].title}</h2>
           <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 14, fontSize: 13, color: "rgba(255,255,255,.78)", flexWrap: "wrap" }}>
             <ClubTag club={slides[idx].venue} tone="dark" size="sm" variant="tag" />
             <span style={{ width: 3, height: 3, borderRadius: 999, background: "rgba(255,255,255,.3)" }} />
@@ -3290,40 +3310,40 @@ function UpNextHero({ theme, onOpenEventList, isCR }) {
             <div style={{ display: "inline-flex", flexShrink: 0 }}>
               {slides[idx].avatars.map((a, k) =>
               <div key={k} style={{
-                width: 24, height: 24, borderRadius: 999, background: a.c, color: "#fff",
+                width: 24, height: 24, borderRadius: 999, background: a.c, color: "var(--pp-bg-default)",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 fontFamily: theme.display, fontWeight: 800, fontSize: 9,
-                border: "2px solid #0F1214", marginLeft: k === 0 ? 0 : -8
+                border: "2px solid var(--pp-fg-default)", marginLeft: k === 0 ? 0 : -8
               }}>{a.i}</div>
               )}
             </div>
-            <span style={{ fontSize: 12, fontWeight: 500, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{slides[idx].proof}</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: "var(--pp-bg-default)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{slides[idx].proof}</span>
           </div>
 
           {/* Action cluster — Calendar / Map quick icons + Share primary */}
           <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
             <button aria-label="Add to calendar" style={{
               width: 44, height: 44, borderRadius: 8, border: "1px solid rgba(255,255,255,.22)",
-              background: "transparent", color: "#fff", cursor: "pointer",
+              background: "transparent", color: "var(--pp-bg-default)", cursor: "pointer",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               transition: "background 160ms"
             }}
             onMouseEnter={(e) => {e.currentTarget.style.background = "rgba(255,255,255,.08)";}}
             onMouseLeave={(e) => {e.currentTarget.style.background = "transparent";}}>
-              <Icon name="Calendar" size={16} color="#fff" strokeWidth={2.2} />
+              <Icon name="Calendar" size={16} color="var(--pp-bg-default)" strokeWidth={2.2} />
             </button>
             <button aria-label="View on map" style={{
               width: 44, height: 44, borderRadius: 8, border: "1px solid rgba(255,255,255,.22)",
-              background: "transparent", color: "#fff", cursor: "pointer",
+              background: "transparent", color: "var(--pp-bg-default)", cursor: "pointer",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               transition: "background 160ms"
             }}
             onMouseEnter={(e) => {e.currentTarget.style.background = "rgba(255,255,255,.08)";}}
             onMouseLeave={(e) => {e.currentTarget.style.background = "transparent";}}>
-              <Icon name="MapPin" size={16} color="#fff" strokeWidth={2.2} />
+              <Icon name="MapPin" size={16} color="var(--pp-bg-default)" strokeWidth={2.2} />
             </button>
-            <button style={{ height: 44, padding: "0 22px", borderRadius: 8, border: 0, background: "#fff", color: "#0F1214", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <Icon name="Share" size={14} color="#0F1214" strokeWidth={2.5} /> Share
+            <button style={{ height: 44, padding: "0 22px", borderRadius: 8, border: 0, background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <Icon name="Share" size={14} color="var(--pp-fg-default)" strokeWidth={2.5} /> Share
             </button>
           </div>
         </div>
@@ -3338,7 +3358,7 @@ function UpNextHero({ theme, onOpenEventList, isCR }) {
         {slides.map((_, i) =>
         <button key={i} onClick={() => go(i)} aria-label={`Slide ${i + 1}`} style={{
           width: i === idx ? 22 : 6, height: 6, borderRadius: 8,
-          background: i === idx ? "#fff" : "rgba(255,255,255,.4)",
+          background: i === idx ? "var(--pp-bg-default)" : "rgba(255,255,255,.4)",
           border: 0, cursor: "pointer", padding: 0, transition: "all 220ms"
         }} />
         )}
@@ -3348,7 +3368,7 @@ function UpNextHero({ theme, onOpenEventList, isCR }) {
 }
 
 function KPIStrip({ theme }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const kpis = [
   { k: PLAYER.dupr.toFixed(2), v: "DUPR", delta: "+0.3 this month" },
   { k: PLAYER.wl, v: "W / L", delta: "75% win rate" },
@@ -3372,7 +3392,7 @@ function KPIStrip({ theme }) {
 }
 
 function PrimaryActionGrid({ theme, onOpenEventList, onFindClubs, onBookCourt, isCR }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   // Two-tier action set. The primaries — book a court, find an event — are
   // what a player almost always wants and get full visual weight (brand fill,
   // size, accent halo, explicit arrow). The secondaries — open play, book a
@@ -3402,7 +3422,7 @@ function PrimaryActionGrid({ theme, onOpenEventList, onFindClubs, onBookCourt, i
         {primaries.map((p) =>
         <button key={p.label} onClick={p.onClick} style={{
           padding: "20px 22px", borderRadius: 8, border: 0,
-          background: theme.primary, color: "#fff",
+          background: theme.primary, color: "var(--pp-neutral-0)",
           cursor: "pointer", textAlign: "left", fontFamily: "inherit",
           display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 16, alignItems: "center",
           position: "relative", overflow: "hidden",
@@ -3413,14 +3433,14 @@ function PrimaryActionGrid({ theme, onOpenEventList, onFindClubs, onBookCourt, i
           
             <span style={{ position: "absolute", top: -50, right: -50, width: 200, height: 200, borderRadius: 999, background: theme.accent, opacity: 0.12, pointerEvents: "none" }} />
             <span style={{ width: 44, height: 44, borderRadius: 8, background: "rgba(255,255,255,.14)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
-              <Icon name={p.icon} size={22} color="#fff" strokeWidth={1.8} />
+              <Icon name={p.icon} size={22} color="var(--pp-bg-default)" strokeWidth={1.8} />
             </span>
             <div style={{ minWidth: 0, position: "relative" }}>
               <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 18, letterSpacing: -0.3 }}>{p.label}</div>
               <div style={{ marginTop: 4, fontSize: 12, color: "rgba(255,255,255,.72)", fontWeight: 500 }}>{p.sub}</div>
             </div>
             <span style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(255,255,255,.16)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
-              <Icon name="ArrowRight" size={16} color="#fff" strokeWidth={2.4} />
+              <Icon name="ArrowRight" size={16} color="var(--pp-bg-default)" strokeWidth={2.4} />
             </span>
           </button>
         )}
@@ -3460,7 +3480,7 @@ function PrimaryActionGrid({ theme, onOpenEventList, onFindClubs, onBookCourt, i
 }
 
 function ClubLeaderboardSegment({ theme, isCR, viewport = "desktop" }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const isMobile = viewport === "mobile";
   const playerClubs = [
   { k: "oc", label: "Old Coast" },
@@ -3534,22 +3554,22 @@ function LeaderboardHeader({ theme, title }) {
 }
 
 function ClubLeaderboard({ theme, view = "friends" }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   // ---- Friends leaderboard — personal ranking among the player's
   // network. Position change vs. last week drives the up/down arrow.
   const friends = [
-  { rank: 1, name: "Reese Tanaka", avatar: "RT", color: "#1F4ED8", dupr: 4.3, delta: +2 },
+  { rank: 1, name: "Reese Tanaka", avatar: "RT", color: "var(--pp-blue-600)", dupr: 4.3, delta: +2 },
   { rank: 2, name: "Mia Chen", avatar: "MC", color: "#D6573B", dupr: 4.2, delta: 0 },
   { rank: 3, name: "You", avatar: "JB", color: null, dupr: 4.2, delta: +1, isYou: true },
-  { rank: 4, name: "Sam Brewer", avatar: "SB", color: "#0F1214", dupr: 4.1, delta: -2 },
+  { rank: 4, name: "Sam Brewer", avatar: "SB", color: "var(--pp-fg-default)", dupr: 4.1, delta: -2 },
   { rank: 5, name: "Priya Shah", avatar: "PS", color: "#8E5BE8", dupr: 4.0, delta: -1 }];
 
   // ---- Club-wide leaderboard — same shape, broader pool.
   const club = [
   { rank: 8, name: "Tom Becker", avatar: "TB", color: "#C77700", dupr: 4.6, delta: +1 },
   { rank: 9, name: "Priya Shah", avatar: "PS", color: "#8E5BE8", dupr: 4.5, delta: -2 },
-  { rank: 10, name: "Mike Alvarado", avatar: "MA", color: "#1F4ED8", dupr: 4.4, delta: +3 },
-  { rank: 11, name: "Reese Tanaka", avatar: "RT", color: "#1F4ED8", dupr: 4.3, delta: 0 },
+  { rank: 10, name: "Mike Alvarado", avatar: "MA", color: "var(--pp-blue-600)", dupr: 4.4, delta: +3 },
+  { rank: 11, name: "Reese Tanaka", avatar: "RT", color: "var(--pp-blue-600)", dupr: 4.3, delta: 0 },
   { rank: 12, name: "You", avatar: "JB", color: null, dupr: 4.2, delta: +2, isYou: true }];
 
   const rows = view === "club" ? club : friends;
@@ -3567,7 +3587,7 @@ function ClubLeaderboard({ theme, view = "friends" }) {
             background: r.isYou ? t.surfaceSoft : "transparent",
             borderRadius: r.isYou ? 8 : 0
           }}>
-            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 13, color: r.isYou ? theme.primary : "#858F8F" }}>#{r.rank}</span>
+            <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 13, color: r.isYou ? theme.primary : "var(--pp-fg-subtle)" }}>#{r.rank}</span>
             {/* Position change indicator — up/down arrow + delta count, or a
                                neutral dash when unchanged. Color signals direction. */}
             <span style={{
@@ -3582,7 +3602,7 @@ function ClubLeaderboard({ theme, view = "friends" }) {
               }
               {!same && Math.abs(r.delta)}
             </span>
-            <div style={{ width: 28, height: 28, borderRadius: 999, background: r.color || theme.primary, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 10 }}>{r.avatar}</div>
+            <div style={{ width: 28, height: 28, borderRadius: 999, background: r.color || theme.primary, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 10 }}>{r.avatar}</div>
             <span style={{ fontFamily: theme.display, fontWeight: r.isYou ? 800 : 600, fontSize: 13, color: t.text }}>{r.name}</span>
             <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: t.text, fontVariantNumeric: "tabular-nums" }}>{r.dupr.toFixed(1)}</span>
           </div>);
@@ -3599,21 +3619,21 @@ function PlayerNetwork({ theme }) {
       <div key={p.id} style={{
         display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 16, alignItems: "center",
         padding: "18px 4px",
-        borderBottom: i < PLAYER.network.length - 1 ? "1px solid #E9EBEC" : 0
+        borderBottom: i < PLAYER.network.length - 1 ? "1px solid var(--pp-border-subtle)" : 0
       }}>
-          <div style={{ width: 48, height: 48, borderRadius: 999, background: p.color, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 14 }}>{p.avatar}</div>
+          <div style={{ width: 48, height: 48, borderRadius: 999, background: p.color, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 14 }}>{p.avatar}</div>
           <div style={{ minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-              <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>{p.name}</span>
-              <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 500 }}>{p.dupr.toFixed(1)} DUPR · {p.reason}</span>
+              <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>{p.name}</span>
+              <span style={{ fontSize: 12, color: "var(--pp-fg-muted)", fontWeight: 500 }}>{p.dupr.toFixed(1)} DUPR · {p.reason}</span>
             </div>
-            <div style={{ marginTop: 4, fontSize: 12, color: "#4B5052", fontWeight: 500, lineHeight: 1.45 }}>{p.proof}</div>
+            <div style={{ marginTop: 4, fontSize: 12, color: "var(--pp-fg-muted)", fontWeight: 500, lineHeight: 1.45 }}>{p.proof}</div>
           </div>
           <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
             <button style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <Icon name="MessageCircle" size={16} strokeWidth={1.8} color="#4B5052" />
+              <Icon name="MessageCircle" size={16} strokeWidth={1.8} color="var(--pp-fg-muted)" />
             </button>
-            <button style={{ height: 36, padding: "0 14px", borderRadius: 8, border: 0, background: theme.primary, color: "#fff", fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>{p.action}</button>
+            <button style={{ height: 36, padding: "0 14px", borderRadius: 8, border: 0, background: theme.primary, color: "var(--pp-neutral-0)", fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>{p.action}</button>
           </div>
         </div>
       )}
@@ -3622,7 +3642,7 @@ function PlayerNetwork({ theme }) {
 }
 
 function NextStepsList({ theme, viewport = "desktop" }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   // Items now live in component state so clicking a row toggles its done
   // status and moves it between the two tabs (Next steps ⇄ Completed).
   const [items, setItems] = useStateAP([
@@ -3702,7 +3722,7 @@ function NextStepsList({ theme, viewport = "desktop" }) {
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               transition: "background 160ms, border-color 160ms"
             }}>
-                {it.done && <Icon name="Check" size={12} color="#fff" strokeWidth={3} />}
+                {it.done && <Icon name="Check" size={12} color="var(--pp-bg-default)" strokeWidth={3} />}
               </span>
             </span>
             <div style={{ minWidth: 0 }}>
@@ -3720,8 +3740,8 @@ function NextStepsList({ theme, viewport = "desktop" }) {
           fontFamily: "inherit", fontSize: 12, fontWeight: 600, cursor: "pointer",
           display: "inline-flex", alignItems: "center", gap: 8
         }}
-        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#0F1214";}}
-        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";}}>
+        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "var(--pp-fg-default)";}}
+        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "var(--pp-border-subtle)";}}>
             {expanded ? "Show less" : `Show ${list.length - 3} more`}
             <Icon name={expanded ? "ChevronUp" : "ChevronDown"} size={12} strokeWidth={2.4} color={t.text} />
           </button>
@@ -3732,7 +3752,7 @@ function NextStepsList({ theme, viewport = "desktop" }) {
 }
 
 function PersonCard({ p, theme }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   return (
     <div style={{
       width: "100%",
@@ -3742,12 +3762,12 @@ function PersonCard({ p, theme }) {
       {/* Header — avatar, name, last active */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{ position: "relative" }}>
-          <div style={{ width: 40, height: 40, borderRadius: 999, background: p.color, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 12 }}>{p.avatar}</div>
+          <div style={{ width: 40, height: 40, borderRadius: 999, background: p.color, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 12 }}>{p.avatar}</div>
           {p.live && <span style={{ position: "absolute", bottom: -2, right: -2, width: 12, height: 12, borderRadius: 999, background: "#E11D2A", border: "2px solid #fff" }} />}
         </div>
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: t.text, letterSpacing: -0.1 }}>{p.name}</div>
-          <div style={{ fontSize: 11, color: p.live ? "#E11D2A" : "#858F8F", fontWeight: 600, marginTop: 1 }}>{p.status}</div>
+          <div style={{ fontSize: 11, color: p.live ? "#E11D2A" : "var(--pp-fg-subtle)", fontWeight: 600, marginTop: 1 }}>{p.status}</div>
         </div>
       </div>
 
@@ -3768,7 +3788,7 @@ function PersonCard({ p, theme }) {
       <div style={{ display: "flex", gap: 6 }}>
         {p.secondary &&
         <button style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: t.surfaceSoft, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-            <Icon name={p.secondary} size={14} strokeWidth={1.8} color="#4B5052" />
+            <Icon name={p.secondary} size={14} strokeWidth={1.8} color="var(--pp-fg-muted)" />
           </button>
         }
         <button style={{
@@ -3777,8 +3797,8 @@ function PersonCard({ p, theme }) {
           fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center"
         }}
-        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#0F1214";}}
-        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";}}>
+        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "var(--pp-fg-default)";}}
+        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "var(--pp-border-subtle)";}}>
           {p.action}
         </button>
       </div>
@@ -3787,7 +3807,7 @@ function PersonCard({ p, theme }) {
 }
 
 function PeopleSegment({ theme, viewport = "desktop" }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const isMobile = viewport === "mobile";
   const [tab, setTab] = useStateAP("live");
   const liveCards = PLAYER.friendActivity.map((a) => ({
@@ -3856,7 +3876,7 @@ function PeopleSegment({ theme, viewport = "desktop" }) {
 // clubs" and "other clubs near you".
 function EventsFeedSegment({ theme, onOpenEventList, viewport = "desktop" }) {
   const isMobile = viewport === "mobile";
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const [tab, setTab] = useStateAP("mine");
   const [limit, setLimit] = useStateAP(4);
   const [filterOpen, setFilterOpen] = useStateAP(false);
@@ -3933,15 +3953,15 @@ function EventsFeedSegment({ theme, onOpenEventList, viewport = "desktop" }) {
             width: 36, height: 36, borderRadius: 8,
             border: `1px solid ${filterOpen || activeFilters ? t.text : t.line}`,
             background: filterOpen ? t.text : t.surface,
-            color: filterOpen ? "#fff" : t.text,
+            color: filterOpen ? "var(--pp-bg-default)" : t.text,
             cursor: "pointer",
             transition: "all 140ms"
           }}
           onMouseEnter={(e) => {if (!filterOpen) e.currentTarget.style.borderColor = t.text;}}
           onMouseLeave={(e) => {if (!filterOpen) e.currentTarget.style.borderColor = activeFilters ? t.text : t.line;}}>
-              <Icon name="SlidersHorizontal" size={14} strokeWidth={2.2} color={filterOpen ? "#fff" : t.text} />
+              <Icon name="SlidersHorizontal" size={14} strokeWidth={2.2} color={filterOpen ? "var(--pp-bg-default)" : t.text} />
               {activeFilters > 0 &&
-            <span style={{ position: "absolute", top: -4, right: -4, display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 16, height: 16, padding: "0 4px", borderRadius: 999, background: theme.primary, color: "#fff", fontSize: 9, fontWeight: 800, fontFamily: theme.display, border: `1.5px solid ${t.surface}` }}>{activeFilters}</span>
+            <span style={{ position: "absolute", top: -4, right: -4, display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 16, height: 16, padding: "0 4px", borderRadius: 999, background: theme.primary, color: "var(--pp-neutral-0)", fontSize: 9, fontWeight: 800, fontFamily: theme.display, border: `1.5px solid ${t.surface}` }}>{activeFilters}</span>
             }
             </button>
             <a href="#" onClick={(e) => {e.preventDefault();onOpenEventList && onOpenEventList();}} style={{
@@ -4003,7 +4023,7 @@ function EventsFeedSegment({ theme, onOpenEventList, viewport = "desktop" }) {
                       height: 28, padding: "0 12px", borderRadius: 8,
                       border: on ? 0 : `1px solid ${t.line}`,
                       background: on ? t.text : t.surface,
-                      color: on ? "#fff" : t.text,
+                      color: on ? "var(--pp-bg-default)" : t.text,
                       fontFamily: "inherit", fontSize: 11, fontWeight: 600, cursor: "pointer"
                     }}>{o.l}</button>);
 
@@ -4021,7 +4041,7 @@ function EventsFeedSegment({ theme, onOpenEventList, viewport = "desktop" }) {
                       height: 28, padding: "0 12px", borderRadius: 8,
                       border: on ? 0 : `1px solid ${t.line}`,
                       background: on ? t.text : t.surface,
-                      color: on ? "#fff" : t.text,
+                      color: on ? "var(--pp-bg-default)" : t.text,
                       fontFamily: "inherit", fontSize: 11, fontWeight: 600, cursor: "pointer"
                     }}>{o.l}</button>);
 
@@ -4042,7 +4062,7 @@ function EventsFeedSegment({ theme, onOpenEventList, viewport = "desktop" }) {
                       color: t.text, fontFamily: "inherit", fontSize: 12, fontWeight: on ? 700 : 500, cursor: "pointer", textAlign: "left"
                     }}>
                       <span style={{ width: 14, height: 14, borderRadius: 999, border: `1.5px solid ${on ? theme.primary : t.line}`, background: on ? theme.primary : "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        {on && <span style={{ width: 6, height: 6, borderRadius: 999, background: "#fff" }} />}
+                        {on && <span style={{ width: 6, height: 6, borderRadius: 999, background: "var(--pp-bg-default)" }} />}
                       </span>
                       {o.l}
                     </button>);
@@ -4075,7 +4095,7 @@ function EventsFeedSegment({ theme, onOpenEventList, viewport = "desktop" }) {
       </div>
       {hasMore ?
         <div ref={sentinelRef} style={{ gridColumn: "1 / -1", padding: "16px 0 0", display: "flex", justifyContent: "center", alignItems: "center", gap: 8, fontSize: 11, color: t.textSubtle, fontWeight: 500, letterSpacing: 0.4, textTransform: "uppercase" }}>
-          <span style={{ width: 14, height: 14, borderRadius: 999, border: `1.5px solid ${t.line}`, borderTopColor: "#0F1214", animation: "spin 700ms linear infinite" }} />
+          <span style={{ width: 14, height: 14, borderRadius: 999, border: `1.5px solid ${t.line}`, borderTopColor: "var(--pp-fg-default)", animation: "spin 700ms linear infinite" }} />
           Loading more
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div> :
@@ -4092,7 +4112,7 @@ function EventsFeedSegment({ theme, onOpenEventList, viewport = "desktop" }) {
 // line, optional urgency or going row, price on the right. No hover-reveal
 // CTA — tap on the row opens the detail page.
 function MobileFeedRow({ ev, theme, onClick }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const urg = window.urgencyOf && window.urgencyOf(ev);
   return (
     <div onClick={onClick} style={{
@@ -4136,12 +4156,12 @@ function MobileFeedRow({ ev, theme, onClick }) {
 }
 
 function ClubsSegment({ theme, isCR, onOpenClub, onFindClubs }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const [tab, setTab] = useStateAP("mine");
   const nearby = [
-  { id: "wc", name: "Wrightsville Courts", logoMark: "WC", color: "#1F4ED8", miles: 2.4, sessions: 0, joined: false, tier: "Guest", tierColor: "#1F4ED8", courts: 6 },
+  { id: "wc", name: "Wrightsville Courts", logoMark: "WC", color: "var(--pp-blue-600)", miles: 2.4, sessions: 0, joined: false, tier: "Guest", tierColor: "var(--pp-blue-600)", courts: 6 },
   { id: "cv", name: "Cape Valley Club", logoMark: "CV", color: "#D6573B", miles: 5.1, sessions: 0, joined: false, tier: "Open booking", tierColor: "#D6573B", courts: 4 },
-  { id: "pn", name: "Pinetop Tennis Center", logoMark: "PN", color: "#2E7D32", miles: 7.3, sessions: 0, joined: false, tier: "Open booking", tierColor: "#2E7D32", courts: 8 }];
+  { id: "pn", name: "Pinetop Tennis Center", logoMark: "PN", color: "var(--pp-green-700)", miles: 7.3, sessions: 0, joined: false, tier: "Open booking", tierColor: "var(--pp-green-700)", courts: 8 }];
 
   const items = tab === "mine" ? PLAYER.clubsPlayedAt : nearby;
   return (
@@ -4167,21 +4187,21 @@ function FriendActivity({ theme }) {
       <div key={a.id} style={{
         display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 14, alignItems: "center",
         padding: "16px 4px",
-        borderBottom: i < PLAYER.friendActivity.length - 1 ? "1px solid #E9EBEC" : 0
+        borderBottom: i < PLAYER.friendActivity.length - 1 ? "1px solid var(--pp-border-subtle)" : 0
       }}>
           <div style={{ position: "relative" }}>
-            <div style={{ width: 40, height: 40, borderRadius: 999, background: a.color, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 12 }}>{a.avatar}</div>
+            <div style={{ width: 40, height: 40, borderRadius: 999, background: a.color, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 12 }}>{a.avatar}</div>
             {a.live && <span style={{ position: "absolute", bottom: 0, right: 0, width: 12, height: 12, borderRadius: 999, background: "#E11D2A", border: "2px solid #fff" }} />}
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 14, color: "#0F1214", lineHeight: 1.4 }}>
+            <div style={{ fontSize: 14, color: "var(--pp-fg-default)", lineHeight: 1.4 }}>
               <b style={{ fontFamily: theme.display, fontWeight: 700 }}>{a.who}</b>{" "}
-              <span style={{ color: "#4B5052" }}>{a.verb}</span>{" "}
+              <span style={{ color: "var(--pp-fg-muted)" }}>{a.verb}</span>{" "}
               <b style={{ fontFamily: theme.display, fontWeight: 700 }}>{a.what}</b>
             </div>
-            <div style={{ marginTop: 2, fontSize: 12, color: "#4B5052", fontWeight: 500 }}>{a.where} · {a.when}</div>
+            <div style={{ marginTop: 2, fontSize: 12, color: "var(--pp-fg-muted)", fontWeight: 500 }}>{a.where} · {a.when}</div>
           </div>
-          <button style={{ height: 34, padding: "0 14px", borderRadius: 8, border: 0, background: a.live ? theme.primary : "transparent", color: a.live ? "#fff" : theme.primary, fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer", flexShrink: 0 }}>{a.action}</button>
+          <button style={{ height: 34, padding: "0 14px", borderRadius: 8, border: 0, background: a.live ? theme.primary : "transparent", color: a.live ? "var(--pp-bg-default)" : theme.primary, fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer", flexShrink: 0 }}>{a.action}</button>
         </div>
       )}
     </div>);
@@ -4245,7 +4265,7 @@ window.useDragScroll = useDragScroll;
 // to register for. Uses the same drag-scroll + arrow-button pattern as
 // MatchesSegment/PeopleSegment so the row feels native to the page.
 function ForYouSegment({ theme, viewport = "desktop" }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const isMobile = viewport === "mobile";
   const trackRef = React.useRef(null);
   useDragScroll(trackRef);
@@ -4262,7 +4282,7 @@ function ForYouSegment({ theme, viewport = "desktop" }) {
     name: "Tom Becker", title: "4.6 DUPR · ↑0.2 this month",
     why: "Same level, played 2× with Mia",
     meta: "Old Coast · weeknights", cta: "Connect" },
-  { id: "c1", kind: "club", icon: "MapPin", avatar: "WC", color: "#1F4ED8",
+  { id: "c1", kind: "club", icon: "MapPin", avatar: "WC", color: "var(--pp-blue-600)",
     name: "Wrightsville Courts", title: "Open booking · 6 courts",
     why: "2.4 mi away · matches your usual time",
     meta: "Booking open this week", cta: "View club" },
@@ -4270,7 +4290,7 @@ function ForYouSegment({ theme, viewport = "desktop" }) {
     name: "Sunday Mixed Doubles RR", title: "Round robin · 3.0–4.0",
     why: "Reese and Sam are going",
     meta: "Sun May 10 · 10 AM", cta: "Register" },
-  { id: "p2", kind: "player", icon: "Users", avatar: "AR", color: "#1F4ED8",
+  { id: "p2", kind: "player", icon: "Users", avatar: "AR", color: "var(--pp-blue-600)",
     name: "Ana Ruiz", title: "4.3 DUPR · 12 wins this month",
     why: "Lives 1.2 mi from you",
     meta: "Plays Tue/Thu · open to doubles", cta: "Connect" },
@@ -4344,10 +4364,10 @@ function ForYouSegment({ theme, viewport = "desktop" }) {
             alignSelf: "flex-start",
             display: "inline-flex", alignItems: "center", gap: 6,
             height: 22, padding: "0 10px", borderRadius: 8,
-            background: it.color, color: "#fff",
+            background: it.color, color: "var(--pp-neutral-0)",
             fontFamily: theme.display, fontWeight: 800, fontSize: 9, letterSpacing: 1, textTransform: "uppercase"
           }}>
-              <Icon name={it.icon} size={10} color="#fff" strokeWidth={2.4} />
+              <Icon name={it.icon} size={10} color="var(--pp-neutral-0)" strokeWidth={2.4} />
               {labelFor[it.kind]}
             </span>
 
@@ -4359,7 +4379,7 @@ function ForYouSegment({ theme, viewport = "desktop" }) {
               <div style={{
               width: 40, height: 40, flexShrink: 0,
               borderRadius: it.kind === "club" ? 10 : it.kind === "event" ? 8 : 999,
-              background: it.color, color: "#fff",
+              background: it.color, color: "var(--pp-neutral-0)",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               fontFamily: theme.display, fontWeight: 800, fontSize: 13
             }}>{it.avatar}</div>
@@ -4402,7 +4422,7 @@ function ForYouSegment({ theme, viewport = "desktop" }) {
 }
 
 function MatchesSegment({ theme, viewport = "desktop" }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const isMobile = viewport === "mobile";
   const [tab, setTab] = useStateAP("upcoming");
   const trackRef = React.useRef(null);
@@ -4448,7 +4468,7 @@ function MatchesSegment({ theme, viewport = "desktop" }) {
 }
 
 function UpcomingCards({ theme }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const items = [
   { id: "u1", kind: "Court reservation", title: "Court 3 reserved", sub: "1 hr · Singles practice", club: "Old Coast", clubColor: "#2E5D52", time: "4:30 PM – 5:30 PM", day: "Today", urgent: "In 2h 14m", going: ["JB"], meta: "Just you · 2.1 mi", cta: "Check in" },
   { id: "u2", kind: "Round robin", title: "Thursday Night RR", sub: "3.0–3.5 · doubles", club: "Old Coast", clubColor: "#2E5D52", time: "6:30 PM – 8:30 PM", day: "Tonight", urgent: "Live · 1 spot left", going: ["MA", "RT", "SB"], goingTotal: 18, meta: "Mia + 17 going", cta: "Check in" },
@@ -4476,7 +4496,7 @@ function UpcomingCards({ theme }) {
             <span style={{
             display: "inline-flex", alignItems: "center", justifyContent: "center",
             height: 22, padding: "0 10px", borderRadius: 8,
-            background: it.clubColor, color: "#fff",
+            background: it.clubColor, color: "var(--pp-bg-default)",
             fontFamily: theme.display, fontWeight: 800, fontSize: 10, letterSpacing: 1, textTransform: "uppercase",
             flexShrink: 0
           }}>{it.kind}</span>
@@ -4522,8 +4542,8 @@ function UpcomingCards({ theme }) {
                   {(it.going || []).slice(0, 3).map((g, i) =>
               <span key={i} style={{
                 width: 22, height: 22, borderRadius: 999,
-                background: ["#D6573B", "#1F4ED8", "#0F1214", "#8E5BE8"][i % 4],
-                color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center",
+                background: ["#D6573B", "var(--pp-blue-600)", "var(--pp-fg-default)", "#8E5BE8"][i % 4],
+                color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center",
                 fontFamily: theme.display, fontWeight: 800, fontSize: 9,
                 border: `2px solid ${t.surface}`, marginLeft: i === 0 ? 0 : -8
               }}>{g}</span>
@@ -4561,8 +4581,8 @@ function UpcomingCards({ theme }) {
             fontFamily: "inherit", fontWeight: 600, fontSize: 11, cursor: "pointer",
             display: "inline-flex", alignItems: "center", justifyContent: "center"
           }}
-          onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#0F1214";}}
-          onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";}}>
+          onMouseEnter={(e) => {e.currentTarget.style.borderColor = "var(--pp-fg-default)";}}
+          onMouseLeave={(e) => {e.currentTarget.style.borderColor = "var(--pp-border-subtle)";}}>
               {it.cta}
             </button>
           </div>
@@ -4573,13 +4593,13 @@ function UpcomingCards({ theme }) {
 }
 
 function RecentMatchCards({ theme }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   // Dark semantic backgrounds — saturated brand colors for each result so
   // the card is unmistakable at a glance.
   const palette = {
-    W: { label: "Win", bg: "#0F3D2A", accent: "#7CE0B5", pillBg: "#1F8A5B", pillText: "#fff" },
-    L: { label: "Loss", bg: "#3D1218", accent: "#FF8B8B", pillBg: "#C8243A", pillText: "#fff" },
-    D: { label: "Draw", bg: "#0F2B4D", accent: "#8AB6FF", pillBg: "#1F6DD1", pillText: "#fff" }
+    W: { label: "Win", bg: "#0F3D2A", accent: "#7CE0B5", pillBg: "#1F8A5B", pillText: "var(--pp-bg-default)" },
+    L: { label: "Loss", bg: "#3D1218", accent: "#FF8B8B", pillBg: "#C8243A", pillText: "var(--pp-bg-default)" },
+    D: { label: "Draw", bg: "#0F2B4D", accent: "#8AB6FF", pillBg: "#1F6DD1", pillText: "var(--pp-bg-default)" }
   };
   return (
     <React.Fragment>
@@ -4589,7 +4609,7 @@ function RecentMatchCards({ theme }) {
         return (
           <div key={m.id} style={{
             flex: "0 0 360px", scrollSnapAlign: "start",
-            background: p.bg, color: "#fff",
+            background: p.bg, color: "var(--pp-bg-default)",
             border: 0,
             borderRadius: 8, padding: "20px 22px 18px",
             position: "relative", overflow: "hidden",
@@ -4615,11 +4635,11 @@ function RecentMatchCards({ theme }) {
               </div>
               <button aria-label="Share match" style={{
                 width: 28, height: 28, borderRadius: 999, border: 0,
-                background: "rgba(255,255,255,.12)", color: "#fff",
+                background: "rgba(255,255,255,.12)", color: "var(--pp-bg-default)",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer", flexShrink: 0
               }}>
-                <Icon name="Share2" size={13} strokeWidth={2} color="#fff" />
+                <Icon name="Share2" size={13} strokeWidth={2} color="var(--pp-bg-default)" />
               </button>
             </div>
 
@@ -4652,23 +4672,23 @@ function RecentMatchCards({ theme }) {
                 {!rated &&
                 <button style={{
                   flex: 1, height: 34, padding: "0 12px", borderRadius: 8,
-                  border: 0, background: "#fff", color: "#0F1214",
+                  border: 0, background: "var(--pp-bg-default)", color: "var(--pp-fg-default)",
                   fontFamily: "inherit", fontWeight: 700, fontSize: 11, cursor: "pointer",
                   display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6
                 }}>
-                    <Icon name="Star" size={12} color="#0F1214" strokeWidth={2.4} /> Rate match
+                    <Icon name="Star" size={12} color="var(--pp-fg-default)" strokeWidth={2.4} /> Rate match
                   </button>
                 }
                 <button style={{
                   flex: 1, height: 34, padding: "0 12px", borderRadius: 8,
                   border: rated ? 0 : "1px solid rgba(255,255,255,.3)",
-                  background: rated ? "#fff" : "transparent",
-                  color: rated ? "#0F1214" : "#fff",
+                  background: rated ? "var(--pp-bg-default)" : "transparent",
+                  color: rated ? "var(--pp-fg-default)" : "var(--pp-bg-default)",
                   fontFamily: "inherit", fontWeight: 700, fontSize: 11, cursor: "pointer",
                   display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                   whiteSpace: "nowrap"
                 }}>
-                  <Icon name="RotateCcw" size={12} strokeWidth={2.2} color={rated ? "#0F1214" : "#fff"} /> Rematch {m.partner.split(" ")[0]}
+                  <Icon name="RotateCcw" size={12} strokeWidth={2.2} color={rated ? "var(--pp-fg-default)" : "var(--pp-bg-default)"} /> Rematch {m.partner.split(" ")[0]}
                 </button>
               </div>
             </div>
@@ -4680,7 +4700,7 @@ function RecentMatchCards({ theme }) {
 }
 
 function RecentMatches({ theme }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   return (
     <div style={{
       display: "flex", gap: 14, overflowX: "auto", scrollSnapType: "x mandatory",
@@ -4692,7 +4712,7 @@ function RecentMatches({ theme }) {
         return (
           <div key={m.id} style={{
             flex: "0 0 360px", scrollSnapAlign: "start",
-            background: win ? "#0F1214" : t.surface,
+            background: win ? "var(--pp-fg-default)" : t.surface,
             color: win ? t.surface : t.text,
             border: win ? 0 : `1px solid ${t.line}`,
             borderRadius: 8, padding: "20px 22px 18px",
@@ -4706,13 +4726,13 @@ function RecentMatches({ theme }) {
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 height: 22, padding: "0 10px", borderRadius: 8,
                 background: win ? theme.accent : t.surfaceSoft,
-                color: win ? "#0F1214" : "#4B5052",
+                color: win ? "var(--pp-fg-default)" : "var(--pp-fg-muted)",
                 fontFamily: theme.display, fontWeight: 800, fontSize: 10, letterSpacing: 1, textTransform: "uppercase"
               }}>{win ? "✨ Win" : "Recap"}</span>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 8, minWidth: 0 }}>
                 <ClubTag club={m.club} tone={win ? "dark" : "light"} size="sm" variant="tag" />
-                <span style={{ width: 3, height: 3, borderRadius: 999, background: win ? "rgba(255,255,255,.3)" : "#DEE1E5", flexShrink: 0 }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: win ? "rgba(255,255,255,.6)" : "#858F8F" }}>{m.when}</span>
+                <span style={{ width: 3, height: 3, borderRadius: 999, background: win ? "rgba(255,255,255,.3)" : "var(--pp-border-default)", flexShrink: 0 }} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: win ? "rgba(255,255,255,.6)" : "var(--pp-fg-subtle)" }}>{m.when}</span>
               </div>
             </div>
 
@@ -4720,7 +4740,7 @@ function RecentMatches({ theme }) {
               <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 20, lineHeight: "24px", letterSpacing: -0.4 }}>
                 {m.headline}.
               </div>
-              <div style={{ marginTop: 8, fontSize: 12, color: win ? "rgba(255,255,255,.7)" : "#4B5052", lineHeight: 1.5, fontWeight: 500 }}>
+              <div style={{ marginTop: 8, fontSize: 12, color: win ? "rgba(255,255,255,.7)" : "var(--pp-fg-muted)", lineHeight: 1.5, fontWeight: 500 }}>
                 {m.blurb}
               </div>
             </div>
@@ -4728,24 +4748,24 @@ function RecentMatches({ theme }) {
             <div style={{ marginTop: "auto", position: "relative" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ display: "inline-flex" }}>
-                  <span style={{ width: 22, height: 22, borderRadius: 999, background: m.partnerColor, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 9, border: win ? "2px solid #0F1214" : "2px solid #fff" }}>JB</span>
-                  <span style={{ width: 22, height: 22, borderRadius: 999, background: m.partnerColor, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 9, marginLeft: -10, border: win ? "2px solid #0F1214" : "2px solid #fff" }}>{m.partnerInit}</span>
+                  <span style={{ width: 22, height: 22, borderRadius: 999, background: m.partnerColor, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 9, border: win ? "2px solid var(--pp-fg-default)" : "2px solid #fff" }}>JB</span>
+                  <span style={{ width: 22, height: 22, borderRadius: 999, background: m.partnerColor, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 9, marginLeft: -10, border: win ? "2px solid var(--pp-fg-default)" : "2px solid #fff" }}>{m.partnerInit}</span>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 600, color: win ? "rgba(255,255,255,.85)" : "#0F1214" }}>You & {m.partner}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: win ? "rgba(255,255,255,.85)" : "var(--pp-fg-default)" }}>You & {m.partner}</span>
               </div>
               <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, fontVariantNumeric: "tabular-nums" }}>{m.score}</span>
-                <span style={{ width: 3, height: 3, borderRadius: 999, background: win ? "rgba(255,255,255,.3)" : "#BBBFC1" }} />
+                <span style={{ width: 3, height: 3, borderRadius: 999, background: win ? "rgba(255,255,255,.3)" : "var(--pp-fg-subtle)" }} />
                 <span style={{ fontSize: 11, fontWeight: 700, color: m.duprDelta >= 0 ? "#7CE0B5" : "#FF8B8B" }}>
                   DUPR {m.duprDelta >= 0 ? "+" : ""}{m.duprDelta.toFixed(2)}
                 </span>
               </div>
               <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
-                <Icon name="Sparkles" size={11} color={win ? theme.accent : "#858F8F"} strokeWidth={2} />
-                <span style={{ fontSize: 10, fontWeight: 700, color: win ? theme.accent : "#4B5052", letterSpacing: 0.4, textTransform: "uppercase" }}>{m.highlight}</span>
+                <Icon name="Sparkles" size={11} color={win ? theme.accent : "var(--pp-fg-subtle)"} strokeWidth={2} />
+                <span style={{ fontSize: 10, fontWeight: 700, color: win ? theme.accent : "var(--pp-fg-muted)", letterSpacing: 0.4, textTransform: "uppercase" }}>{m.highlight}</span>
               </div>
               <div style={{ marginTop: 14, display: "flex", gap: 6 }}>
-                <button style={{ flex: 1, height: 32, padding: "0 12px", borderRadius: 8, border: 0, background: win ? t.surface : theme.primary, color: win ? "#0F1214" : t.surface, fontFamily: "inherit", fontWeight: 700, fontSize: 11, cursor: "pointer", whiteSpace: "nowrap" }}>Rebook {m.partner.split(" ")[0]}</button>
+                <button style={{ flex: 1, height: 32, padding: "0 12px", borderRadius: 8, border: 0, background: win ? t.surface : theme.primary, color: win ? "var(--pp-fg-default)" : t.surface, fontFamily: "inherit", fontWeight: 700, fontSize: 11, cursor: "pointer", whiteSpace: "nowrap" }}>Rebook {m.partner.split(" ")[0]}</button>
                 <button style={{ height: 32, padding: "0 12px", borderRadius: 8, border: win ? "1px solid rgba(255,255,255,.3)" : `1px solid ${t.line}`, background: "transparent", color: win ? t.surface : t.text, fontFamily: "inherit", fontWeight: 600, fontSize: 11, cursor: "pointer" }}>Share</button>
               </div>
             </div>
@@ -4757,7 +4777,7 @@ function RecentMatches({ theme }) {
 }
 
 function SuggestedSegment({ theme, viewport = "desktop" }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const [tab, setTab] = useStateAP("tournaments");
   const [expanded, setExpanded] = useStateAP(false);
   const desktop = viewport === "desktop";
@@ -4791,7 +4811,7 @@ function SuggestedSegment({ theme, viewport = "desktop" }) {
 
 // Shared mobile shell: shows first N children; "Show more" reveals the rest.
 function ListMoreShell({ theme, expanded, setExpanded, children }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   return (
     <div>
       {children}
@@ -4802,8 +4822,8 @@ function ListMoreShell({ theme, expanded, setExpanded, children }) {
           fontFamily: "inherit", fontSize: 12, fontWeight: 600, cursor: "pointer",
           display: "inline-flex", alignItems: "center", gap: 8
         }}
-        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#0F1214";}}
-        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";}}>
+        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "var(--pp-fg-default)";}}
+        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "var(--pp-border-subtle)";}}>
           {expanded ? "Show less" : "Show more"}
           <Icon name={expanded ? "ChevronUp" : "ChevronDown"} size={12} strokeWidth={2.4} color={t.text} />
         </button>
@@ -4813,7 +4833,7 @@ function ListMoreShell({ theme, expanded, setExpanded, children }) {
 }
 
 function SegmentedHeading({ tabs, value, onChange, theme, action }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   // Detect a "narrow" container (a phone frame): once available width is
   // below the threshold, the control fills its row and each tab takes an
   // equal share so the segmented control reads as part of the page edge to
@@ -4869,7 +4889,7 @@ function SegmentedHeading({ tabs, value, onChange, theme, action }) {
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 minWidth: 18, height: 18, padding: "0 6px", borderRadius: 999,
                 background: on ? t.text : t.line,
-                color: on ? "#fff" : t.textMuted,
+                color: on ? "var(--pp-bg-default)" : t.textMuted,
                 fontFamily: theme.display, fontSize: 10, fontWeight: 800, letterSpacing: 0,
                 textTransform: "none",
                 flexShrink: 0,
@@ -4887,7 +4907,7 @@ function SegmentedHeading({ tabs, value, onChange, theme, action }) {
 }
 
 function SuggestedRow({ icon, title, reason, meta, theme, last }) {
-  const t = theme.t || { bg: "#fff", surface: "#fff", surfaceSoft: "#F4F5F6", text: "#0F1214", textMuted: "#4B5052", textSubtle: "#858F8F", textInverted: "#fff", line: "#E9EBEC", rule: "#0F1214", chip: "#F4F5F6" };
+  const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   return (
     <button style={{
       width: "100%", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 16, alignItems: "center",
@@ -4972,12 +4992,12 @@ function DrillsRecs({ theme }) {
       <div key={d.id} style={{
         display: "grid", gridTemplateColumns: "1fr auto", gap: 14, alignItems: "center",
         padding: "16px 4px",
-        borderBottom: i < PLAYER.drills.length - 1 ? "1px solid #E9EBEC" : 0
+        borderBottom: i < PLAYER.drills.length - 1 ? "1px solid var(--pp-border-subtle)" : 0
       }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "#0F1214", letterSpacing: -0.1 }}>{d.title}</div>
-            <div style={{ marginTop: 4, fontSize: 12, color: "#4B5052", fontWeight: 500, lineHeight: 1.45 }}>{d.why}</div>
-            <div style={{ marginTop: 4, fontSize: 11, color: "#4B5052", fontWeight: 500 }}>{d.duration} · {d.coach}</div>
+            <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)", letterSpacing: -0.1 }}>{d.title}</div>
+            <div style={{ marginTop: 4, fontSize: 12, color: "var(--pp-fg-muted)", fontWeight: 500, lineHeight: 1.45 }}>{d.why}</div>
+            <div style={{ marginTop: 4, fontSize: 11, color: "var(--pp-fg-muted)", fontWeight: 500 }}>{d.duration} · {d.coach}</div>
           </div>
           <button style={{ height: 34, padding: "0 14px", borderRadius: 8, border: 0, background: "transparent", color: theme.primary, fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Try ›</button>
         </div>
@@ -4990,13 +5010,13 @@ function TournamentTeaser({ theme }) {
   return (
     <div style={{ padding: "18px 0", display: "flex", flexDirection: "column", gap: 14 }}>
       <div>
-        <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>Spring Doubles Bracket</div>
-        <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 2 }}>Apr 6 · Old Coast · 32 teams</div>
+        <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>Spring Doubles Bracket</div>
+        <div style={{ fontSize: 11, color: "var(--pp-fg-muted)", fontWeight: 500, marginTop: 2 }}>Apr 6 · Old Coast · 32 teams</div>
       </div>
-      <div style={{ fontSize: 13, color: "#0F1214", fontWeight: 500, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 13, color: "var(--pp-fg-default)", fontWeight: 500, lineHeight: 1.5 }}>
         <b style={{ color: theme.primary }}>You &amp; Reese</b> would seed at <b>#5 of 32</b>. Combined DUPR 8.3 — sweet spot for this bracket.
       </div>
-      <button style={{ alignSelf: "flex-start", height: 38, padding: "0 18px", borderRadius: 8, border: 0, background: theme.primary, color: "#fff", fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Invite Reese</button>
+      <button style={{ alignSelf: "flex-start", height: 38, padding: "0 18px", borderRadius: 8, border: 0, background: theme.primary, color: "var(--pp-neutral-0)", fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Invite Reese</button>
     </div>);
 
 }
