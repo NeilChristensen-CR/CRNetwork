@@ -1787,91 +1787,130 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
   return ReactDOM.createPortal(sheet, portalTarget);
 }
 
-// ---- Carousel section ---------------------------------------------------
-// Used inside SearchResultsModal to render a themed strip of club cards.
-// Title + sub copy header (h2-style, smaller than the modal title) with
-// optional Prev/Next arrows when more than 2 cards exist.
-function SBResultsCarousel({ title, sub, clubs, theme, onSelectClub }) {
-  const trackRef = useRefSB(null);
-  if (!clubs || clubs.length === 0) return null;
-  const scroll = (dx) => {
-    const el = trackRef.current; if (!el) return;
-    el.scrollBy({ left: dx, behavior: "smooth" });
-  };
+// ---- Club list row (SearchResultsModal) ---------------------------------
+// Mirrors the logged-out home's MoreEventsNearYou EventRow pattern: 24px
+// padding, gap 24, white-rest / soft-tint-hover zebra, dark icon-only
+// Reserve square that expands to "Reserve" on hover. Each row is one
+// club — `name` headline, "City, ST · Sport · N mi away · Booked N x
+// Today" caption line, time-slot chips below.
+function SBClubListRow({ club, onSelect }) {
+  const [hover, setHover] = useStateSB(false);
   return (
-    <section style={{ padding: "0 0 16px 0" }}>
-      <div style={{
-        display: "flex", alignItems: "flex-end", justifyContent: "space-between",
-        padding: "16px 24px 8px 24px", gap: 16,
-      }}>
-        <div style={{ minWidth: 0 }}>
-          <h3 style={{
-            margin: 0,
-            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-            fontWeight: 800, fontSize: 17, letterSpacing: -0.3,
-            color: "#0F1214", lineHeight: 1.2,
-          }}>{title}</h3>
-          {sub && (
-            <div style={{
-              marginTop: 2, fontSize: 12.5, color: "#4B5052", lineHeight: 1.3,
-            }}>{sub}</div>
-          )}
+    <div
+      data-card-hover
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={() => onSelect && onSelect(club.name, club.id)}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 24,
+        padding: 24,
+        borderBottom: "1px solid #E9EBEC",
+        background: hover ? "rgba(0,0,0,.04)" : "#FFFFFF",
+        cursor: "pointer",
+        transition: "background 140ms ease",
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700,
+          fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+          color: "#0F1214",
+        }}>{club.name}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+          {window.Icon && <window.Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />}
+          <span>{club.city}, {club.state} • {club.distance} mi away</span>
         </div>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-          <button
-            type="button"
-            onClick={() => scroll(-340)}
-            aria-label="Previous"
-            style={{
-              width: 36, height: 36, borderRadius: 999, border: 0,
-              background: "transparent", cursor: "pointer",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
-            }}
-          >
-            {window.Icon && <window.Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />}
-          </button>
-          <button
-            type="button"
-            onClick={() => scroll(340)}
-            aria-label="Next"
-            style={{
-              width: 36, height: 36, borderRadius: 999, border: 0,
-              background: "transparent", cursor: "pointer",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
-            }}
-          >
-            {window.Icon && <window.Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />}
-          </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <span style={{
+            padding: "2px 6px", borderRadius: 9999,
+            background: "#F4F5F6", color: "#2F3436",
+            fontSize: 12, lineHeight: "16px", letterSpacing: 0.3, fontWeight: 400,
+            whiteSpace: "nowrap",
+          }}>{club.sport}</span>
+          <span style={{ fontSize: 12, lineHeight: "16px", letterSpacing: 0.3, color: "#2F3436" }}>
+            · Booked {club.booked} x Today
+          </span>
         </div>
+        {/* Time-slot chips — first 4 openings as borderless dark-outlined
+            buttons, matching the BookNowCard slot grid. Clicking a slot
+            still routes through onSelect so the booking flow opens at
+            this club. */}
+        {club.times && club.times.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
+            {club.times.slice(0, 4).map((time) => (
+              <button
+                key={time}
+                onClick={(e) => { e.stopPropagation(); onSelect && onSelect(club.name, club.id); }}
+                style={{
+                  padding: "6px 12px", borderRadius: 8,
+                  border: "1px solid #222424",
+                  background: "#FFFFFF", color: "#222424",
+                  fontFamily: "inherit", fontWeight: 500, fontSize: 13, lineHeight: "16px",
+                  letterSpacing: 0.2,
+                  cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                }}
+              >{time}</button>
+            ))}
+          </div>
+        )}
       </div>
-      <div
-        ref={trackRef}
+      <button
+        onClick={(e) => { e.stopPropagation(); onSelect && onSelect(club.name, club.id); }}
+        aria-label="Select club"
         style={{
-          display: "flex", gap: 16,
-          overflowX: "auto", scrollSnapType: "x mandatory",
-          padding: "8px 24px 16px 24px",
-          scrollbarWidth: "none",
+          minWidth: hover ? 132 : 48,
+          height: 48,
+          padding: hover ? "0 16px" : 0,
+          borderRadius: 8,
+          background: "#222424", color: "#fff", border: 0, cursor: "pointer",
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          gap: hover ? 8 : 0,
+          fontFamily: "inherit", fontWeight: 500, fontSize: 16, lineHeight: "24px",
+          whiteSpace: "nowrap", flexShrink: 0, overflow: "hidden",
+          boxShadow: "0 2px 4px rgba(0,0,0,.08)",
+          transition: "min-width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
         }}
       >
+        {hover && <span>Reserve</span>}
+        {window.Icon && <window.Icon name="ArrowRight" size={24} strokeWidth={1.75} color="#fff" />}
+      </button>
+    </div>
+  );
+}
+
+// ---- Club list section --------------------------------------------------
+// Renders one themed section inside SearchResultsModal: display/d5
+// section title (matching the homepage) + a list of SBClubListRow
+// items. Replaces the carousel-of-cards pattern with the same vertical
+// list rhythm used on MoreEventsNearYou.
+function SBClubListSection({ title, sub, clubs, onSelectClub }) {
+  if (!clubs || clubs.length === 0) return null;
+  return (
+    <section style={{ padding: "0 0 24px 0" }}>
+      <div style={{
+        padding: "16px 24px 12px 24px",
+        display: "flex", alignItems: "baseline", justifyContent: "space-between",
+        gap: 16,
+      }}>
+        <h3 style={{
+          margin: 0, flex: 1, minWidth: 0,
+          fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+          fontWeight: 700, fontSize: 24, lineHeight: "32px", letterSpacing: 0,
+          color: "#0F1214",
+        }}>{title}</h3>
+        {sub && (
+          <span style={{
+            fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
+            color: "#4B5052", fontWeight: 500, whiteSpace: "nowrap",
+          }}>{sub}</span>
+        )}
+      </div>
+      <div>
         {clubs.map((c) => (
-          <div
-            key={c.id}
-            onClick={() => onSelectClub && onSelectClub(c.name, c.id)}
-            style={{
-              flex: "0 0 280px", scrollSnapAlign: "start",
-              cursor: "pointer", display: "flex",
-            }}
-          >
-            {window.BookNowCard && (
-              <window.BookNowCard
-                v={c}
-                theme={theme}
-                viewport="desktop"
-                onPickSlot={() => onSelectClub && onSelectClub(c.name, c.id)}
-                onOpenClub={() => onSelectClub && onSelectClub(c.name, c.id)}
-              />
-            )}
-          </div>
+          <SBClubListRow key={c.id} club={c} onSelect={onSelectClub} />
         ))}
       </div>
     </section>
@@ -1998,8 +2037,11 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           </div>
         )}
 
-        {/* Scrollable body — broken into themed carousel sections so
-            the list reads as curated picks rather than a single grid. */}
+        {/* Scrollable body — themed list sections styled to match the
+            logged-out home (display/d5 section titles + MoreEventsNearYou
+            row rhythm). Replaces the prior carousel of BookNowCard
+            tiles; a list reads more efficiently for a "pick a club"
+            decision than a side-scrolling deck of cards. */}
         <div style={{
           flex: 1,
           overflowY: "auto",
@@ -2022,12 +2064,11 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
               clubs: SB_RESULTS_CLUBS.filter((c) => parseFloat(c.distance) <= 5),
             },
           ].map((section, sIdx) => (
-            <SBResultsCarousel
+            <SBClubListSection
               key={sIdx}
               title={section.title}
               sub={section.sub}
               clubs={section.clubs}
-              theme={theme}
               onSelectClub={onSelectClub}
             />
           ))}
