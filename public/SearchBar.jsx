@@ -1174,7 +1174,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                 active={v.where === "Current location"}
                 icon="Navigation"
                 label="Current location"
-                sub="Oakland, CA (my current location)"
+                sub="Oakland, CA"
                 onClick={() => { set("where", "Current location"); setOpenSection("what"); }}
               />
               {whereVisible.length === 0 ? (
@@ -1288,71 +1288,77 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             </div>
           </SectionAccordion>
 
-          {/* ---- WHO — borderless row + contained pill stepper ----------- */}
-          <SectionAccordion id="who" label="Who" chip={whoChip}>
+          {/* ---- WHO — inline header, no accordion expand ----------------- */}
+          {/* The stepper pill lives directly across from the "Who" title;
+              no expanded body. Counter renders as "N players" and caps
+              at 8. Matches the section-header height + typography of the
+              accordion sections above so the row reads as part of the
+              same list. */}
+          <section style={{
+            minHeight: 56,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: 12,
+            padding: "12px 0",
+          }}>
+            <span style={{
+              fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+              fontWeight: 800,
+              fontSize: 16, lineHeight: 1.25, letterSpacing: -0.2,
+              color: "#0F1214",
+            }}>Who</span>
+            {/* Single contained pill: [−] [N players] [+]. Cap at 8. */}
             <div style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "12px 0",
+              display: "inline-flex", alignItems: "center",
+              background: "#F4F5F6",
+              borderRadius: 999,
+              padding: 4,
+              gap: 0,
+              height: 44,
             }}>
+              <button
+                type="button"
+                onClick={() => setPlayers(playerCount - 1)}
+                disabled={playerCount <= 1}
+                aria-label="Fewer players"
+                style={{
+                  width: 36, height: 36, borderRadius: 999,
+                  border: 0, background: "transparent",
+                  color: "#0F1214",
+                  cursor: playerCount <= 1 ? "not-allowed" : "pointer",
+                  opacity: playerCount <= 1 ? 0.35 : 1,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  padding: 0,
+                }}
+              >
+                {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="#0F1214" />}
+              </button>
               <span style={{
-                fontFamily: "inherit", fontSize: 15, fontWeight: 500, color: "#0F1214",
-              }}>Players (1 – 8)</span>
-              {/* Single contained pill: [−] [N] [+] joined as one
-                  borderless rounded capsule against a subtle grey fill.
-                  The minus and plus glyphs sit inside without their own
-                  strokes — the outer pill is the only container. */}
-              <div style={{
-                display: "inline-flex", alignItems: "center",
-                background: "#F4F5F6",
-                borderRadius: 999,
-                padding: 4,
-                gap: 0,
-                height: 44,
-              }}>
-                <button
-                  type="button"
-                  onClick={() => setPlayers(playerCount - 1)}
-                  disabled={playerCount <= 1}
-                  aria-label="Fewer players"
-                  style={{
-                    width: 36, height: 36, borderRadius: 999,
-                    border: 0, background: "transparent",
-                    color: "#0F1214",
-                    cursor: playerCount <= 1 ? "not-allowed" : "pointer",
-                    opacity: playerCount <= 1 ? 0.35 : 1,
-                    display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    padding: 0,
-                  }}
-                >
-                  {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="#0F1214" />}
-                </button>
-                <span style={{
-                  minWidth: 32, textAlign: "center",
-                  fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-                  fontWeight: 800, fontSize: 16, color: "#0F1214",
-                  fontVariantNumeric: "tabular-nums",
-                  padding: "0 4px",
-                }}>{playerCount}</span>
-                <button
-                  type="button"
-                  onClick={() => setPlayers(playerCount + 1)}
-                  disabled={playerCount >= 8}
-                  aria-label="More players"
-                  style={{
-                    width: 36, height: 36, borderRadius: 999,
-                    border: 0, background: "transparent",
-                    color: "#0F1214",
-                    cursor: playerCount >= 8 ? "not-allowed" : "pointer",
-                    opacity: playerCount >= 8 ? 0.35 : 1,
-                    display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    padding: 0,
-                  }}
-                >
-                  {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#0F1214" />}
-                </button>
-              </div>
+                minWidth: 76, textAlign: "center",
+                fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+                fontWeight: 700, fontSize: 14, color: "#0F1214",
+                fontVariantNumeric: "tabular-nums",
+                padding: "0 6px",
+                whiteSpace: "nowrap",
+              }}>{playerCount} players</span>
+              <button
+                type="button"
+                onClick={() => setPlayers(playerCount + 1)}
+                disabled={playerCount >= 8}
+                aria-label="More players"
+                style={{
+                  width: 36, height: 36, borderRadius: 999,
+                  border: 0, background: "transparent",
+                  color: "#0F1214",
+                  cursor: playerCount >= 8 ? "not-allowed" : "pointer",
+                  opacity: playerCount >= 8 ? 0.35 : 1,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  padding: 0,
+                }}
+              >
+                {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#0F1214" />}
+              </button>
             </div>
-          </SectionAccordion>
+          </section>
         </div>
 
         {/* Sticky footer — Search button sits on a gradient fade so the
@@ -1403,6 +1409,163 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   return ReactDOM.createPortal(sheet, portalTarget);
 }
 
+// ---- Mobile results sheet ------------------------------------------------
+// Slides up after the user taps Search in MobileSearchSheet. Shows the
+// clubs that match the committed filter set (Where / What / When / Who).
+// Tapping a club closes the sheet and routes the user into the booking
+// flow with the prefill payload already on window.__searchPrefill.
+//
+// Visual model mirrors MobileSearchSheet so the two read as one design:
+// same backdrop + slide animation, same 24/800 title, same ghost X,
+// same row anatomy. Difference: no radios — each club row is a direct
+// navigation target with a trailing chevron.
+function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
+  useEffectSB(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
+  const portalTarget = typeof document !== "undefined"
+    ? document.getElementById("device-frame-inner")
+    : null;
+  if (!portalTarget) return null;
+
+  // For the prototype, all clubs in SB_WHERE_SUGGESTIONS are considered
+  // "matched" — real filtering against where/activity/when isn't wired
+  // through to the data corpus. The filter pills at the top show what
+  // the user picked so the connection between input and output is
+  // visible.
+  const clubs = SB_WHERE_SUGGESTIONS.filter((s) => s.kind === "club");
+  const v = values || {};
+  const filterChips = [v.where, v.activity, v.when, v.who].filter(Boolean);
+
+  const sheet = (
+    <>
+      <div
+        onClick={onClose}
+        aria-hidden={!open}
+        style={{
+          position: "absolute", inset: 0,
+          background: "rgba(15,18,20,.45)",
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 220ms ease",
+          zIndex: 100,
+        }}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Available clubs"
+        style={{
+          position: "absolute", left: 0, right: 0, bottom: 0,
+          height: "92%",
+          background: "#FFFFFF",
+          borderTopLeftRadius: 20, borderTopRightRadius: 20,
+          boxShadow: "0 -8px 32px rgba(15,18,20,.22)",
+          transform: open ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 320ms cubic-bezier(.2,.8,.2,1)",
+          zIndex: 101,
+          display: "flex", flexDirection: "column",
+          fontFamily: "Inter, system-ui, sans-serif",
+          pointerEvents: open ? "auto" : "none",
+        }}
+      >
+        {/* Drag handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px 0" }}>
+          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#E9EBEC" }} />
+        </div>
+        {/* Header — same scale as MobileSearchSheet's title */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "8px 16px 12px 16px",
+        }}>
+          <h2 style={{
+            margin: 0,
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+            fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
+            color: "#0F1214",
+          }}>Available clubs</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: 44, height: 44, border: 0, padding: 0,
+              background: "transparent",
+              display: "inline-flex", alignItems: "center", justifyContent: "flex-end",
+              cursor: "pointer",
+            }}
+          >
+            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="#0F1214" />}
+          </button>
+        </div>
+
+        {/* Filter chip row — surfaces the committed filters at the top
+            so the user sees the connection from search to results. */}
+        {filterChips.length > 0 && (
+          <div style={{
+            padding: "0 16px 12px 16px",
+            display: "flex", flexWrap: "wrap", gap: 6,
+          }}>
+            {filterChips.map((c, i) => (
+              <span key={i} style={{
+                height: 22, padding: "0 10px", borderRadius: 6,
+                background: "#F4F5F6", color: "#0F1214",
+                fontSize: 11.5, fontWeight: 600,
+                display: "inline-flex", alignItems: "center",
+                whiteSpace: "nowrap",
+              }}>{c}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Scrollable club list — each row navigates on tap. */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 16px 16px" }}>
+          {clubs.map((c) => (
+            <button
+              key={c.name}
+              type="button"
+              onClick={() => onSelectClub && onSelectClub(c.name)}
+              style={{
+                display: "flex", alignItems: "center", gap: 12,
+                width: "100%",
+                minHeight: 56,
+                padding: "12px 12px",
+                border: 0, background: "transparent",
+                borderRadius: 10,
+                color: "#0F1214",
+                fontFamily: "inherit", textAlign: "left", cursor: "pointer",
+                transition: "background 120ms ease",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              {window.Icon && <window.Icon name="Building2" size={18} strokeWidth={2} color="#4B5052" />}
+              <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+                <span style={{
+                  fontSize: 15, fontWeight: 600, color: "#0F1214",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  lineHeight: 1.3,
+                }}>{c.name}</span>
+                <span style={{
+                  fontSize: 13, color: "#4B5052", lineHeight: 1.3,
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>{(c.sub || "").replace(/\s·\s\d{5}.*$/, "")}</span>
+              </span>
+              {window.Icon && <window.Icon name="ChevronRight" size={18} strokeWidth={2} color="#4B5052" />}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
+  return ReactDOM.createPortal(sheet, portalTarget);
+}
+
 // ---- Mobile compact variant ----------------------------------------------
 // Single-row pill that opens the MobileSearchSheet on tap. The pill shows
 // the title "Search for anything" plus the four current facet values on a
@@ -1422,6 +1585,10 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
   };
 
   const [open, setOpen] = useStateSB(false);
+  // Results sheet — shown after the user taps Search inside the filter
+  // sheet. Listing matched clubs; selecting one routes to the booking
+  // flow via the parent's onSubmit.
+  const [resultsOpen, setResultsOpen] = useStateSB(false);
   return (
     <>
     <button
@@ -1435,15 +1602,14 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
       }}
       style={{
         width: "100%",
-        // Auto height with 8px vertical padding gives the pill a more
-        // balanced shape — content (label + value) is two stacked lines
-        // ≈ 36px tall, so 36 + 8 + 8 = 52, but the explicit vertical
-        // padding lets the bar grow if a font swap changes line height.
+        // Auto height with 12px vertical padding gives the pill a more
+        // generous shape — content (label + value) is two stacked lines
+        // ≈ 36px tall, so total pill ≈ 60px tall.
         borderRadius: 999,
         background: "#fff",
         border: 0,
         boxShadow: "0 1px 2px rgba(15,18,20,.06), 0 4px 14px rgba(15,18,20,.08), inset 0 0 0 1px rgba(15,18,20,.06)",
-        padding: "8px 8px 8px 18px",
+        padding: "12px 8px 12px 18px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -1499,11 +1665,30 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
       onClose={() => setOpen(false)}
       values={v}
       onChange={update}
-      onSubmit={(committed) => onSubmit && onSubmit(committed)}
+      onSubmit={(committed) => {
+        // Tapping Search in the filter sheet now opens the results
+        // sheet listing matched clubs. Parent's onSubmit fires later,
+        // once the user picks a club.
+        setOpen(false);
+        setResultsOpen(true);
+      }}
+      theme={theme}
+    />
+    <SearchResultsSheet
+      open={resultsOpen}
+      onClose={() => setResultsOpen(false)}
+      values={v}
+      onSelectClub={(clubName) => {
+        // Stash the selected club on the prefill payload so the
+        // booking screen can pick it up, then navigate.
+        window.__searchPrefill = { ...(window.__searchPrefill || {}), club: clubName };
+        setResultsOpen(false);
+        onSubmit && onSubmit({ ...v, club: clubName });
+      }}
       theme={theme}
     />
     </>
   );
 }
 
-Object.assign(window, { SearchBar, SearchBarCompact, MobileSearchSheet });
+Object.assign(window, { SearchBar, SearchBarCompact, MobileSearchSheet, SearchResultsSheet });
