@@ -1985,32 +1985,30 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
         ref={trackRef}
         onMouseLeave={() => setHovered(null)}
         style={{
-          // Track tokens per Figma px.club spec (node 8059-57685):
-          // bg #0B0E0E (system/bg/neutrals/card-(specific) on dark),
-          // pad 8, gap 8, fully rounded, elevation/500 drop shadow.
+          // Track tokens per updated Figma spec (node 8059-57685):
+          // bg #0B0E0E (system/bg/neutrals/card on dark),
+          // pad 4 + gap 4 (compact, was 8/8),
+          // fully rounded, elevation/500 drop shadow.
           pointerEvents: "auto",
           position: "relative",
           display: isMobile ? "flex" : "inline-flex",
           width: isMobile ? "100%" : "auto",
           alignItems: "center",
-          gap: isMobile ? 4 : 8,
+          gap: 4,
           background: "#0B0E0E",
           color: "#EDF3F3",
-          padding: 8, borderRadius: 999,
+          padding: 4, borderRadius: 999,
           boxShadow: "0 16px 16px rgba(0,0,0,.16)",
         }}
       >
-        {/* Sliding pill — single absolutely-positioned capsule that tracks
-            the active item via transform + width. Spec uses the mint
-            #EDF3F3 (buttons/primary/bg/default in the inverted dark
-            context) rather than pure white, so the pill reads as a soft
-            chip rather than a hot spotlight. Sits BEHIND the buttons
-            (zIndex: 0) so the button text stays interactive on top. */}
+        {/* Sliding pill — mint #EDF3F3 capsule that tracks the active
+            item. Top/bottom insets match the new 4px track padding so
+            the pill sits flush against the dark track edges. */}
         <div
           aria-hidden="true"
           style={{
             position: "absolute",
-            top: 8, bottom: 8,
+            top: 4, bottom: 4,
             left: 0,
             width: pillRect.width,
             transform: `translateX(${pillRect.left}px)`,
@@ -2031,27 +2029,31 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
               onClick={it.onClick || undefined}
               onMouseEnter={() => setHovered(idx)}
               style={{
-                // Desktop hugs content with 16/12 padding + minWidth 72
-                // (Figma "🎮 buttons/lg" sizing). Mobile fills the row
-                // evenly with tighter horizontal padding so all 4 items
+                // Desktop: 10/12 padding + minWidth 72 + 20px icon
+                // + p2 14/medium label (Figma "🎮 buttons/md*" sizing).
+                // Mobile keeps tighter horizontal padding so 4 items
                 // remain readable inside the 360px viewport.
                 position: "relative",
                 zIndex: 1,
                 flex: isMobile ? 1 : "0 0 auto",
                 minWidth: isMobile ? 0 : 72,
-                padding: isMobile ? "10px 8px" : "12px 16px",
+                padding: isMobile ? "8px 8px" : "10px 12px",
                 borderRadius: 999, border: 0,
                 background: "transparent",
-                color: isActive ? "#222424" : "#EDF3F3",
+                // Active text uses the system primary fg token (#0F1214)
+                // so it matches the page's body type instead of pure
+                // black, which would read harsher against the mint pill.
+                color: isActive ? "#0F1214" : "#EDF3F3",
                 fontFamily: "inherit",
-                // Spec: p1/medium 16/24 with letterSpacing 0. Mobile drops
-                // to 13/medium so the shortLabel set fits without truncation.
+                // Spec: p2/medium 14/20 letterSpacing 0.1. Mobile drops
+                // to 13/medium so the shortLabel set still fits.
                 fontWeight: 500,
-                fontSize: isMobile ? 13 : 16,
-                lineHeight: isMobile ? "20px" : "24px",
+                fontSize: isMobile ? 13 : 14,
+                lineHeight: isMobile ? "20px" : "20px",
+                letterSpacing: 0.1,
                 cursor: it.onClick ? "pointer" : "default",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
-                gap: isMobile ? 0 : 8,
+                gap: isMobile ? 0 : 6,
                 whiteSpace: "nowrap",
                 // Only color animates per-button; the mint background is
                 // owned by the sliding pill above.
@@ -2060,9 +2062,9 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
             >
               {/* Icons appear only on desktop; mobile hides them so labels
                   fit comfortably across the 4-item row. Per Figma the
-                  icon is 24px and sits left of the label container. */}
+                  icon is 20px and sits left of the label container. */}
               {!isMobile && (
-                <Icon name={it.icon} size={24} color={isActive ? "#222424" : "#EDF3F3"} strokeWidth={1.75} />
+                <Icon name={it.icon} size={20} color={isActive ? "#0F1214" : "#EDF3F3"} strokeWidth={1.75} />
               )}
               {/* Desktop uses the long label per Figma spec ("Book a
                   Court" not "Book Court"); mobile keeps the short label
