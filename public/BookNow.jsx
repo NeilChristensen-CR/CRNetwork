@@ -238,7 +238,7 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   transition: "background 120ms ease",
                 }}>
-                <Icon name="CaretLeft" size={16} strokeWidth={2} color="#0F1214" />
+                <Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />
               </button>
               <button onClick={() => scrollBy(1)} aria-label="Next"
                 onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
@@ -249,7 +249,7 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   transition: "background 120ms ease",
                 }}>
-                <Icon name="CaretRight" size={16} strokeWidth={2} color="#0F1214" />
+                <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
               </button>
             </div>
           }
