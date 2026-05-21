@@ -25,7 +25,11 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
   // Center tab navigation (Clubs / Players) — desktop only. Active tab is
   // tracked internally so the underline indicator follows clicks. Tab
   // clicks also forward through onNav so a host can route on the label.
-  const [activeTab, setActiveTab] = useStateCBLO("Clubs");
+  // Default "Players" because the current logged-out home renders the
+  // player-discovery surface (clubs near me, available to play now,
+  // event feeds) — "Clubs" will eventually route to a dedicated club
+  // directory view.
+  const [activeTab, setActiveTab] = useStateCBLO("Players");
   const TABS = ["Clubs", "Players"];
 
   return (
