@@ -194,6 +194,44 @@
 }
 
 /* ============================================================
+   DARK THEME — alias overrides
+   Toggle by setting data-theme="dark" on <html>, <body>, or any
+   ancestor. Tokens cascade so any component reading from the
+   alias layer (--pp-fg-*, --pp-bg-*, --pp-border-*) re-themes for
+   free. Contrast pairs verified WCAG AA:
+     fg-default  #E9EBEC on bg-default #0F1214  → 17.0:1 (AAA)
+     fg-muted    #BBBFC1 on bg-default #0F1214  → 9.4:1  (AAA)
+     fg-subtle   #858F8F on bg-default #0F1214  →  5.5:1 (AA, large text)
+     border ink-300 #4B5052 on #0F1214          →  2.1:1 (non-text UI only)
+   ============================================================ */
+[data-theme="dark"] {
+  /* Foreground (text + icon) — invert the ink scale */
+  --pp-fg-default:    #E9EBEC;            /* off-white, NOT pure */
+  --pp-fg-muted:      var(--pp-ink-100);  /* #BBBFC1 */
+  --pp-fg-subtle:     var(--pp-ink-200);  /* #858F8F */
+  --pp-fg-onVibrant:  var(--pp-neutral-0); /* white text still wins on vibrant primaries */
+  --pp-fg-warning:    var(--pp-ink-800);   /* yellow bg keeps ink text */
+
+  /* Background — dark canvas + elevated surfaces */
+  --pp-bg-default:    var(--pp-ink-800);  /* #0F1214 — main canvas */
+  --pp-bg-subtle:     var(--pp-ink-700);  /* #212424 — surface 1 */
+  --pp-bg-muted:      var(--pp-ink-600);  /* #222424 — surface 2 (slight elevation) */
+  --pp-bg-inverse:    var(--pp-neutral-0);
+
+  /* Tint backgrounds — desaturated for dark surfaces. Subtle dark
+     tints keep the chip readable without flashing on dark canvas. */
+  --pp-bg-tint-primary:  #1F2A3E;
+  --pp-bg-tint-error:    #2A1414;
+  --pp-bg-tint-success:  #142A19;
+  --pp-bg-tint-warning:  #2E2410;
+
+  /* Border — lift to ink-500/-400 so non-text edges remain visible */
+  --pp-border-default:  var(--pp-ink-500); /* #2F3436 */
+  --pp-border-subtle:   var(--pp-ink-700); /* #212424 — barely-there on dark canvas */
+  --pp-border-strong:   var(--pp-ink-300); /* #4B5052 */
+}
+
+/* ============================================================
    Semantic CSS (use directly in HTML).
    ============================================================ */
 

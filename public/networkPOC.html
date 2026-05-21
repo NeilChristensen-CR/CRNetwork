@@ -211,12 +211,18 @@
     // panel for state changes.
     const [controlsOpen, setControlsOpen] = useState(false);
 
-    // Color mode — light / dark / branded. The theme system doesn't
-    // currently wire dark/branded surfaces through to all components,
-    // so this is presented as a stub today: the ControlPanel toggles
-    // state but the canvas only reflects whatever `THEMES[app]` ships.
-    // Wired here for future plumbing.
+    // Color mode — light / dark. Toggling Mode = Dark writes
+    // data-theme="dark" onto <html>, which re-points the Pickle
+    // Pixels alias layer (--pp-fg-*, --pp-bg-*, --pp-border-*) to
+    // their dark equivalents in colors_and_type.css. Any component
+    // reading from those tokens re-themes without prop drilling.
     const [mode, setMode] = useState("light");
+    React.useEffect(() => {
+      const root = document.documentElement;
+      if (mode === "dark") root.setAttribute("data-theme", "dark");
+      else root.removeAttribute("data-theme");
+      return () => { root.removeAttribute("data-theme"); };
+    }, [mode]);
 
     const theme = window.THEMES[app];
 
