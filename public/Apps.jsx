@@ -2400,17 +2400,19 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                 {(() => {
                   const s = trendingSupplyState(ev);
                   const isLimited = s.variant === "limited";
+                  // Limited variant uses the spec's subtle error tone
+                  // (#F7ECEB / #860606) at rest. On parent-card hover
+                  // the existing [data-card-hover]:hover [data-tag=
+                  // "warning"] CSS rule inverts it to the vibrant solid
+                  // #DC2626 / white treatment — gives the resting card
+                  // a calmer chip but escalates the urgency cue when
+                  // the player engages with the card.
                   return (
                     <span data-tag={isLimited ? "warning" : "default"} style={{
-                      // Limited variant is the Figma vibrant red ("X Spots
-                      // Left" pill, md size: 8/4 padding, fontSize 12).
-                      // Other variants use the spec's primary-tag default
-                      // (#EDF3F3 bg) so they read as informational chips,
-                      // not urgency.
-                      padding: isLimited ? "4px 8px" : "2px 6px",
+                      padding: "2px 6px",
                       borderRadius: 9999,
-                      background: isLimited ? "#DA0B0B" : "#EDF3F3",
-                      color: isLimited ? "#FFFFFF" : "#161919",
+                      background: isLimited ? "#F7ECEB" : "#EDF3F3",
+                      color: isLimited ? "#860606" : "#161919",
                       fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
                       fontWeight: 400,
                       display: "inline-flex", alignItems: "center",
@@ -2438,13 +2440,16 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                     {ev.club}
                   </span>
                 </div>
-                {/* Location row — MapPin + miles away + city. */}
+                {/* Location row — MapPin + "City, FL • N mi away". City
+                    leads so the player anchors on a place name first
+                    (the more recognizable bit) before the precise
+                    distance — Figma reference reads location-then-distance. */}
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                   <span style={{ display: "inline-flex", marginTop: 0, flexShrink: 0 }}>
                     <Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />
                   </span>
                   <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
-                    {ev.distance} away • {ev.city}
+                    {ev.city} • {ev.distance} away
                   </span>
                 </div>
                 {/* Time row — Clock + "Wed, 4/29 • 6:00 PM - 7:00 PM". */}
@@ -2582,22 +2587,25 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
           {isMobile ? "More Events" : "More events near you"}
         </h2>
       </div>
-      {groups.map((g) => (
-        <div key={g.id} style={{ marginBottom: 0 }}>
+      {groups.map((g, gi) => (
+        <div key={g.id} style={{ marginBottom: gi === groups.length - 1 ? 0 : 32 }}>
           {/* Date subsection header, per Figma spec (node 8057-51747):
-              - 12 / 24 padding, gap 12
-              - border-bottom #BBBFC1 (neutral, NOT subtle) — the date
-                row reads as a sticky-style divider line above the
-                list items below
-              - date label: p3/semiBold 13/0.2ls #0F1214 (was 12/700 muted)
-              - count badge: solid dark #222424 chip with white p3/medium
-                text (was muted #F4F5F6 / #4B5052). Width 16, padding 2,
-                rounded-xs 4. Reads as the spec's "📛 inline primary sm"
-                badge token. */}
+              padding 12 / 24 — left padding matches the EventRow's 24px
+              padding-left so the date label aligns vertically with the
+              "Time" column below. No negative margin: the date row
+              shares the same content column as the rows it groups, and
+              the border-bottom stretches naturally to the row width.
+
+              Tokens:
+                date label    p3/semiBold 13/0.2ls #0F1214
+                count badge   solid #222424 / white p3/medium
+                              (📛 inline primary sm)
+                divider       border-bottom #BBBFC1 (neutral, NOT subtle)
+                              so the date row reads as a sticky-style
+                              divider line above the list items below */}
           <div style={{
             display: "flex", alignItems: "center", gap: 12,
             padding: "12px 24px",
-            margin: "0 -24px",
             borderBottom: "1px solid #BBBFC1",
             background: "#FFFFFF",
           }}>
@@ -2843,25 +2851,29 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         fontSize: 20, lineHeight: "28px", letterSpacing: 0,
         color: "#0F1214", whiteSpace: "nowrap", flexShrink: 0,
       }}>{r.price}</div>
-      {/* Reserve button — icon-only square per Figma spec
-          (node 8057-51747): 48×48, p-12 padding, 24px ArrowRight glyph,
-          rounded-xs 8px, #222424 bg with elevation/200 shadow. The full
-          row is itself clickable (onClick at the row level opens the
-          event), so the dark square reads as the visual affordance
-          without needing a label. */}
+      {/* Reserve button — 48×48 icon-only square at rest, expands on
+          row hover to a 132px pill with the "Reserve" label + arrow.
+          Matches the spec's resting state (icon-only #222424 square,
+          rounded-xs 8, elevation/200) and surfaces the explicit verb
+          when the row is being engaged with. */}
       <button
         onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
         aria-label="Reserve event"
         style={{
-          width: 48, height: 48,
-          padding: 12,
+          minWidth: hover ? 132 : 48,
+          height: 48,
+          padding: hover ? "0 16px" : 0,
           borderRadius: 8,
           background: "#222424", color: "#fff", border: 0, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0,
+          gap: hover ? 8 : 0,
+          fontFamily: "inherit", fontWeight: 500, fontSize: 16, lineHeight: "24px",
+          whiteSpace: "nowrap", flexShrink: 0, overflow: "hidden",
           boxShadow: "0 2px 4px rgba(0,0,0,.08)",
+          transition: "min-width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
         }}
       >
+        {hover && <span>Reserve</span>}
         <Icon name="ArrowRight" size={24} strokeWidth={1.75} color="#fff" />
       </button>
     </div>
