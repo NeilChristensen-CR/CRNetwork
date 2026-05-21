@@ -2968,7 +2968,12 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             letterSpacing: isMobile ? -0.4 : -0.4,
             color: theme.t.text,
           }}>
-            This is CourtReserve. Let's Play.
+            This is CourtReserve.{" "}
+            {/* "Let's Play." picks up the brand green (#2E7D32) so the
+                tagline reads as the CourtReserve voice instead of a
+                second beat in the headline. Same hex as the brandmark
+                check and the Active-players dot. */}
+            <span style={{ color: "#2E7D32" }}>Let's Play.</span>
           </h1>
         </div> :
         <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
