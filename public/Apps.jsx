@@ -2482,20 +2482,34 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
     { id: "today",    label: "Today, Monday, May 11, 2026",     rows: allRows.slice(0, 4) },
     { id: "tomorrow", label: "Tomorrow, Tuesday, May 12, 2026", rows: allRows.slice(4) },
   ];
-  // Single combo-filter button replacing the three separate pills. Reads
-  // as "<window> · <time> · <location>" and opens an inline dropdown with
-  // all three controls on tap.
-  const [filterOpen, setFilterOpen] = React.useState(false);
+  // Three independent dropdown segments — WINDOW / TIME / LOCATION — laid
+  // out side-by-side and styled to mirror the hero SearchBar's segment
+  // language (uppercase label on top, current value below, click to open
+  // a popover with options). `openSegment` is mutually exclusive: only one
+  // popover can be open at a time. The previous combo-filter button +
+  // shared dropdown (with sliders + calendar icons) was collapsed into
+  // a single trigger; splitting it back out makes each filter feel like a
+  // first-class control and matches the SearchBar pattern players already
+  // know from the hero.
+  const [openSegment, setOpenSegment] = React.useState(null); // "window" | "time" | "location" | null
   const [filterWindow, setFilterWindow] = React.useState("This Week");
   const [filterTime, setFilterTime] = React.useState("Any Time");
   const [filterLoc, setFilterLoc] = React.useState("Oakland, CA");
   const filterRef = React.useRef(null);
   React.useEffect(() => {
-    if (!filterOpen) return;
-    const onDoc = (e) => { if (filterRef.current && !filterRef.current.contains(e.target)) setFilterOpen(false); };
+    if (!openSegment) return;
+    const onDoc = (e) => { if (filterRef.current && !filterRef.current.contains(e.target)) setOpenSegment(null); };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
-  }, [filterOpen]);
+  }, [openSegment]);
+  // Segment + popover config — declarative so the JSX below is just a map.
+  // Each entry carries its label, the current value, the option list, the
+  // setter (with auto-close on pick), and the key used for open/close.
+  const filterSegments = [
+    { key: "window",   label: "WINDOW",   value: filterWindow, options: ["Today", "This Week", "Next 2 Weeks", "This Month"], onPick: (v) => { setFilterWindow(v); setOpenSegment(null); } },
+    { key: "time",     label: "TIME",     value: filterTime,   options: ["Any Time", "Morning", "Afternoon", "Evening"],     onPick: (v) => { setFilterTime(v);   setOpenSegment(null); } },
+    { key: "location", label: "LOCATION", value: filterLoc,    options: ["Oakland, CA", "Berkeley, CA", "San Francisco, CA", "St. Augustine, FL"], onPick: (v) => { setFilterLoc(v); setOpenSegment(null); } },
+  ];
   return (
     <div style={{ marginTop: isMobile ? 32 : 16 }}>
       <div style={{
@@ -2511,61 +2525,100 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
         <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           {isMobile ? "More Events" : "More events near you"}
         </h2>
-        <div ref={filterRef} style={{ position: "relative", minWidth: 0, maxWidth: "100%" }}>
-          {/* Single-line combo trigger. A leading SlidersHorizontal glyph
-              signals "filters" so the chips read as a button, not as a
-              passive sentence. Hover deepens the border + lightens the
-              fill; open state inverts to dark so it's obvious which row
-              is driving the open popover. */}
-          <button
-            onClick={() => setFilterOpen((o) => !o)}
-            aria-expanded={filterOpen}
-            onMouseEnter={(e) => { if (!filterOpen) { e.currentTarget.style.borderColor = "#0F1214"; e.currentTarget.style.background = "#F4F5F6"; } }}
-            onMouseLeave={(e) => { if (!filterOpen) { e.currentTarget.style.borderColor = "#E9EBEC"; e.currentTarget.style.background = "#fff"; } }}
-            style={{
-              height: 40, padding: "0 14px", borderRadius: 8,
-              border: `1px solid ${filterOpen ? "#0F1214" : "#E9EBEC"}`,
-              background: filterOpen ? "#0F1214" : "#fff",
-              color: filterOpen ? "#fff" : "#0F1214",
-              display: "block",
-              maxWidth: "100%",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              fontFamily: "inherit", fontSize: 13, fontWeight: 500,
-              cursor: "pointer",
-              textAlign: "left",
-              lineHeight: "38px",
-              transition: "background 140ms ease, border-color 140ms ease, color 140ms ease",
-            }}
-          >
-            <span style={{ display: "inline-block", verticalAlign: "-3px", marginRight: 8 }}>
-              <Icon name="SlidersHorizontal" size={14} strokeWidth={2} color={filterOpen ? "#fff" : "#0F1214"} />
-            </span>
-            <span style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}>
-              <Icon name="Calendar" size={14} strokeWidth={2} color={filterOpen ? "#fff" : "#0F1214"} />
-            </span>
-            {filterWindow}
-            <span style={{ color: filterOpen ? "rgba(255,255,255,.4)" : "#C8CDCD", margin: "0 10px" }}>·</span>
-            {filterTime}
-            <span style={{ color: filterOpen ? "rgba(255,255,255,.4)" : "#C8CDCD", margin: "0 10px" }}>·</span>
-            <span style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 6 }}>
-              <Icon name="Navigation" size={13} strokeWidth={2.2} color={filterOpen ? "#8AB6FF" : "#5B7CFA"} />
-            </span>
-            {filterLoc}
-          </button>
-          {filterOpen && (
-            <div role="dialog" style={{
-              position: "absolute", top: "100%", right: 0, marginTop: 8,
-              minWidth: 280, padding: 12,
-              background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
-              boxShadow: "0 12px 40px rgba(15,18,20,.12), 0 2px 8px rgba(15,18,20,.06)",
-              zIndex: 30,
-              display: "flex", flexDirection: "column", gap: 10,
-            }}>
-              <FilterSelect label="Window" value={filterWindow} onChange={setFilterWindow} options={["Today", "This Week", "Next 2 Weeks", "This Month"]} />
-              <FilterSelect label="Time" value={filterTime} onChange={setFilterTime} options={["Any Time", "Morning", "Afternoon", "Evening"]} />
-              <FilterSelect label="Location" value={filterLoc} onChange={setFilterLoc} options={["Oakland, CA", "Berkeley, CA", "San Francisco, CA", "St. Augustine, FL"]} />
-            </div>
-          )}
+        {/* Segment row — three independent dropdown buttons styled to
+            mirror the hero SearchBar's segment language: uppercase label
+            on top, current value + chevron below, white pill with subtle
+            border, click to open a popover. Each segment has its own
+            anchored popover; only one is open at a time. The previous
+            combo trigger (with the SlidersHorizontal + Calendar icons)
+            is gone — the labels do that job now. */}
+        <div ref={filterRef} style={{
+          display: "flex", gap: 8, minWidth: 0, maxWidth: "100%",
+          // Mobile gets a horizontal scrollable row so the 3 segments
+          // don't crush below readable widths. Desktop has plenty of
+          // room beside the H2 to lay them out inline.
+          overflowX: isMobile ? "auto" : "visible",
+          scrollbarWidth: "none",
+        }}>
+          {filterSegments.map((seg) => {
+            const open = openSegment === seg.key;
+            return (
+              <div key={seg.key} style={{ position: "relative", flex: isMobile ? "0 0 auto" : "0 1 auto" }}>
+                <button
+                  type="button"
+                  onClick={() => setOpenSegment((cur) => cur === seg.key ? null : seg.key)}
+                  aria-expanded={open}
+                  aria-haspopup="listbox"
+                  onMouseEnter={(e) => { if (!open) e.currentTarget.style.background = "#F4F5F6"; }}
+                  onMouseLeave={(e) => { if (!open) e.currentTarget.style.background = "#FFFFFF"; }}
+                  style={{
+                    height: 56, padding: "8px 14px",
+                    borderRadius: 8,
+                    border: `1px solid ${open ? "#0F1214" : "#E9EBEC"}`,
+                    background: "#FFFFFF",
+                    cursor: "pointer",
+                    display: "inline-flex", flexDirection: "column", alignItems: "flex-start",
+                    gap: 4, minWidth: 132, textAlign: "left",
+                    transition: "background 140ms ease, border-color 140ms ease",
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+                    fontWeight: 800, fontSize: 10.5, letterSpacing: 1.3,
+                    textTransform: "uppercase", color: "#858F8F", lineHeight: 1,
+                  }}>{seg.label}</span>
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    fontFamily: "Inter, system-ui, sans-serif",
+                    fontWeight: 600, fontSize: 14, color: "#0F1214", lineHeight: 1.2,
+                  }}>
+                    {seg.value}
+                    <Icon name="ChevronDown" size={13} strokeWidth={2.2} color="#0F1214" />
+                  </span>
+                </button>
+                {open && (
+                  <div role="listbox" style={{
+                    position: "absolute", top: "100%", left: 0, marginTop: 8,
+                    minWidth: 200, padding: 6,
+                    background: "#FFFFFF", border: "1px solid #E9EBEC", borderRadius: 10,
+                    boxShadow: "0 12px 40px rgba(15,18,20,.12), 0 2px 8px rgba(15,18,20,.06)",
+                    zIndex: 30,
+                    display: "flex", flexDirection: "column",
+                  }}>
+                    {seg.options.map((opt) => {
+                      const selected = opt === seg.value;
+                      return (
+                        <button
+                          key={opt}
+                          type="button"
+                          role="option"
+                          aria-selected={selected}
+                          onClick={() => seg.onPick(opt)}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = selected ? "#F4F5F6" : "transparent"; }}
+                          style={{
+                            height: 36, padding: "0 10px", borderRadius: 6,
+                            border: 0,
+                            background: selected ? "#F4F5F6" : "transparent",
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            fontFamily: "inherit", fontSize: 13,
+                            fontWeight: selected ? 600 : 500,
+                            color: "#0F1214",
+                            cursor: "pointer",
+                            transition: "background 120ms ease",
+                            textAlign: "left",
+                          }}
+                        >
+                          <span>{opt}</span>
+                          {selected && <Icon name="Check" size={14} strokeWidth={2.4} color="#0F1214" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
       {groups.map((g) => (
@@ -2614,29 +2667,6 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
         </button>
       </div>
     </div>
-  );
-}
-
-// ---- FilterSelect — labeled select wrapper used inside the combo dropdown
-// on MoreEventsNearYou. Keeps the layout consistent across the three
-// (window / time / location) sub-controls without prop-drilling theme.
-function FilterSelect({ label, value, onChange, options }) {
-  return (
-    <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#4B5052" }}>{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          height: 36, padding: "0 12px", borderRadius: 8,
-          border: "1px solid #E9EBEC", background: "#fff",
-          fontFamily: "inherit", fontSize: 13, color: "#0F1214",
-          cursor: "pointer",
-        }}
-      >
-        {options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-      </select>
-    </label>
   );
 }
 
