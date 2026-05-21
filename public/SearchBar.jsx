@@ -1,13 +1,13 @@
 // SearchBar.jsx — Network discovery search pill
 // ----------------------------------------------------------------------------
-// Airbnb-style 4-segment pill (WHERE / ACTIVITY / WHEN / WHO) with a circular
+// Airbnb-style 4-segment pill (WHERE / WHAT / WHEN / WHO) with a circular
 // submit button on the right. Six interactive states:
 //
 //   1. Default              — unified white pill, no segment highlighted
 //   2. Hover (per segment)  — subtle gray fill on the hovered segment
 //   3. WHERE focused        — track turns gray; WHERE lifts as a white pill
 //                              + popover with city list opens below it
-//   4. ACTIVITY focused     — same lift; popover with sport list
+//   4. WHAT focused         — same lift; popover with sport list
 //   5. WHEN focused         — same lift; popover with date/time options
 //   6. WHO focused          — same lift; popover with player stepper; AND
 //                              the submit button expands to a labeled pill
@@ -460,7 +460,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // touched yet; the watermark color is applied at render time.
   const segments = [
     { key: "where",    label: "WHERE",    value: v.where,    display: touched.where    ? v.where    : PLACEHOLDERS.where,    icon: "Navigation", anchorRef: whereRef },
-    { key: "activity", label: "ACTIVITY", value: v.activity, display: touched.activity ? v.activity : PLACEHOLDERS.activity, icon: null,         anchorRef: activityRef },
+    { key: "activity", label: "WHAT",     value: v.activity, display: touched.activity ? v.activity : PLACEHOLDERS.activity, icon: null,         anchorRef: activityRef },
     { key: "when",     label: "WHEN",     value: v.when,     display: touched.when     ? v.when     : PLACEHOLDERS.when,     icon: null,         anchorRef: whenRef },
     { key: "who",      label: "WHO",      value: v.who,      display: touched.who      ? v.who      : PLACEHOLDERS.who,      icon: null,         anchorRef: whoRef },
   ];
@@ -944,7 +944,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
 
 // ---- Mobile bottom sheet --------------------------------------------------
 // Full-height sheet that slides up from the bottom of the viewport. Renders
-// the four facets stacked in segment order (Where → Activity → When → Who)
+// the four facets stacked in segment order (Where → What → When → Who)
 // with the option lists from the desktop SearchBar so the discovery model
 // stays consistent.
 //
