@@ -2289,7 +2289,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
     return () => obs.disconnect();
   }, [isMobile]);
   return (
-    <div style={{ marginTop: isMobile ? 32 : 16 }}>
+    <div style={{ marginTop: isMobile ? 48 : 56 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
         <h2 style={{ fontFamily: theme.display, fontWeight: 800, fontSize: isMobile ? 20 : 28, lineHeight: 1.15, letterSpacing: isMobile ? -0.4 : -0.8, color: theme.t.text, margin: 0 }}>
           {title}
@@ -2547,7 +2547,7 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
     { id: "tomorrow", label: "Tomorrow, Tuesday, May 12, 2026", rows: allRows.slice(4) },
   ];
   return (
-    <div style={{ marginTop: isMobile ? 32 : 16 }}>
+    <div style={{ marginTop: isMobile ? 48 : 56 }}>
       {/* Header — just the title now. The 3-segment filter row
           (WINDOW / TIME / LOCATION) was pulled per product feedback:
           More Events sits below Trending + Beginners which are already
@@ -2705,8 +2705,11 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
 
   // ---- Desktop layout — Figma spec (node 8061-58156) ----------------------
   // Row tokens: 24px padding all sides, gap 24 between columns. Default
-  // (non-hovered) state carries a soft inset tint (`rgba(0,0,0,.04)` per
-  // spec) so the row reads as a zebra-striped lane; hover lifts to white.
+  // state is white (the rest mode reads as a clean lane); hover swaps in
+  // the soft inset tint (`rgba(0,0,0,.04)`, Figma's
+  // `system/contrast/darken/50` token — used in the spec's "default"
+  // variant). Inverting the two states keeps the resting state cleaner
+  // and gives the row an explicit interactive feedback on hover.
   return (
     <div
       data-card-hover
@@ -2720,8 +2723,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         padding: 24,
         margin: 0,
         borderBottom: "1px solid #E9EBEC",
-        // Zebra tint per spec — `system/contrast/darken/50` ≈ rgba(0,0,0,.04).
-        background: hover ? "#FFFFFF" : "rgba(0,0,0,.04)",
+        background: hover ? "rgba(0,0,0,.04)" : "#FFFFFF",
         cursor: "pointer",
         transition: "background 140ms ease",
       }}
@@ -3007,7 +3009,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
         <VerifiedPopularClubs theme={theme} viewport={viewport} onOpenClub={onOpenClub} />
         }
         {isCR &&
-        <div style={{ marginTop: isMobile ? 32 : 16 }}>
+        <div style={{ marginTop: isMobile ? 48 : 56 }}>
             <BookNowSegment theme={theme} viewport={viewport} />
           </div>
         }
