@@ -1768,8 +1768,8 @@ function Dashboard({ theme, viewport, onOpenEventList, onOpenClub, onFindClubs, 
 
   return (
     <div data-dark={theme.dark ? "true" : undefined} style={{
-      background: theme.t.bg, fontFamily: "Inter, system-ui, sans-serif",
-      color: theme.t.text,
+      background: "var(--pp-bg-default)", fontFamily: "Inter, system-ui, sans-serif",
+      color: "var(--pp-fg-default)",
       // Lock the dashboard to the artboard's viewport so the bottom nav
       // and primary floater can pin to the bottom edge instead of sitting
       // at the end of the scrolling content. Content scrolls inside the
@@ -2914,7 +2914,13 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
   }, []);
   return (
     <div data-dark={theme.dark ? "true" : undefined} style={{
-      background: theme.t.bg,
+      // Read from Pickle Pixels alias so dark mode (data-theme="dark"
+      // on <html>) propagates through. Branded clubs (Old Coast, Dill
+      // Dinkers) lose their tinted bg in light mode here — that
+      // theme.t.bg per-club tinting will return after the broader
+      // multi-theme refactor (S5 work, in progress).
+      background: "var(--pp-bg-default)",
+      color: "var(--pp-fg-default)",
       // On mobile the device frame's inner container has overflow: hidden,
       // so DashboardDesktop has to be its own scroll context for sticky to
       // function and for the page to actually scroll vertically. On desktop
