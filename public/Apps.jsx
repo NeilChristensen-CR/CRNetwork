@@ -2349,105 +2349,135 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             onMouseEnter={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
             onMouseLeave={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
-            {/* Header — brandmark logo on the left, spots tag opposite
-                on the right. align-items: center vertically centers the
-                tag's text against the logo lockup (both blocks are 22h)
-                so the baselines read aligned. */}
-            <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            {/* Header — bordered "content" block, 12px padding, gap 12.
+                Per Figma spec (node 8049-15861): brandmark on the left,
+                supply pill on the right. The supply pill renders as a
+                vibrant red "X Spots Left" capsule when scarce; for the
+                other variants (DUPR Rated / Filling Fast / Open Spots)
+                it falls back to a neutral chip. */}
+            <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 12, borderBottom: "1px solid #E9EBEC" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <div style={{
+                    width: 22, height: 22, borderRadius: 4,
+                    background: ev.logoBg,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <span style={{ fontSize: 9, fontWeight: 800, color: ev.logoFg, lineHeight: 1 }}>{ev.logoMark}</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+                    <span style={{ fontFamily: theme.display, fontSize: 11, fontWeight: 800, color: ev.logoBg, letterSpacing: 0.4 }}>{ev.logoLine1}</span>
+                    <span style={{ fontFamily: theme.display, fontSize: 9, fontWeight: 700, color: ev.logoBg, letterSpacing: 1.4, marginTop: 2 }}>{ev.logoLine2}</span>
+                  </div>
+                </div>
+                {(() => {
+                  const s = trendingSupplyState(ev);
+                  const isLimited = s.variant === "limited";
+                  return (
+                    <span data-tag={isLimited ? "warning" : "default"} style={{
+                      // Limited variant is the Figma vibrant red ("X Spots
+                      // Left" pill, md size: 8/4 padding, fontSize 12).
+                      // Other variants use the spec's primary-tag default
+                      // (#EDF3F3 bg) so they read as informational chips,
+                      // not urgency.
+                      padding: isLimited ? "4px 8px" : "2px 6px",
+                      borderRadius: 9999,
+                      background: isLimited ? "#DA0B0B" : "#EDF3F3",
+                      color: isLimited ? "#FFFFFF" : "#161919",
+                      fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
+                      fontWeight: 400,
+                      display: "inline-flex", alignItems: "center",
+                      whiteSpace: "nowrap",
+                    }}>{isLimited ? `${ev.spotsLeft} Spots Left` : s.text}</span>
+                  );
+                })()}
+              </div>
+              {/* Content stack — title + 3 info rows. Each info row is a
+                  16x16 icon + p3 text, gap 8 between icon and text. */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{
-                  width: 22, height: 22, borderRadius: 4,
-                  background: ev.logoBg,
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  fontFamily: theme.display, fontWeight: 700,
+                  fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+                  color: "#0F1214",
                 }}>
-                  <span style={{ fontSize: 9, fontWeight: 800, color: ev.logoFg, lineHeight: 1 }}>{ev.logoMark}</span>
+                  {ev.title}
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
-                  <span style={{ fontFamily: theme.display, fontSize: 11, fontWeight: 800, color: ev.logoBg, letterSpacing: 0.4 }}>{ev.logoLine1}</span>
-                  <span style={{ fontFamily: theme.display, fontSize: 9, fontWeight: 700, color: ev.logoBg, letterSpacing: 1.4, marginTop: 2 }}>{ev.logoLine2}</span>
-                </div>
-              </div>
-              {(() => {
-                const s = trendingSupplyState(ev);
-                return (
-                  <span data-tag={s.variant === "limited" ? "warning" : "default"} style={{
-                    height: 22, padding: "0 10px", borderRadius: 6,
-                    background: TRENDING_PILL[s.variant].bg,
-                    color: TRENDING_PILL[s.variant].fg,
-                    fontSize: 11.5, fontWeight: 600,
-                    display: "inline-flex", alignItems: "center",
-                    whiteSpace: "nowrap",
-                  }}>{s.text}</span>
-                );
-              })()}
-            </div>
-            {/* Content — strict vertical rhythm:
-                  24px → title
-                  12px → location block (pin icon + club / city • distance)
-                   8px → time block (clock icon + date — duration)
-                  24px → tag pills */}
-            <div style={{ padding: "0 16px" }}>
-              <div style={{
-                marginTop: 24,
-                fontFamily: theme.display, fontWeight: 800,
-                fontSize: 18, lineHeight: "22px", letterSpacing: -0.3,
-                color: "#0F1214",
-              }}>
-                {ev.title}
-              </div>
-              {/* Location — pin icon anchored to the first line, stacked
-                  club name + "city · distance" to the right. flex-start so
-                  the icon stays at the top if the club name wraps. */}
-              <div style={{ marginTop: 12, display: "flex", alignItems: "flex-start", gap: 8 }}>
-                <span style={{ display: "inline-flex", marginTop: 2, flexShrink: 0 }}>
-                  <Icon name="MapPin" size={13} strokeWidth={2.2} color="#4B5052" />
-                </span>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13, color: "#0F1214", fontWeight: 500, lineHeight: 1.3 }}>
+                {/* Club row — Buildings icon + club name. */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ display: "inline-flex", marginTop: 0, flexShrink: 0 }}>
+                    <Icon name="Building2" size={16} strokeWidth={1.75} color="#4B5052" />
+                  </span>
+                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
                     {ev.club}
-                  </div>
-                  <div style={{ marginTop: 2, fontSize: 12.5, color: "#4B5052", lineHeight: 1.3 }}>
-                    {ev.city} • {ev.distance}
-                  </div>
+                  </span>
+                </div>
+                {/* Location row — MapPin + miles away + city. */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ display: "inline-flex", marginTop: 0, flexShrink: 0 }}>
+                    <Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />
+                  </span>
+                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+                    {ev.distance} away • {ev.city}
+                  </span>
+                </div>
+                {/* Time row — Clock + "Wed, 4/29 • 6:00 PM - 7:00 PM". */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ display: "inline-flex", marginTop: 0, flexShrink: 0 }}>
+                    <Icon name="Clock" size={16} strokeWidth={1.75} color="#4B5052" />
+                  </span>
+                  <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
+                    {ev.date} • {ev.duration}
+                  </span>
                 </div>
               </div>
-              {/* Time — clock icon + date — duration on a single row. */}
-              <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "#4B5052" }}>
-                <Icon name="Clock" size={13} strokeWidth={2.2} color="#4B5052" />
-                <span>{ev.date} — {ev.duration}</span>
-              </div>
-              <div style={{ marginTop: 24, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {/* Tag pills — primary (#EDF3F3) sm chips per Figma spec.
+                  Sized 6/2 padding, 12 caption type, fully rounded. */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {ev.tags.map((tag, i) => (
                   <span key={i} data-tag="default" style={{
-                    height: 22, padding: "0 10px", borderRadius: 6,
-                    background: "#F4F5F6", color: "#0F1214",
-                    fontSize: 11.5, fontWeight: 600,
+                    padding: "2px 6px", borderRadius: 9999,
+                    background: "#EDF3F3", color: "#161919",
+                    fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
+                    fontWeight: 400,
                     display: "inline-flex", alignItems: "center",
+                    whiteSpace: "nowrap",
                   }}>{tag}</span>
                 ))}
               </div>
             </div>
+            {/* Footer — bg #F4F5F6, padding 12, gap 12. Left side stacks
+                $price (display/d6 20/700) over an uppercase overline
+                "X of Y spots Left" caption. Right side is a 40px dark
+                square reserve button. */}
             <div style={{
               marginTop: "auto",
-              padding: "14px 16px",
-              borderTop: "1px solid #E9EBEC",
+              padding: 12,
               background: "#F4F5F6",
               display: "flex", alignItems: "center", justifyContent: "space-between",
+              gap: 12,
             }}>
-              <div>
-                <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214" }}>{ev.price}</div>
-                {/* Spots-remaining caption — unbolded so the price stays
-                    the focal point of the footer. */}
-                <div style={{ marginTop: 2, fontSize: 11.5, fontWeight: 500, color: "#4B5052" }}>
-                  {ev.taken} of {ev.totalSpots} spots remaining
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{
+                  fontFamily: theme.display, fontWeight: 700,
+                  fontSize: 20, lineHeight: "28px", letterSpacing: 0,
+                  color: "#0F1214",
+                }}>{ev.price}</div>
+                <div style={{
+                  marginTop: 2,
+                  fontSize: 10, lineHeight: "12px", letterSpacing: 0.8,
+                  textTransform: "uppercase",
+                  fontWeight: 400, color: "#4B5052",
+                }}>
+                  {ev.taken} of {ev.totalSpots} spots Left
                 </div>
               </div>
               <button onClick={() => onOpenEvent && onOpenEvent(ev.id)} aria-label="Open event" style={{
                 width: 40, height: 40, borderRadius: 8,
-                background: "#0F1214", color: "#fff", border: 0, cursor: "pointer",
+                background: "#222424", color: "#fff", border: 0, cursor: "pointer",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 2px 4px rgba(0,0,0,.08)",
               }}>
-                <Icon name="ArrowRight" size={16} strokeWidth={2.2} color="#fff" />
+                <Icon name="ArrowRight" size={20} strokeWidth={1.75} color="#fff" />
               </button>
             </div>
           </div>
