@@ -934,6 +934,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     <div
       ref={containerRef}
       data-searchbar-root
+      data-theme-lock="light"
       style={{
         width: "100%",
         maxWidth: desktop ? 1040 : "100%",
@@ -1275,6 +1276,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         role="dialog"
         aria-modal="true"
         aria-label="Search"
+        data-theme-lock="light"
         style={{
           position: "absolute", left: 0, right: 0, bottom: 0,
           height: "92%",
@@ -1687,6 +1689,7 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
         role="dialog"
         aria-modal="true"
         aria-label="Available clubs"
+        data-theme-lock="light"
         style={{
           position: "absolute", left: 0, right: 0, bottom: 0,
           height: "92%",
@@ -2002,6 +2005,7 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
         role="dialog"
         aria-modal="true"
         aria-label="Search results"
+        data-theme-lock="light"
         style={{
           position: "fixed",
           left: "50%", top: "50%",
@@ -2146,6 +2150,7 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
     <>
     <button
       type="button"
+      data-theme-lock="light"
       onClick={() => {
         // Tap opens the bottom sheet for editing facets. The legacy
         // `onExpand` prop still fires for callers that want a navigation

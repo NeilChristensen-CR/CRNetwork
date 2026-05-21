@@ -244,6 +244,42 @@
 }
 
 /* ============================================================
+   THEME LOCK — opt out of dark-mode re-theming for a subtree.
+   Set data-theme-lock="light" on any element to pin the alias
+   tokens back to their light-mode values within that subtree,
+   regardless of the ancestor data-theme. Useful for surfaces
+   that should stay light in both modes (e.g. the SearchBar).
+   ============================================================ */
+[data-theme="dark"] [data-theme-lock="light"] {
+  --pp-fg-default:    var(--pp-ink-800);
+  --pp-fg-muted:      var(--pp-ink-300);
+  --pp-fg-subtle:     var(--pp-ink-200);
+  --pp-fg-onVibrant:  var(--pp-neutral-0);
+  --pp-fg-warning:    var(--pp-ink-800);
+
+  --pp-bg-default:    var(--pp-neutral-0);
+  --pp-bg-subtle:     var(--pp-neutral-100);
+  --pp-bg-muted:      var(--pp-neutral-200);
+  --pp-bg-inverse:    var(--pp-ink-800);
+
+  --pp-bg-tint-primary:  #EDF1FB;
+  --pp-bg-tint-error:    var(--pp-red-50);
+  --pp-bg-tint-success:  var(--pp-green-50);
+  --pp-bg-tint-warning:  #FFF8E1;
+
+  --pp-border-default:  var(--pp-neutral-300);
+  --pp-border-subtle:   var(--pp-neutral-250);
+  --pp-border-strong:   var(--pp-ink-300);
+
+  --pp-map-water: #E8F0EC;
+  --pp-map-land:  #F2F6F3;
+  --pp-map-road:  #FFFFFF;
+  --pp-map-block: #E1E9E3;
+
+  color: var(--pp-fg-default);
+}
+
+/* ============================================================
    Semantic CSS (use directly in HTML).
    ============================================================ */
 

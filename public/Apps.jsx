@@ -1990,17 +1990,19 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
         ref={trackRef}
         onMouseLeave={() => setHovered(null)}
         style={{
-          // Track tokens per updated Figma spec (node 8059-57685):
-          // bg #0B0E0E (system/bg/neutrals/card on dark),
-          // pad 4 + gap 4 (compact, was 8/8),
-          // fully rounded, elevation/500 drop shadow.
+          // Track tokens — bg uses --pp-bg-inverse so the bar flips
+          // automatically between modes: dark track in light mode,
+          // light track in dark mode (the active pill, text, and
+          // inactive text all flip together via the alias layer
+          // below, keeping contrast pairs intact in both themes).
+          // Padding 4 + gap 4 (compact), fully rounded, elevation/500.
           pointerEvents: "auto",
           position: "relative",
           display: isMobile ? "flex" : "inline-flex",
           width: isMobile ? "100%" : "auto",
           alignItems: "center",
           gap: 4,
-          background: "#0B0E0E",
+          background: "var(--pp-bg-inverse)",
           color: "var(--pp-bg-muted)",
           padding: 4, borderRadius: 999,
           boxShadow: "0 16px 16px rgba(0,0,0,.16)",
@@ -2048,14 +2050,14 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
                 padding: isMobile ? "10px 8px" : "12px 16px",
                 borderRadius: 999, border: 0,
                 background: "transparent",
-                // The action bar track is always #0B0E0E (dark) and the
-                // active pill is always white — both states are theme-
-                // independent. Use primitives directly so the active
-                // text stays dark on the white pill and the inactive
-                // text stays light on the dark track in both light AND
-                // dark modes. The alias layer would flip these in dark
-                // mode and break contrast.
-                color: isActive ? "var(--pp-ink-800)" : "var(--pp-neutral-200)",
+                // Active text on the white-in-light/dark-in-dark pill:
+                //   --pp-bg-inverse is dark in light mode, white in
+                //   dark mode — the perfect contrast against the pill.
+                // Inactive text on the dark-in-light/light-in-dark
+                // track: --pp-bg-muted is mid-grey that flips with
+                // theme (light grey on dark, dark grey on light),
+                // giving us a readable secondary in both modes.
+                color: isActive ? "var(--pp-bg-inverse)" : "var(--pp-bg-muted)",
                 fontFamily: "inherit",
                 fontWeight: 500,
                 fontSize: isMobile ? 13 : 16,
@@ -2074,7 +2076,7 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
                   fit comfortably across the 4-item row. Per the updated
                   Figma spec the icon is 24px (was 20). */}
               {!isMobile && (
-                <Icon name={it.icon} size={24} color={isActive ? "var(--pp-fg-default)" : "var(--pp-bg-muted)"} strokeWidth={1.75} />
+                <Icon name={it.icon} size={24} color={isActive ? "var(--pp-bg-inverse)" : "var(--pp-bg-muted)"} strokeWidth={1.75} />
               )}
               {/* Desktop uses the long label per Figma spec ("Book a
                   Court" not "Book Court"); mobile keeps the short label
