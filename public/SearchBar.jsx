@@ -1787,12 +1787,65 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
   return ReactDOM.createPortal(sheet, portalTarget);
 }
 
+// ---- Map thumbnail (SearchResultsModal) ---------------------------------
+// 96×96 square preview rendered as a stylized SVG (cross-streets +
+// centered pin). Reads as a quick "where is this" anchor on the left
+// of each club row without pulling in a real map tile API. Distance
+// pill in the corner gives the same at-a-glance signal the
+// BookNowCard's MiniMap carries.
+function SBClubMapThumb({ club }) {
+  // Deterministic per-club layout — stable across renders so the
+  // streets don't churn between mounts of the same row. Hash the id.
+  const hash = (() => { let h = 0; const s = String(club.id || ""); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; })();
+  const xPin = 40 + (hash % 20);          // jitter the pin x-position
+  const yPin = 40 + ((hash >> 3) % 20);   // jitter the pin y-position
+  const xRoad1 = 25 + (hash % 30);
+  const yRoad1 = 30 + ((hash >> 2) % 30);
+  return (
+    <div style={{
+      position: "relative",
+      width: 96, height: 96,
+      borderRadius: 8,
+      overflow: "hidden",
+      background: "#EDF3F3",
+      flexShrink: 0,
+    }}>
+      <svg viewBox="0 0 96 96" width="96" height="96" style={{ display: "block" }} aria-hidden="true">
+        {/* base tone */}
+        <rect width="96" height="96" fill="#EDF3F3" />
+        {/* park / blocks */}
+        <rect x="0" y="0" width="50" height="36" fill="#E0EBE7" />
+        <rect x="56" y="58" width="40" height="38" fill="#E0EBE7" />
+        {/* streets */}
+        <line x1="0" y1={yRoad1} x2="96" y2={yRoad1} stroke="#FFFFFF" strokeWidth="3" />
+        <line x1={xRoad1} y1="0" x2={xRoad1} y2="96" stroke="#FFFFFF" strokeWidth="3" />
+        <line x1="0" y1="72" x2="96" y2="72" stroke="#FFFFFF" strokeWidth="2.4" />
+        {/* pin */}
+        <g transform={`translate(${xPin} ${yPin})`}>
+          <ellipse cx="0" cy="11" rx="6" ry="2" fill="rgba(15,18,20,.18)" />
+          <path d="M 0 -10 C -6 -10 -10 -6 -10 0 C -10 6 0 14 0 14 C 0 14 10 6 10 0 C 10 -6 6 -10 0 -10 Z" fill="#2E7D32" stroke="#fff" strokeWidth="1.4" />
+          <circle cx="0" cy="-1" r="3" fill="#fff" />
+        </g>
+      </svg>
+      {/* Distance pill — neutral chip in the top-left of the map. */}
+      <span style={{
+        position: "absolute", top: 6, left: 6,
+        padding: "2px 6px", borderRadius: 9999,
+        background: "#F4F5F6", color: "#2F3436",
+        fontSize: 11, lineHeight: "14px", letterSpacing: 0.3,
+        fontWeight: 500,
+        whiteSpace: "nowrap",
+      }}>{club.distance}mi</span>
+    </div>
+  );
+}
+
 // ---- Club list row (SearchResultsModal) ---------------------------------
 // Mirrors the logged-out home's MoreEventsNearYou EventRow pattern: 24px
 // padding, gap 24, white-rest / soft-tint-hover zebra, dark icon-only
 // Reserve square that expands to "Reserve" on hover. Each row is one
-// club — `name` headline, "City, ST · Sport · N mi away · Booked N x
-// Today" caption line, time-slot chips below.
+// club — 96×96 map square on the left, then `name` headline, location
+// line, and the sport/booked caption.
 function SBClubListRow({ club, onSelect }) {
   const [hover, setHover] = useStateSB(false);
   return (
@@ -1812,6 +1865,7 @@ function SBClubListRow({ club, onSelect }) {
         transition: "background 140ms ease",
       }}
     >
+      <SBClubMapThumb club={club} />
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 8 }}>
         <div style={{
           fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700,
@@ -1833,29 +1887,6 @@ function SBClubListRow({ club, onSelect }) {
             · Booked {club.booked} x Today
           </span>
         </div>
-        {/* Time-slot chips — first 4 openings as borderless dark-outlined
-            buttons, matching the BookNowCard slot grid. Clicking a slot
-            still routes through onSelect so the booking flow opens at
-            this club. */}
-        {club.times && club.times.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
-            {club.times.slice(0, 4).map((time) => (
-              <button
-                key={time}
-                onClick={(e) => { e.stopPropagation(); onSelect && onSelect(club.name, club.id); }}
-                style={{
-                  padding: "6px 12px", borderRadius: 8,
-                  border: "1px solid #222424",
-                  background: "#FFFFFF", color: "#222424",
-                  fontFamily: "inherit", fontWeight: 500, fontSize: 13, lineHeight: "16px",
-                  letterSpacing: 0.2,
-                  cursor: "pointer",
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                }}
-              >{time}</button>
-            ))}
-          </div>
-        )}
       </div>
       <button
         onClick={(e) => { e.stopPropagation(); onSelect && onSelect(club.name, club.id); }}
@@ -1886,27 +1917,17 @@ function SBClubListRow({ club, onSelect }) {
 // section title (matching the homepage) + a list of SBClubListRow
 // items. Replaces the carousel-of-cards pattern with the same vertical
 // list rhythm used on MoreEventsNearYou.
-function SBClubListSection({ title, sub, clubs, onSelectClub }) {
+function SBClubListSection({ title, clubs, onSelectClub }) {
   if (!clubs || clubs.length === 0) return null;
   return (
     <section style={{ padding: "0 0 24px 0" }}>
-      <div style={{
-        padding: "16px 24px 12px 24px",
-        display: "flex", alignItems: "baseline", justifyContent: "space-between",
-        gap: 16,
-      }}>
+      <div style={{ padding: "16px 24px 12px 24px" }}>
         <h3 style={{
-          margin: 0, flex: 1, minWidth: 0,
+          margin: 0,
           fontFamily: "Axiforma, Inter, system-ui, sans-serif",
           fontWeight: 700, fontSize: 24, lineHeight: "32px", letterSpacing: 0,
           color: "#0F1214",
         }}>{title}</h3>
-        {sub && (
-          <span style={{
-            fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
-            color: "#4B5052", fontWeight: 500, whiteSpace: "nowrap",
-          }}>{sub}</span>
-        )}
       </div>
       <div>
         {clubs.map((c) => (
@@ -2048,26 +2069,13 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           padding: "0 0 24px 0",
         }}>
           {[
-            {
-              title: "Popular near you",
-              sub: "Most booked clubs in your area",
-              clubs: SB_RESULTS_CLUBS.filter((c) => c.booked >= 20),
-            },
-            {
-              title: "Ready to book today",
-              sub: "Open courts in the next few hours",
-              clubs: SB_RESULTS_CLUBS.filter((c) => c.times && c.times.length >= 4).slice(0, 5),
-            },
-            {
-              title: "Closest to you",
-              sub: "Under 5 miles away",
-              clubs: SB_RESULTS_CLUBS.filter((c) => parseFloat(c.distance) <= 5),
-            },
+            { title: "Popular near you",     clubs: SB_RESULTS_CLUBS.filter((c) => c.booked >= 20) },
+            { title: "Ready to book today",  clubs: SB_RESULTS_CLUBS.filter((c) => c.times && c.times.length >= 4).slice(0, 5) },
+            { title: "Closest to you",       clubs: SB_RESULTS_CLUBS.filter((c) => parseFloat(c.distance) <= 5) },
           ].map((section, sIdx) => (
             <SBClubListSection
               key={sIdx}
               title={section.title}
-              sub={section.sub}
               clubs={section.clubs}
               onSelectClub={onSelectClub}
             />
