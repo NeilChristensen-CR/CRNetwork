@@ -457,36 +457,20 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
             color: "#0F1214", letterSpacing: 0, lineHeight: "28px",
           }}>{v.name}</div>
 
-          {/* Star + rating + price row — 5 stars (16px each, gap 4), then
-              gap 8 to "4.8" bold + " (256)" regular muted + bullet + "$$$"
-              bold muted. Reads as the venue's social proof. Falls back to
-              4.7 / 100 / "$$" when the underlying venue lacks rating data. */}
-          {(() => {
-            const rating = v.rating != null ? v.rating : 4.7;
-            const reviews = v.reviews != null ? v.reviews : 100;
-            const price = v.price || "$$";
-            const full = Math.floor(rating);
-            return (
-              <div style={{
-                display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8,
-                fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
-              }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < full ? "#FFB400" : "#E9EBEC"} style={{ display: "block" }}>
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 6.91-1.01z" />
-                    </svg>
-                  ))}
-                </span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontWeight: 700, color: "#0F1214", fontVariantNumeric: "tabular-nums" }}>{rating.toFixed(1)}</span>
-                  <span style={{ color: "#4B5052" }}>({reviews})</span>
-                </span>
-                <span style={{ color: "#0F1214", fontWeight: 700 }}>·</span>
-                <span style={{ color: "#4B5052", fontWeight: 700 }}>{price}</span>
-              </div>
-            );
-          })()}
+          {/* Location row — pin icon + "Club, City, State". Replaces the
+              star + rating + price row we tried from the Figma spec — for
+              a discovery surface the city/state line is more actionable
+              ("is this near me?") than social proof, especially since the
+              distance pill on the MiniMap above already covers the
+              "near me" question at a glance and the rating data is mock. */}
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
+            color: "#4B5052",
+          }}>
+            <Icon name="MapPin" size={14} strokeWidth={1.75} color="#4B5052" />
+            <span>{v.city}{v.state ? `, ${v.state}` : ""}</span>
+          </div>
 
           {/* Sport tag + "Booked N x Today" caption. Sport tag is the
               Figma tagschips/neutral/sm variant: 6/2 padding, fully
