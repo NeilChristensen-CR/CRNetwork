@@ -2584,7 +2584,7 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
           stays pulled. */}
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
-          {isMobile ? "More Events" : "More events near you"}
+          {isMobile ? "Advanced players" : "Events for advanced players"}
         </h2>
       </div>
       {groups.map((g, gi) => (
@@ -3105,7 +3105,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             you" to "everything else." Beginner cards are intentionally
             ≤50% filled so the trending pill never reads as urgent. */}
         {isCR &&
-        <PopularEventsNearYou theme={theme} viewport={viewport} title="Events for Beginners" events={BEGINNER_EVENTS_DEFAULT} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <PopularEventsNearYou theme={theme} viewport={viewport} title="Events for beginners" events={BEGINNER_EVENTS_DEFAULT} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
         <MoreEventsNearYou theme={theme} viewport={viewport} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
