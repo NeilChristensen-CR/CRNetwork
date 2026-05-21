@@ -12,14 +12,20 @@ const { useState: useStateCBLO } = React;
 
 function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now", onNav }) {
   const desktop = viewport === "desktop";
+  // Color tokens read from the Pickle Pixels alias layer so the chrome
+  // re-themes automatically when <html data-theme="dark"> flips. brandGreen
+  // is intentionally a primitive — the brand mark color shouldn't shift
+  // with theme. The CTA pill (`pillBg`) uses bg-inverse so it stays
+  // legible in both modes (dark pill on light canvas, light pill on
+  // dark canvas).
   const C = {
-    surface: "#FFFFFF",
-    text: "#0F1214",
-    textSubtle: "#858F8F",
-    line: "#E9EBEC",
-    pillBg: "#0F1214",
-    pillFg: "#FFFFFF",
-    brandGreen: "#2E7D32",
+    surface:    "var(--pp-bg-default)",
+    text:       "var(--pp-fg-default)",
+    textSubtle: "var(--pp-fg-subtle)",
+    line:       "var(--pp-border-subtle)",
+    pillBg:     "var(--pp-bg-inverse)",
+    pillFg:     "var(--pp-fg-onVibrant)",
+    brandGreen: "var(--pp-green-700)",
   };
 
   // Center tab navigation (Clubs / Players) — desktop only. Active tab is
@@ -90,6 +96,8 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
             }}
           >
             {window.Icon && (
+              /* White check on the brand-green disc — disc stays green
+                  in both themes so the literal "#FFFFFF" remains correct. */
               <window.Icon name="Check" size={desktop ? 16 : 14} strokeWidth={3} color="#FFFFFF" />
             )}
           </span>
@@ -195,7 +203,12 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
           }}
         >
           {window.Icon && (
-            <window.Icon name="User" size={desktop ? 14 : 12} strokeWidth={2} color={C.pillFg} />
+            /* `currentColor` lets the SVG stroke inherit the button's
+                `color` CSS (which uses var(--pp-fg-onVibrant)). SVG
+                presentation attributes can't always resolve var(), so
+                we pin the icon to the button's text color via
+                inheritance — works in both themes. */
+            <window.Icon name="User" size={desktop ? 14 : 12} strokeWidth={2} color="currentColor" />
           )}
           Create Account
         </button>
