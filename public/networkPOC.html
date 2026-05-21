@@ -11,14 +11,24 @@
 <style>
   html, body {
     margin: 0; padding: 0;
-    background: #F4F5F6;
-    font-family: "Inter", system-ui, sans-serif;
+    /* Reads the Pickle Pixels alias token so [data-theme="dark"] on
+       <html> automatically re-themes the page background. Falls back
+       to #F4F5F6 if the token CSS hasn't loaded yet. */
+    background: var(--pp-bg-subtle, #F4F5F6);
+    color: var(--pp-fg-default, #0F1214);
+    font-family: var(--pp-font-body, "Inter", system-ui, sans-serif);
     /* The prototype renders flush to the viewport now (no device-frame
        card to clip overflow). Hiding horizontal overflow at the page
        level prevents extended sticky shelves and negative-margin tracks
        (SearchBar, action bar, MoreEventsNearYou) from triggering a
        horizontal scrollbar on the body. Vertical scroll stays default. */
     overflow-x: hidden;
+  }
+  /* When dark mode is active, the body lands on the canvas tone
+     directly (no subtle surface tint behind app content). */
+  [data-theme="dark"], [data-theme="dark"] body {
+    background: var(--pp-bg-default);
+    color: var(--pp-fg-default);
   }
   * { box-sizing: border-box; }
   /* Focus-visible rings — keyboard users get an obvious blue ring on
@@ -89,27 +99,27 @@
 <!-- Cache-buster — bump ?v= when iterating on a .jsx file so the browser
      refetches it instead of serving the previously-compiled version.
      Babel-standalone has no module hashing of its own. -->
-<script type="text/babel" src="Components.jsx?v=20260521ab"></script>
-<script type="text/babel" src="SearchBar.jsx?v=20260521ab"></script>
-<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521ab"></script>
-<script type="text/babel" src="data.jsx?v=20260521ab"></script>
-<script type="text/babel" src="EventCard.jsx?v=20260521ab"></script>
-<script type="text/babel" src="BrowseDesktop.jsx?v=20260521ab"></script>
-<script type="text/babel" src="FilterDesktop.jsx?v=20260521ab"></script>
-<script type="text/babel" src="Mobile.jsx?v=20260521ab"></script>
-<script type="text/babel" src="FilterBarD.jsx?v=20260521ab"></script>
-<script type="text/babel" src="RecurringCarousel.jsx?v=20260521ab"></script>
-<script type="text/babel" src="EventDetails.jsx?v=20260521ab"></script>
-<script type="text/babel" src="EventRegistration.jsx?v=20260521ab"></script>
-<script type="text/babel" src="BookNow.jsx?v=20260521ab"></script>
-<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521ab"></script>
-<script type="text/babel" src="BookCourtWidget.jsx?v=20260521ab"></script>
-<script type="text/babel" src="Apps.jsx?v=20260521ab"></script>
-<script type="text/babel" src="ClubDetail.jsx?v=20260521ab"></script>
-<script type="text/babel" src="FindClubs.jsx?v=20260521ab"></script>
-<script type="text/babel" src="Profile.jsx?v=20260521ab"></script>
-<script type="text/babel" src="ReserveCourt.jsx?v=20260521ab"></script>
-<script type="text/babel" src="design-canvas.jsx?v=20260521ab"></script>
+<script type="text/babel" src="Components.jsx?v=20260521ac"></script>
+<script type="text/babel" src="SearchBar.jsx?v=20260521ac"></script>
+<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521ac"></script>
+<script type="text/babel" src="data.jsx?v=20260521ac"></script>
+<script type="text/babel" src="EventCard.jsx?v=20260521ac"></script>
+<script type="text/babel" src="BrowseDesktop.jsx?v=20260521ac"></script>
+<script type="text/babel" src="FilterDesktop.jsx?v=20260521ac"></script>
+<script type="text/babel" src="Mobile.jsx?v=20260521ac"></script>
+<script type="text/babel" src="FilterBarD.jsx?v=20260521ac"></script>
+<script type="text/babel" src="RecurringCarousel.jsx?v=20260521ac"></script>
+<script type="text/babel" src="EventDetails.jsx?v=20260521ac"></script>
+<script type="text/babel" src="EventRegistration.jsx?v=20260521ac"></script>
+<script type="text/babel" src="BookNow.jsx?v=20260521ac"></script>
+<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521ac"></script>
+<script type="text/babel" src="BookCourtWidget.jsx?v=20260521ac"></script>
+<script type="text/babel" src="Apps.jsx?v=20260521ac"></script>
+<script type="text/babel" src="ClubDetail.jsx?v=20260521ac"></script>
+<script type="text/babel" src="FindClubs.jsx?v=20260521ac"></script>
+<script type="text/babel" src="Profile.jsx?v=20260521ac"></script>
+<script type="text/babel" src="ReserveCourt.jsx?v=20260521ac"></script>
+<script type="text/babel" src="design-canvas.jsx?v=20260521ac"></script>
 <script type="text/babel">
   const { useState } = React;
 
