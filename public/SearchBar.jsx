@@ -463,11 +463,15 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     ? { pillH: 68, pad: 4, gap: 0,
         segPadX: 24, segPadY: 12, whoPadRight: 8,
         segGapY: 4, labelFs: 10, labelLs: 0.8,
-        valueFs: 16, btn: 32, btnExpW: 104, radius: 999 }
+        // Submit button: 40h circle (was 32) — the smaller iconly state
+        // was reading as a control accessory rather than the primary
+        // hero action. Expanded width 120 leaves room for the "Search"
+        // label + 16px icon + p-12 horizontal padding without crowding.
+        valueFs: 16, btn: 40, btnExpW: 120, radius: 999 }
     : { pillH: 64, pad: 4, gap: 0,
         segPadX: 16, segPadY: 10, whoPadRight: 8,
         segGapY: 3, labelFs: 9, labelLs: 0.7,
-        valueFs: 14, btn: 30, btnExpW: 92, radius: 999 };
+        valueFs: 14, btn: 36, btnExpW: 104, radius: 999 };
   const pillH = SIZES.pillH;
 
   // ---- Segments ----------------------------------------------------------
@@ -858,9 +862,12 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
               and the only control is the stepper, so a second label is
               redundant). The stepper pill now fills the popover width
               instead of hugging right, so the +/- targets sit at the
-              edges where players' thumbs naturally land. */}
+              edges where players' thumbs naturally land.
+              Wrapper padding matches SBRow's 10/12 pattern so the WHO
+              popover sits flush with the WHERE / WHAT / WHEN row
+              rhythm. */}
           <div style={{
-            padding: 12,
+            padding: "10px 12px",
             display: "flex",
           }}>
             <div style={{
