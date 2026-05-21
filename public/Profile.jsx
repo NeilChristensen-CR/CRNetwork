@@ -246,8 +246,12 @@ const PROFILE = {
   location: "St. Augustine area",
   email: "neil.christensen@gmail.com",
   phone: "+1 (904) 555-0142",
+  // When false, the phone / email row is hidden from the public-facing
+  // contact card. The Edit Profile sheet exposes toggles that flip these.
+  phonePublic: true,
+  emailPublic: true,
   completion: 85,
-  sports: ["Tennis", "Pickleball", "Recreational", "Open Play"],
+  sports: ["Tennis", "Pickleball"],
   bio: "1-year CR member finding my game. Mostly weekend tennis and Tuesday-night drills at Old Coast.",
   // Tags applied TO this player by coaches, captains, and other players.
   // Each tag carries an author so we can show "from <name>" for trust.
@@ -259,11 +263,11 @@ const PROFILE = {
   { label: "Punctual", by: "Mia C.", sport: "PB" }],
 
   // Tags this player applies to themselves (their public profile vibe).
+  // Sports live in PROFILE.sports — keep them out of this list.
   tagsByMe: [
   "Looking for partners",
   "Drills regular",
-  "Weekend warrior",
-  "Open to coaching"],
+  "Weekend warrior"],
 
   // Trophy cabinet — tournament wins, league titles, championship runs.
   // Each item carries a place (1st/2nd/Finalist) so the cabinet can
@@ -1259,7 +1263,7 @@ function IdentityCard({ theme, desktop = false }) {
               right. When editing, the bar swaps to an "Editing profile"
               indicator with Save / Cancel actions inline so the player has
               a single anchored place for editing controls. */}
-      {editing ?
+      {editing &&
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
         padding: "12px 16px",
@@ -1289,29 +1293,7 @@ function IdentityCard({ theme, desktop = false }) {
               <Icon name="Check" size={12} color="#fff" strokeWidth={2.6} />
             </button>
           </div>
-        </div> :
-
-      !complete &&
-      <div style={{
-        background: "#F4F5F6",
-        borderRadius: 8,
-        padding: "14px 20px",
-        display: "flex", flexDirection: "column", gap: 10
-      }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
-              <div style={{ fontSize: 13, color: "#4B5052", fontWeight: 500, textAlign: "center" }}>
-                Your profile is <span style={{ color: "#0F1214", fontWeight: 700 }}>{PROFILE.completion}% complete</span>. Add your DUPR rating to finish.
-              </div>
-              {/* Add rating link — Edit moved to the bottom action bar. */}
-              <a href="#" style={{ color: theme.primary, fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
-                Add rating →
-              </a>
-            </div>
-            <div style={{ height: 3, borderRadius: 999, background: "rgba(15,18,20,.06)", overflow: "hidden" }}>
-              <div style={{ width: `${PROFILE.completion}%`, height: "100%", background: theme.primary, borderRadius: 999, transition: "width 240ms" }} />
-            </div>
-          </div>
-
+        </div>
       }
 
       {/* Hero — typography-first, all type left-aligned. Avatar pinned
@@ -1336,10 +1318,8 @@ function IdentityCard({ theme, desktop = false }) {
               color: "#0F1214"
             }}>{PROFILE.name}</h1>
             }
-            {/* Meta line — handle · location · active indicator. */}
+            {/* Meta line — location · active indicator. */}
             <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 14, color: "#4B5052", fontWeight: 500 }}>{PROFILE.handle}</span>
-              <span style={{ width: 3, height: 3, borderRadius: 999, background: "#DEE1E5" }} />
               <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 14, color: "#4B5052", fontWeight: 500 }}>
                 <Icon name="MapPin" size={13} strokeWidth={2} color="#858F8F" />
                 {PROFILE.location}
@@ -1403,12 +1383,28 @@ function IdentityCard({ theme, desktop = false }) {
       <div style={{ display: "grid", gridTemplateColumns: desktop ? "1fr 1fr" : "1fr", gap: desktop ? 48 : 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
           <ContactCard theme={theme} editing={editing} />
-          <ClubsLinkedCard theme={theme} />
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          {/* Group 1 — Your tags: self-applied tags + sports the
-                  player plays most. Brand-tinted self tags lead so the
-                  "your voice" cluster reads first. Edit mode reveals X
+          {/* Sports — neutral chips for the sports this player plays.
+                  Lives above the tag chips so the identity cluster reads:
+                  what you play, then who you are as a player. */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <span style={{
+              fontFamily: theme.display, fontWeight: 800, fontSize: 11,
+              letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F"
+            }}>Sports</span>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {PROFILE.sports.map((s) =>
+              <span key={s} style={{
+                display: "inline-flex", alignItems: "center",
+                height: 28, padding: "0 12px", borderRadius: 999,
+                background: "#E9EBEC", color: "#0F1214",
+                fontFamily: "inherit", fontWeight: 600, fontSize: 12
+              }}>{s}</span>
+              )}
+            </div>
+          </div>
+          {/* Your tags — self-applied tag chips. Edit mode reveals X
                   buttons + an "Add tag" affordance. */}
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <span style={{
@@ -1421,9 +1417,9 @@ function IdentityCard({ theme, desktop = false }) {
                 display: "inline-flex", alignItems: "center", gap: 6,
                 height: 28, padding: editing ? "0 6px 0 12px" : "0 12px",
                 borderRadius: 999,
-                background: "rgba(31,140,90,.22)",
-                color: "#1A5A38",
-                fontFamily: "inherit", fontWeight: 700, fontSize: 12
+                background: "#E9EBEC",
+                color: "#0F1214",
+                fontFamily: "inherit", fontWeight: 600, fontSize: 12
               }}>
                   {t}
                   {editing &&
@@ -1437,16 +1433,6 @@ function IdentityCard({ theme, desktop = false }) {
                     </button>
                 }
                 </span>
-              )}
-              {/* Sports played — neutral chips, paired with self tags
-                      since they're both "your voice" identity attributes. */}
-              {PROFILE.sports.map((s) =>
-              <span key={s} style={{
-                display: "inline-flex", alignItems: "center",
-                height: 28, padding: "0 12px", borderRadius: 999,
-                background: "#E9EBEC", color: "#0F1214",
-                fontSize: 12, fontWeight: 600
-              }}>{s}</span>
               )}
               {editing &&
               <button style={{
@@ -1462,27 +1448,6 @@ function IdentityCard({ theme, desktop = false }) {
             </div>
           </div>
 
-          {/* Group 2 — Tagged by other players. Each chip carries the
-                  author's initials so the attribution is legible at a glance. */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <span style={{
-              fontFamily: theme.display, fontWeight: 800, fontSize: 11,
-              letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F"
-            }}>Tagged by other players</span>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {PROFILE.tagsFromOthers.map((t, i) =>
-              <span key={`${t.label}-${i}`} style={{
-                display: "inline-flex", alignItems: "center",
-                height: 28, padding: "0 12px",
-                borderRadius: 999,
-                background: "#E9EBEC", color: "#0F1214",
-                fontFamily: "inherit", fontWeight: 600, fontSize: 12
-              }}>
-                  {t.label}
-                </span>
-              )}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -1575,17 +1540,23 @@ function IdentityCardMobile({ theme }) {
 
 // Compact contact card — typography-first, no border. Email + phone
 // stacked, optional in-place editing.
+//
+// Visibility flags (PROFILE.phonePublic, PROFILE.emailPublic) control
+// whether each row shows on the public profile. In edit mode every row
+// is rendered so the user can still see/edit the values.
 function ContactCard({ theme, editing }) {
-  const rows = [
-  { icon: "Mail", label: "Email", value: PROFILE.email },
-  { icon: "Phone", label: "Phone", value: PROFILE.phone }];
+  const allRows = [
+  { key: "email", icon: "Mail", label: "Email", value: PROFILE.email, visible: PROFILE.emailPublic },
+  { key: "phone", icon: "Phone", label: "Phone", value: PROFILE.phone, visible: PROFILE.phonePublic }];
+
+  const rows = editing ? allRows : allRows.filter((r) => r.visible);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "#858F8F" }}>Contact</span>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {rows.map((r) =>
-        <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div key={r.key} style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <Icon name={r.icon} size={16} strokeWidth={1.8} color="#858F8F" />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 11, color: "#858F8F", fontWeight: 600, letterSpacing: 0.2 }}>{r.label}</div>
@@ -1739,12 +1710,8 @@ function StatsCard({ theme, desktop = false }) {
     </div>;
 
   const cells = [
-  { k: s.ntrp.toFixed(2), v: "USTA NTRP", sub: "Self-reported" },
   { k: s.dupr.toFixed(1), v: "DUPR", sub: `Reliability: ${s.duprReliability}%` },
   { k: s.sessions, v: "Sessions", sub: "Last 12 months" },
-  { k: s.reliability, v: "Reliability", sub: "Show-up grade" },
-  { k: s.friends, v: "Friends", sub: <FriendAvatars />, link: true },
-  { k: s.rivalries, v: "Rivalries", sub: `5+ matches in ${s.rivalryWindow}` },
   { k: s.clubsPlayedAt, v: "Clubs", sub: "Played at" },
   { k: s.memberSince, v: "Member Since", sub: "1 year" }];
 
@@ -2038,11 +2005,6 @@ function ActivityHeatmapCard({ theme, desktop = false }) {
           ))}
         </div>
 
-        <div style={{
-          marginTop: 14, fontSize: 12, color: "#858F8F", fontWeight: 500,
-        }}>
-          Based on booking patterns — not a real-time schedule.
-        </div>
       </div>
     </div>
   );
@@ -2051,7 +2013,10 @@ window.ActivityHeatmapCard = ActivityHeatmapCard;
 
 function AvailabilityCard({ theme, desktop = false }) {
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const fill = (v) => v === 0 ? "#F4F5F6" : `color-mix(in oklch, ${theme.primary} ${20 + v * 28}%, #fff)`;
+  // Binary fill — the editor toggles cells on/off, so the view-mode
+  // heatmap mirrors that: every "on" cell is the same brand green,
+  // every "off" cell is the neutral tint. No intensity gradient.
+  const fill = (v) => v === 0 ? "#F4F5F6" : "#1F8C5A";
   const grid =
   <>
       <div style={{ display: "grid", gridTemplateColumns: "44px 1fr 1fr 1fr", gap: 8, alignItems: "center" }}>
@@ -2067,9 +2032,6 @@ function AvailabilityCard({ theme, desktop = false }) {
         )}
           </React.Fragment>
       )}
-      </div>
-      <div style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, textAlign: "center", marginTop: 12 }}>
-        Based on booking patterns — not a real-time schedule.
       </div>
     </>;
 
@@ -2224,49 +2186,13 @@ function ProfilePage({ theme, viewport = "desktop", onBack }) {
       <IdentityCard theme={theme} desktop={false} />
 
       <div style={{ marginTop: 24 }}>
-        <PSectionHead theme={theme} sub="Last 12 months">Performance & community</PSectionHead>
+        <PSectionHead theme={theme} sub="Last 12 months">Activity</PSectionHead>
         <StatsCard theme={theme} desktop={false} />
       </div>
 
       <div style={{ marginTop: 24 }}>
-        <PSectionHead theme={theme} sub="Synced from your gear locker">Equipment</PSectionHead>
-        <EquipmentCard theme={theme} desktop={false} />
-      </div>
-
-      <div style={{ marginTop: 24 }}>
-        <PSectionHead theme={theme} sub="This week · monthly trend">Activity</PSectionHead>
-        <ActivityHeatmapCard theme={theme} desktop={false} />
-      </div>
-
-      <div style={{ marginTop: 24 }}>
-        <PSectionHead theme={theme} sub={`${PROFILE.trophies.length} championships · ${PROFILE.badges.length} badges`}>Recognition</PSectionHead>
-        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 13, letterSpacing: -0.2, color: "#0F1214" }}>Trophies</span>
-              <span style={{ fontSize: 11, color: "#858F8F", fontWeight: 500 }}>Championship wins</span>
-            </div>
-            <TrophyCabinetCard theme={theme} desktop={false} />
-          </div>
-          <div style={{ height: 1, background: "#E9EBEC" }} />
-          <div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 13, letterSpacing: -0.2, color: "#0F1214" }}>Badges</span>
-              <span style={{ fontSize: 11, color: "#858F8F", fontWeight: 500 }}>Earned through play</span>
-            </div>
-            <BadgesCard theme={theme} desktop={false} />
-          </div>
-        </div>
-      </div>
-
-      <div style={{ marginTop: 24 }}>
-        <PSectionHead theme={theme} sub="From partners & coaches">Mentions</PSectionHead>
-        <MentionsCard theme={theme} desktop={false} />
-      </div>
-
-      <div style={{ marginTop: 24 }}>
-        <PSectionHead theme={theme} sub={`${PROFILE.communities.length} groups`}>Communities</PSectionHead>
-        <CommunitiesCard theme={theme} desktop={false} />
+        <PSectionHead theme={theme}>Typical availability</PSectionHead>
+        <AvailabilityCard theme={theme} desktop={false} />
       </div>
 
       <div style={{ marginTop: 24 }}>
@@ -2298,57 +2224,13 @@ function ProfilePage({ theme, viewport = "desktop", onBack }) {
 
       {/* Stats dashboard — at-a-glance numbers. */}
       <div style={{ marginTop: 32 }}>
-        <PSectionHead theme={theme} sub="Last 12 months">Performance & community</PSectionHead>
+        <PSectionHead theme={theme} sub="Last 12 months">Activity</PSectionHead>
         <StatsCard theme={theme} desktop={true} />
       </div>
 
       <div style={{ marginTop: 32 }}>
-        <PSectionHead theme={theme} sub="Synced from your gear locker">Equipment</PSectionHead>
-        <EquipmentCard theme={theme} desktop={true} />
-      </div>
-
-      <div style={{ marginTop: 32 }}>
-        <PSectionHead theme={theme} sub="This week · monthly trend">Activity</PSectionHead>
-        <ActivityHeatmapCard theme={theme} desktop={true} />
-      </div>
-
-      {/* Trophies + Badges — single recognition area, visually
-       differentiated by a sub-head + their own tile styling
-       (medal-tinted vs neutral). */}
-      <div style={{ marginTop: 32 }}>
-        <PSectionHead theme={theme} sub={`${PROFILE.trophies.length} championships · ${PROFILE.badges.length} badges`}>Recognition</PSectionHead>
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          {/* Sub-head — Trophies */}
-          <div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, letterSpacing: -0.2, color: "#0F1214" }}>Trophies</span>
-              <span style={{ fontSize: 12, color: "#858F8F", fontWeight: 500 }}>Championship wins & podium finishes</span>
-            </div>
-            <TrophyCabinetCard theme={theme} desktop={true} />
-          </div>
-          {/* Hairline divider between the two sub-areas. */}
-          <div style={{ height: 1, background: "#E9EBEC" }} />
-          {/* Sub-head — Badges */}
-          <div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 14, letterSpacing: -0.2, color: "#0F1214" }}>Badges</span>
-              <span style={{ fontSize: 12, color: "#858F8F", fontWeight: 500 }}>Earned through participation & reliability</span>
-            </div>
-            <BadgesCard theme={theme} desktop={true} />
-          </div>
-        </div>
-      </div>
-
-      {/* Mentions — quoted testimonials. */}
-      <div style={{ marginTop: 32 }}>
-        <PSectionHead theme={theme} sub={`From partners & coaches`}>Mentions</PSectionHead>
-        <MentionsCard theme={theme} desktop={true} />
-      </div>
-
-      {/* Communities. */}
-      <div style={{ marginTop: 32 }}>
-        <PSectionHead theme={theme} sub={`${PROFILE.communities.length} groups`}>Communities</PSectionHead>
-        <CommunitiesCard theme={theme} desktop={true} />
+        <PSectionHead theme={theme}>Typical availability</PSectionHead>
+        <AvailabilityCard theme={theme} desktop={true} />
       </div>
 
       <div style={{ marginTop: 32 }}>
@@ -3696,11 +3578,42 @@ function EditProfileSheet({ theme, onClose }) {
   const [location, setLocation] = useStateP(PROFILE.location);
   const [bio, setBio] = useStateP(PROFILE.bio);
   const [sports, setSports] = useStateP(new Set(PROFILE.sports.filter((s) => s === "Tennis" || s === "Pickleball")));
-  const [privacy, setPrivacy] = useStateP("Friends only");
-  const ALL_SPORTS = ["Tennis", "Pickleball", "Recreational", "Open Play"];
+  const [privacy, setPrivacy] = useStateP("Public");
+  // Phone / Email visibility — toggles whether each row appears on
+  // the public profile. The numbers/addresses themselves are edited
+  // under Settings → My Account (per the info banner above).
+  const [phonePublic, setPhonePublic] = useStateP(PROFILE.phonePublic);
+  const [emailPublic, setEmailPublic] = useStateP(PROFILE.emailPublic);
+  // Self-applied tags — editable list. The user can remove existing
+  // chips (X) or pick from a suggested pool of additional ones.
+  const [tags, setTags] = useStateP(PROFILE.tagsByMe);
+  // Full universe of self-applicable tags. Sports (Tennis, Pickleball)
+  // live in their own editor section above — they're intentionally NOT
+  // in this pool. Recreational / Open Play are play-style tags, not
+  // sports, so they belong here.
+  const TAG_SUGGESTIONS = [
+  "Looking for partners", "Drills regular", "Weekend warrior",
+  "Open to coaching", "Recreational", "Open Play",
+  "Lefty", "Early bird", "Mixed doubles fan", "Travels for tournaments",
+  "Always on time", "Bring-the-snacks energy", "Captain", "Beginner",
+  "Tournament player", "Looking for clinics"];
+
+  // Availability — binary on/off per (day × band) cell. Seeded from
+  // PROFILE.availability where any non-zero weight counts as "on".
+  const [avail, setAvail] = useStateP(() => {
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const out = {};
+    for (const d of days) out[d] = PROFILE.availability[d].map((v) => v > 0);
+    return out;
+  });
+  const toggleCell = (day, idx) =>
+  setAvail((prev) => ({
+    ...prev,
+    [day]: prev[day].map((on, i) => i === idx ? !on : on)
+  }));
+  const ALL_SPORTS = ["Tennis", "Pickleball"];
   const PRIVACY_OPTIONS = [
   { id: "Public", label: "Public", sub: "Anyone on CourtReserve can find your profile" },
-  { id: "Friends only", label: "Friends only", sub: "Only friends and connected players can view" },
   { id: "Private", label: "Private", sub: "Only you can view your profile" }];
 
   const toggleSport = (s) => {
@@ -3711,6 +3624,8 @@ function EditProfileSheet({ theme, onClose }) {
       return next;
     });
   };
+  const removeTag = (t) => setTags((cur) => cur.filter((x) => x !== t));
+  const addTag = (t) => setTags((cur) => cur.includes(t) ? cur : [...cur, t]);
   // Save is a no-op for the prototype; just close.
   const onSave = () => onClose();
   return (
@@ -3792,6 +3707,73 @@ function EditProfileSheet({ theme, onClose }) {
             letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F", marginBottom: 12
           }}>Basics</div>
           <EpField label="Display name" value={displayName} onChange={setDisplayName} />
+          {/* PHONE NUMBER — visibility toggle. The number itself is
+              edited in Settings → My Account (see info banner above). */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 13, color: "#4B5052", fontWeight: 600, marginBottom: 6 }}>Phone number</div>
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "14px 16px", borderRadius: 12, border: "1px solid #DEE1E5"
+            }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <span style={{ fontWeight: 700, fontSize: 14, color: "#0F1214" }}>Show phone on my public profile</span>
+                <span style={{ fontSize: 12, color: "#858F8F", fontWeight: 500 }}>{PROFILE.phone}</span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={phonePublic}
+                aria-label="Show phone on my public profile"
+                onClick={() => setPhonePublic((v) => !v)}
+                style={{
+                  width: 40, height: 22, borderRadius: 999,
+                  background: phonePublic ? "#0F1214" : "#DEE1E5",
+                  border: 0, cursor: "pointer", position: "relative",
+                  transition: "background 160ms",
+                  flexShrink: 0
+                }}>
+                <span style={{
+                  position: "absolute", top: 2, left: phonePublic ? 20 : 2,
+                  width: 18, height: 18, borderRadius: 999, background: "#fff",
+                  boxShadow: "0 1px 3px rgba(15,18,20,.20)",
+                  transition: "left 160ms"
+                }} />
+              </button>
+            </div>
+          </div>
+          {/* EMAIL — same shape as Phone, controls public visibility. */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 13, color: "#4B5052", fontWeight: 600, marginBottom: 6 }}>Email</div>
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "14px 16px", borderRadius: 12, border: "1px solid #DEE1E5"
+            }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <span style={{ fontWeight: 700, fontSize: 14, color: "#0F1214" }}>Show email on my public profile</span>
+                <span style={{ fontSize: 12, color: "#858F8F", fontWeight: 500 }}>{PROFILE.email}</span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={emailPublic}
+                aria-label="Show email on my public profile"
+                onClick={() => setEmailPublic((v) => !v)}
+                style={{
+                  width: 40, height: 22, borderRadius: 999,
+                  background: emailPublic ? "#0F1214" : "#DEE1E5",
+                  border: 0, cursor: "pointer", position: "relative",
+                  transition: "background 160ms",
+                  flexShrink: 0
+                }}>
+                <span style={{
+                  position: "absolute", top: 2, left: emailPublic ? 20 : 2,
+                  width: 18, height: 18, borderRadius: 999, background: "#fff",
+                  boxShadow: "0 1px 3px rgba(15,18,20,.20)",
+                  transition: "left 160ms"
+                }} />
+              </button>
+            </div>
+          </div>
           <EpField label="Location" value={location} onChange={setLocation} />
           {/* Sports chips */}
           <div style={{ marginBottom: 24 }}>
@@ -3823,6 +3805,120 @@ function EditProfileSheet({ theme, onClose }) {
             outline: "none", resize: "vertical", background: "#fff",
             marginBottom: 24
           }} />
+          {/* YOUR TAGS — self-applied tag chips. Tap X to remove, tap a
+              suggested chip below to add. Suggestion pool filters out
+              tags already on the player. */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{
+              fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
+              letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F", marginBottom: 10
+            }}>Your tags</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+              {tags.map((t) =>
+              <span key={t} style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                height: 30, padding: "0 8px 0 12px",
+                borderRadius: 999,
+                background: "#E9EBEC",
+                color: "#0F1214",
+                fontFamily: "inherit", fontWeight: 600, fontSize: 13
+              }}>
+                {t}
+                <button
+                  type="button"
+                  aria-label={`Remove ${t}`}
+                  onClick={() => removeTag(t)}
+                  style={{
+                    width: 18, height: 18, borderRadius: 999,
+                    background: "rgba(15,18,20,.10)", border: 0, cursor: "pointer",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center"
+                  }}>
+                  <Icon name="X" size={10} strokeWidth={2.4} color="#0F1214" />
+                </button>
+              </span>
+              )}
+            </div>
+            {/* Suggested chips — the full universe of available tags.
+                Already-selected ones render disabled with a check icon so
+                the user can see at a glance what's added. Tap an
+                unselected one to add it. */}
+            <div>
+              <div style={{ fontSize: 12, color: "#858F8F", fontWeight: 600, marginBottom: 8 }}>Suggested</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {TAG_SUGGESTIONS.map((t) => {
+                  const added = tags.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => !added && addTag(t)}
+                      disabled={added}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 4,
+                        height: 30, padding: "0 12px", borderRadius: 999,
+                        background: added ? "#F4F5F6" : "#fff",
+                        border: `1px solid ${added ? "#E9EBEC" : "#DEE1E5"}`,
+                        color: added ? "#858F8F" : "#0F1214",
+                        fontFamily: "inherit", fontWeight: 600, fontSize: 13,
+                        cursor: added ? "default" : "pointer",
+                        opacity: added ? 0.7 : 1
+                      }}>
+                      <Icon
+                        name={added ? "Check" : "Plus"}
+                        size={11}
+                        strokeWidth={2.4}
+                        color={added ? "#858F8F" : "#4B5052"} />
+                      {t}
+                    </button>);
+
+                })}
+              </div>
+            </div>
+          </div>
+          {/* AVAILABILITY — 7 days × 3 bands of toggleable cells. Days
+              read left-to-right as rows; tap a cell to flip it on/off. */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{
+              display: "flex", alignItems: "baseline", justifyContent: "space-between",
+              marginBottom: 12
+            }}>
+              <div style={{
+                fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
+                letterSpacing: 1.4, textTransform: "uppercase", color: "#858F8F"
+              }}>Availability</div>
+              <span style={{ fontSize: 11, color: "#858F8F", fontWeight: 500 }}>Tap a cell to toggle</span>
+            </div>
+            <div style={{
+              display: "grid", gridTemplateColumns: "44px 1fr 1fr 1fr",
+              gap: 8, alignItems: "center"
+            }}>
+              <div />
+              {["Morning", "Afternoon", "Evening"].map((p) =>
+              <div key={p} style={{ fontSize: 11, fontWeight: 700, color: "#858F8F", textAlign: "center" }}>{p}</div>
+              )}
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) =>
+              <React.Fragment key={d}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#4B5052" }}>{d}</div>
+                {avail[d].map((on, i) =>
+                <button
+                  key={i}
+                  type="button"
+                  aria-pressed={on}
+                  aria-label={`${d} ${["morning", "afternoon", "evening"][i]} availability ${on ? "on" : "off"}`}
+                  onClick={() => toggleCell(d, i)}
+                  style={{
+                    height: 32, borderRadius: 6,
+                    background: on ? "#1F8C5A" : "#F4F5F6",
+                    border: on ? 0 : "1px solid #E9EBEC",
+                    cursor: "pointer",
+                    transition: "background 120ms"
+                  }}
+                />
+                )}
+              </React.Fragment>
+              )}
+            </div>
+          </div>
           {/* PRIVACY */}
           <div style={{
             fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 800, fontSize: 11,
