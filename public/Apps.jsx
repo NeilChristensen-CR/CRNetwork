@@ -2074,6 +2074,42 @@ function supplyState({ spotsLeft, totalSpots }) {
   return { urgent, text: `${spotsLeft} of ${totalSpots} spots` };
 }
 
+// ---- trendingSupplyState — qualitative pill used by Trending events.
+// Where MoreEventsNearYou shows a literal "{n} of {N} spots" count so a
+// scanning player can compare exact availability across a long list, the
+// trending carousel is curated — the pill is a *headline* about the event
+// instead of a count. Returns one of four variants in priority order:
+//   limited  — fill ≥80% / scarce seats, urgent red treatment
+//   dupr     — event has a DUPR-tagged level (signals "rated play")
+//   filling  — fill ≥50%, soft amber treatment
+//   open     — neutral fallback
+// The priority order (limited → dupr → filling → open) means a packed
+// DUPR event still surfaces as "Limited Spots Left" because urgency wins.
+function trendingSupplyState({ spotsLeft, totalSpots, tags }) {
+  const filled = (typeof totalSpots === "number" && totalSpots > 0)
+    ? (totalSpots - spotsLeft) / totalSpots
+    : 1;
+  const hasDupr = Array.isArray(tags) && tags.some((t) => /DUPR/i.test(t));
+  if (filled >= 0.8) return { variant: "limited", text: "Limited Spots Left" };
+  if (hasDupr)       return { variant: "dupr",    text: "DUPR Rated" };
+  if (filled >= 0.5) return { variant: "filling", text: "Filling Fast" };
+  return { variant: "open", text: "Open Spots" };
+}
+
+// Pill palette indexed by the variant returned from trendingSupplyState.
+// Kept inline (not a CSS class) so the hover-invert rules in
+// networkPOC.html — which target `[data-tag="warning"]` / `[data-tag=
+// "default"]` — still kick in: the dupr/filling cards use data-tag
+// "default" so they invert to dark on hover just like the other neutral
+// pills; only the limited pill carries `data-tag="warning"` so it
+// inverts to the white-on-red urgent state.
+const TRENDING_PILL = {
+  limited: { bg: "#FEE2E2", fg: "#B91C1C" },
+  dupr:    { bg: "#DBEAFE", fg: "#1E3A8A" },
+  filling: { bg: "#FEF3C7", fg: "#92400E" },
+  open:    { bg: "#F4F5F6", fg: "#0F1214" },
+};
+
 // ---- Verified popular clubs near you — horizontal carousel of map-image
 // venue cards. Each card: map preview with distance badge, club name,
 // rating + price, sport tag, and a See Events & Info link.
@@ -2300,12 +2336,12 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                 </div>
               </div>
               {(() => {
-                const s = supplyState(ev);
+                const s = trendingSupplyState(ev);
                 return (
-                  <span data-tag={s.urgent ? "warning" : "default"} style={{
+                  <span data-tag={s.variant === "limited" ? "warning" : "default"} style={{
                     height: 22, padding: "0 10px", borderRadius: 6,
-                    background: s.urgent ? "#FEE2E2" : "#F4F5F6",
-                    color: s.urgent ? "#B91C1C" : "#0F1214",
+                    background: TRENDING_PILL[s.variant].bg,
+                    color: TRENDING_PILL[s.variant].fg,
                     fontSize: 11.5, fontWeight: 600,
                     display: "inline-flex", alignItems: "center",
                     whiteSpace: "nowrap",
