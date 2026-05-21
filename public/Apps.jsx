@@ -163,7 +163,7 @@ function ExperienceSwitcher({ theme, app, setApp, compact = false }) {
       }}>
         <span style={{
           width: compact ? 28 : 40, height: compact ? 28 : 40, borderRadius: compact ? 8 : 10,
-          background: current.color, color: "var(--pp-bg-default)",
+          background: current.color, color: "var(--pp-neutral-0)",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           fontFamily: theme.display, fontWeight: 800, fontSize: compact ? current.universal ? 13 : 10 : current.universal ? 18 : 13,
           flexShrink: 0
@@ -456,7 +456,7 @@ function ChromeBar({ theme, viewport, app, setApp, onOpenQR, onFindClubs, onOpen
         </button>
         <div data-profile-trigger style={{ position: "relative" }}>
           <button onClick={() => setProfileOpen((o) => !o)} aria-label="Profile menu" aria-expanded={profileOpen} style={{
-            width: 32, height: 32, borderRadius: 999, background: theme.primary, color: "var(--pp-bg-default)",
+            width: 32, height: 32, borderRadius: 999, background: theme.primary, color: "var(--pp-neutral-0)",
             display: "inline-flex", alignItems: "center", justifyContent: "center",
             fontFamily: theme.display, fontWeight: 800, fontSize: 12,
             border: 0, padding: 0, cursor: "pointer",
@@ -905,7 +905,7 @@ function ClubsRow({ theme, isCR, onOpenClub, items }) {
         borderBottom: `1px solid ${t.line}`,
         cursor: "pointer", fontFamily: "inherit", textAlign: "left"
       }}>
-          <span style={{ width: 32, height: 32, borderRadius: 8, background: c.color, color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11 }}>{c.logoMark}</span>
+          <span style={{ width: 32, height: 32, borderRadius: 8, background: c.color, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11 }}>{c.logoMark}</span>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: t.text, letterSpacing: -0.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
             <div style={{ fontSize: 11, color: t.textMuted, fontWeight: 500, marginTop: 2 }}>{c.miles} mi · {c.sessions} sessions · {c.courts} courts</div>
@@ -932,7 +932,7 @@ function DiscoverClubsRow({ theme }) {
         borderBottom: "1px solid var(--pp-border-subtle)",
         cursor: "pointer", fontFamily: "inherit", textAlign: "left"
       }}>
-          <span style={{ width: 32, height: 32, borderRadius: 8, background: c.color, color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11 }}>{c.logoMark}</span>
+          <span style={{ width: 32, height: 32, borderRadius: 8, background: c.color, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11 }}>{c.logoMark}</span>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>{c.name}</div>
             <div style={{ fontSize: 11, color: "var(--pp-fg-muted)", fontWeight: 500, marginTop: 2 }}>{c.miles} mi · {c.courts} courts · <span style={{ color: "var(--pp-green-700)", fontWeight: 600 }}>Booking open</span></div>
@@ -1200,7 +1200,7 @@ function MessagesScreen({ theme }) {
                   {th.unread > 0 &&
               <span style={{
                 minWidth: 18, height: 18, padding: "0 6px",
-                borderRadius: 999, background: "#E11D2A", color: "var(--pp-bg-default)",
+                borderRadius: 999, background: "#E11D2A", color: "var(--pp-neutral-0)",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 fontFamily: theme.display, fontWeight: 800, fontSize: 10
               }}>{th.unread}</span>
@@ -1496,7 +1496,7 @@ function ComposeMessage({ theme, onBack, onPicked }) {
           onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
                 <span style={{
               width: 40, height: 40, borderRadius: 999,
-              background: c.color || "var(--pp-fg-default)", color: "var(--pp-bg-default)",
+              background: c.color || "var(--pp-fg-default)", color: "var(--pp-neutral-0)",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               fontFamily: theme.display, fontWeight: 800, fontSize: 12
             }}>{c.avatar}</span>
@@ -1545,7 +1545,7 @@ function MobileBottomNav({ theme, flow = false, active = "home", onChange }) {
         style={{
           justifySelf: "center",
           width: 56, height: 56, borderRadius: 999,
-          background: theme.primary, color: "var(--pp-bg-default)",
+          background: theme.primary, color: "var(--pp-neutral-0)",
           border: 0, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           // Stronger lift shadow — sells the "raised" affordance against
@@ -1569,7 +1569,7 @@ function MobileBottomNav({ theme, flow = false, active = "home", onChange }) {
             <span style={{ position: "relative", display: "inline-flex" }}>
               <Icon name={item.icon} size={22} color={active === item.key ? theme.primary : "var(--pp-fg-subtle)"} strokeWidth={active === item.key ? 2.4 : 1.8} />
               {item.badge &&
-            <span style={{ position: "absolute", top: -4, right: -8, minWidth: 16, height: 16, padding: "0 4px", borderRadius: 8, background: "#E11D2A", color: "var(--pp-bg-default)", fontSize: 9, fontWeight: 800, fontFamily: theme.display, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{item.badge}</span>
+            <span style={{ position: "absolute", top: -4, right: -8, minWidth: 16, height: 16, padding: "0 4px", borderRadius: 8, background: "#E11D2A", color: "var(--pp-neutral-0)", fontSize: 9, fontWeight: 800, fontFamily: theme.display, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{item.badge}</span>
             }
             </span>
           </button>
@@ -2048,7 +2048,14 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
                 padding: isMobile ? "10px 8px" : "12px 16px",
                 borderRadius: 999, border: 0,
                 background: "transparent",
-                color: isActive ? "var(--pp-fg-default)" : "var(--pp-bg-muted)",
+                // The action bar track is always #0B0E0E (dark) and the
+                // active pill is always white — both states are theme-
+                // independent. Use primitives directly so the active
+                // text stays dark on the white pill and the inactive
+                // text stays light on the dark track in both light AND
+                // dark modes. The alias layer would flip these in dark
+                // mode and break contrast.
+                color: isActive ? "var(--pp-ink-800)" : "var(--pp-neutral-200)",
                 fontFamily: "inherit",
                 fontWeight: 500,
                 fontSize: isMobile ? 13 : 16,
@@ -2468,7 +2475,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
                 {ev.tags.map((tag, i) => (
                   <span key={i} data-tag="default" style={{
                     padding: "2px 6px", borderRadius: 9999,
-                    background: "var(--pp-bg-muted)", color: "#161919",
+                    background: "var(--pp-bg-muted)", color: "var(--pp-fg-default)",
                     fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
                     fontWeight: 400,
                     display: "inline-flex", alignItems: "center",
@@ -2826,7 +2833,7 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
             <span style={{
               width: 24, height: 24, marginLeft: -8,
               borderRadius: 9999,
-              background: "var(--pp-bg-subtle)", color: "#6F7476",
+              background: "var(--pp-bg-subtle)", color: "var(--pp-fg-muted)",
               border: "2px solid var(--pp-bg-default)",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               fontSize: 13, lineHeight: "16px", fontWeight: 600,
@@ -3413,7 +3420,7 @@ function PrimaryActionGrid({ theme, onOpenEventList, onFindClubs, onBookCourt, i
         {primaries.map((p) =>
         <button key={p.label} onClick={p.onClick} style={{
           padding: "20px 22px", borderRadius: 8, border: 0,
-          background: theme.primary, color: "var(--pp-bg-default)",
+          background: theme.primary, color: "var(--pp-neutral-0)",
           cursor: "pointer", textAlign: "left", fontFamily: "inherit",
           display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 16, alignItems: "center",
           position: "relative", overflow: "hidden",
@@ -3593,7 +3600,7 @@ function ClubLeaderboard({ theme, view = "friends" }) {
               }
               {!same && Math.abs(r.delta)}
             </span>
-            <div style={{ width: 28, height: 28, borderRadius: 999, background: r.color || theme.primary, color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 10 }}>{r.avatar}</div>
+            <div style={{ width: 28, height: 28, borderRadius: 999, background: r.color || theme.primary, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 10 }}>{r.avatar}</div>
             <span style={{ fontFamily: theme.display, fontWeight: r.isYou ? 800 : 600, fontSize: 13, color: t.text }}>{r.name}</span>
             <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: t.text, fontVariantNumeric: "tabular-nums" }}>{r.dupr.toFixed(1)}</span>
           </div>);
@@ -3612,7 +3619,7 @@ function PlayerNetwork({ theme }) {
         padding: "18px 4px",
         borderBottom: i < PLAYER.network.length - 1 ? "1px solid var(--pp-border-subtle)" : 0
       }}>
-          <div style={{ width: 48, height: 48, borderRadius: 999, background: p.color, color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 14 }}>{p.avatar}</div>
+          <div style={{ width: 48, height: 48, borderRadius: 999, background: p.color, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 14 }}>{p.avatar}</div>
           <div style={{ minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
               <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>{p.name}</span>
@@ -3624,7 +3631,7 @@ function PlayerNetwork({ theme }) {
             <button style={{ width: 36, height: 36, borderRadius: 999, border: 0, background: "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
               <Icon name="MessageCircle" size={16} strokeWidth={1.8} color="var(--pp-fg-muted)" />
             </button>
-            <button style={{ height: 36, padding: "0 14px", borderRadius: 8, border: 0, background: theme.primary, color: "var(--pp-bg-default)", fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>{p.action}</button>
+            <button style={{ height: 36, padding: "0 14px", borderRadius: 8, border: 0, background: theme.primary, color: "var(--pp-neutral-0)", fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer" }}>{p.action}</button>
           </div>
         </div>
       )}
@@ -3753,7 +3760,7 @@ function PersonCard({ p, theme }) {
       {/* Header — avatar, name, last active */}
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{ position: "relative" }}>
-          <div style={{ width: 40, height: 40, borderRadius: 999, background: p.color, color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 12 }}>{p.avatar}</div>
+          <div style={{ width: 40, height: 40, borderRadius: 999, background: p.color, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 12 }}>{p.avatar}</div>
           {p.live && <span style={{ position: "absolute", bottom: -2, right: -2, width: 12, height: 12, borderRadius: 999, background: "#E11D2A", border: "2px solid #fff" }} />}
         </div>
         <div style={{ minWidth: 0, flex: 1 }}>
@@ -3952,7 +3959,7 @@ function EventsFeedSegment({ theme, onOpenEventList, viewport = "desktop" }) {
           onMouseLeave={(e) => {if (!filterOpen) e.currentTarget.style.borderColor = activeFilters ? t.text : t.line;}}>
               <Icon name="SlidersHorizontal" size={14} strokeWidth={2.2} color={filterOpen ? "var(--pp-bg-default)" : t.text} />
               {activeFilters > 0 &&
-            <span style={{ position: "absolute", top: -4, right: -4, display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 16, height: 16, padding: "0 4px", borderRadius: 999, background: theme.primary, color: "var(--pp-bg-default)", fontSize: 9, fontWeight: 800, fontFamily: theme.display, border: `1.5px solid ${t.surface}` }}>{activeFilters}</span>
+            <span style={{ position: "absolute", top: -4, right: -4, display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 16, height: 16, padding: "0 4px", borderRadius: 999, background: theme.primary, color: "var(--pp-neutral-0)", fontSize: 9, fontWeight: 800, fontFamily: theme.display, border: `1.5px solid ${t.surface}` }}>{activeFilters}</span>
             }
             </button>
             <a href="#" onClick={(e) => {e.preventDefault();onOpenEventList && onOpenEventList();}} style={{
@@ -4181,7 +4188,7 @@ function FriendActivity({ theme }) {
         borderBottom: i < PLAYER.friendActivity.length - 1 ? "1px solid var(--pp-border-subtle)" : 0
       }}>
           <div style={{ position: "relative" }}>
-            <div style={{ width: 40, height: 40, borderRadius: 999, background: a.color, color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 12 }}>{a.avatar}</div>
+            <div style={{ width: 40, height: 40, borderRadius: 999, background: a.color, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 12 }}>{a.avatar}</div>
             {a.live && <span style={{ position: "absolute", bottom: 0, right: 0, width: 12, height: 12, borderRadius: 999, background: "#E11D2A", border: "2px solid #fff" }} />}
           </div>
           <div style={{ minWidth: 0 }}>
@@ -4355,10 +4362,10 @@ function ForYouSegment({ theme, viewport = "desktop" }) {
             alignSelf: "flex-start",
             display: "inline-flex", alignItems: "center", gap: 6,
             height: 22, padding: "0 10px", borderRadius: 8,
-            background: it.color, color: "var(--pp-bg-default)",
+            background: it.color, color: "var(--pp-neutral-0)",
             fontFamily: theme.display, fontWeight: 800, fontSize: 9, letterSpacing: 1, textTransform: "uppercase"
           }}>
-              <Icon name={it.icon} size={10} color="var(--pp-bg-default)" strokeWidth={2.4} />
+              <Icon name={it.icon} size={10} color="var(--pp-neutral-0)" strokeWidth={2.4} />
               {labelFor[it.kind]}
             </span>
 
@@ -4370,7 +4377,7 @@ function ForYouSegment({ theme, viewport = "desktop" }) {
               <div style={{
               width: 40, height: 40, flexShrink: 0,
               borderRadius: it.kind === "club" ? 10 : it.kind === "event" ? 8 : 999,
-              background: it.color, color: "var(--pp-bg-default)",
+              background: it.color, color: "var(--pp-neutral-0)",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               fontFamily: theme.display, fontWeight: 800, fontSize: 13
             }}>{it.avatar}</div>
@@ -4739,8 +4746,8 @@ function RecentMatches({ theme }) {
             <div style={{ marginTop: "auto", position: "relative" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ display: "inline-flex" }}>
-                  <span style={{ width: 22, height: 22, borderRadius: 999, background: m.partnerColor, color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 9, border: win ? "2px solid var(--pp-fg-default)" : "2px solid #fff" }}>JB</span>
-                  <span style={{ width: 22, height: 22, borderRadius: 999, background: m.partnerColor, color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 9, marginLeft: -10, border: win ? "2px solid var(--pp-fg-default)" : "2px solid #fff" }}>{m.partnerInit}</span>
+                  <span style={{ width: 22, height: 22, borderRadius: 999, background: m.partnerColor, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 9, border: win ? "2px solid var(--pp-fg-default)" : "2px solid #fff" }}>JB</span>
+                  <span style={{ width: 22, height: 22, borderRadius: 999, background: m.partnerColor, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 9, marginLeft: -10, border: win ? "2px solid var(--pp-fg-default)" : "2px solid #fff" }}>{m.partnerInit}</span>
                 </div>
                 <span style={{ fontSize: 11, fontWeight: 600, color: win ? "rgba(255,255,255,.85)" : "var(--pp-fg-default)" }}>You & {m.partner}</span>
               </div>
@@ -5007,7 +5014,7 @@ function TournamentTeaser({ theme }) {
       <div style={{ fontSize: 13, color: "var(--pp-fg-default)", fontWeight: 500, lineHeight: 1.5 }}>
         <b style={{ color: theme.primary }}>You &amp; Reese</b> would seed at <b>#5 of 32</b>. Combined DUPR 8.3 — sweet spot for this bracket.
       </div>
-      <button style={{ alignSelf: "flex-start", height: 38, padding: "0 18px", borderRadius: 8, border: 0, background: theme.primary, color: "var(--pp-bg-default)", fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Invite Reese</button>
+      <button style={{ alignSelf: "flex-start", height: 38, padding: "0 18px", borderRadius: 8, border: 0, background: theme.primary, color: "var(--pp-neutral-0)", fontFamily: "inherit", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Invite Reese</button>
     </div>);
 
 }

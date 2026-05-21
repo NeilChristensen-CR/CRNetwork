@@ -467,7 +467,7 @@ function CDNetworkMeta({ club, theme }) {
                     {row.avatar &&
                 <span style={{
                   width: 28, height: 28, borderRadius: 999,
-                  background: row.color || theme.primary, color: "var(--pp-bg-default)",
+                  background: row.color || theme.primary, color: "var(--pp-neutral-0)",
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   fontFamily: theme.display, fontWeight: 800, fontSize: 10, flexShrink: 0
                 }}>{row.avatar}</span>
@@ -593,7 +593,7 @@ function CDCourtAvailability({ club, theme }) {
                 {!taken &&
                 <button style={{
                   height: 28, padding: "0 14px", borderRadius: 8, border: 0,
-                  background: theme.primary, color: "var(--pp-bg-default)",
+                  background: theme.primary, color: "var(--pp-neutral-0)",
                   fontFamily: "inherit", fontWeight: 700, fontSize: 11, cursor: "pointer"
                 }}>Reserve</button>
                 }
@@ -640,7 +640,7 @@ function CDPlayersYouMightKnow({ club, theme, desktop }) {
             {/* Identity: avatar + name + level */}
             <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
               <span style={{
-              width: 36, height: 36, borderRadius: 999, background: theme.primary, color: "var(--pp-bg-default)",
+              width: 36, height: 36, borderRadius: 999, background: theme.primary, color: "var(--pp-neutral-0)",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               fontFamily: theme.display, fontWeight: 800, fontSize: 12, flexShrink: 0
             }}>{p.avatar}</span>
@@ -739,7 +739,7 @@ function CDProsPrograms({ club, theme }) {
           display: "flex", flexDirection: "column", gap: 8
         }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-              <span style={{ width: 36, height: 36, borderRadius: 999, background: theme.primary, color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11, flexShrink: 0 }}>{c.avatar}</span>
+              <span style={{ width: 36, height: 36, borderRadius: 999, background: theme.primary, color: "var(--pp-neutral-0)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11, flexShrink: 0 }}>{c.avatar}</span>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
                 <Icon name="Star" size={12} color="#F2A93B" strokeWidth={2.2} />
                 <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 13, color: "var(--pp-fg-default)", fontVariantNumeric: "tabular-nums" }}>{c.rating}</span>
@@ -1017,12 +1017,12 @@ function ClubDetailBody({ club, theme, viewport }) {
           <span style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             height: 30, padding: "0 14px", borderRadius: 999,
-            background: "#1FA868", color: "var(--pp-bg-default)",
+            background: "#1FA868", color: "var(--pp-neutral-0)",
             fontFamily: theme.display, fontWeight: 800, fontSize: 11,
             letterSpacing: 1, textTransform: "uppercase",
             boxShadow: "0 2px 8px rgba(31,168,104,.25)"
           }}>
-              <Icon name="BadgeCheck" size={14} strokeWidth={2.6} color="var(--pp-bg-default)" />
+              <Icon name="BadgeCheck" size={14} strokeWidth={2.6} color="var(--pp-neutral-0)" />
               Verified on CourtReserve
             </span>
           }
@@ -1242,7 +1242,7 @@ function ClubDetailMobile({ club, theme, onBack, onBookCourt, onBrowseEvents }) 
         }}>See events</button>
         <button onClick={onBookCourt} style={{
           flex: 1.4, height: 48, padding: "0 18px", borderRadius: 8,
-          border: 0, background: theme.primary, color: "var(--pp-bg-default)",
+          border: 0, background: theme.primary, color: "var(--pp-neutral-0)",
           fontFamily: "inherit", fontWeight: 700, fontSize: 13, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8
         }}>
