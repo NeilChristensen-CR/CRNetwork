@@ -22,6 +22,12 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
     brandGreen: "#2E7D32",
   };
 
+  // Center tab navigation (Clubs / Players) — desktop only. Active tab is
+  // tracked internally so the underline indicator follows clicks. Tab
+  // clicks also forward through onNav so a host can route on the label.
+  const [activeTab, setActiveTab] = useStateCBLO("Clubs");
+  const TABS = ["Clubs", "Players"];
+
   return (
     <div
       style={{
@@ -39,12 +45,13 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
           margin: "0 auto",
           // 64px total height = 16px top + 32px content + 16px bottom (desktop)
           // 56px on mobile = 12px top + 32px content + 12px bottom
-          padding: desktop ? "16px 24px" : "12px 16px",
+          padding: desktop ? "0 24px" : "12px 16px",
           height: desktop ? 64 : 56,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 8,
+          position: "relative",
         }}
       >
         {/* Brandmark — green checkmark + "Court" light / "RESERVE" bold.
@@ -94,6 +101,65 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
             CourtReserve
           </span>
         </button>
+
+        {/* Center tabs — desktop only. Absolutely positioned so the
+            left brandmark and right CTA stay anchored to the edges via
+            the parent's space-between flex while the tabs sit dead-
+            centered regardless of side-content widths. Each tab is
+            full chrome height (64px) so its active underline lands
+            flush against the chrome's own border-bottom, reading as
+            one continuous bottom rule with a colored segment under
+            the active label. */}
+        {desktop && (
+          <div
+            role="tablist"
+            aria-label="Browse"
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: 0,
+              bottom: 0,
+              transform: "translateX(-50%)",
+              display: "flex",
+              alignItems: "stretch",
+              gap: 24,
+            }}
+          >
+            {TABS.map((label) => {
+              const isActive = activeTab === label;
+              return (
+                <button
+                  key={label}
+                  role="tab"
+                  aria-selected={isActive}
+                  type="button"
+                  onClick={() => { setActiveTab(label); onNav && onNav(label); }}
+                  style={{
+                    height: "100%",
+                    padding: "0 4px",
+                    background: "transparent",
+                    border: 0,
+                    cursor: "pointer",
+                    fontFamily: "Inter, system-ui, sans-serif",
+                    fontWeight: isActive ? 600 : 500,
+                    fontSize: 14, lineHeight: 1,
+                    color: isActive ? C.text : C.textSubtle,
+                    // Underline indicator — 3px inset shadow on the
+                    // active tab so it appears to extend the chrome's
+                    // own bottom-border with a brand-green segment.
+                    boxShadow: isActive ? `inset 0 -3px 0 ${C.brandGreen}` : "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    whiteSpace: "nowrap",
+                    transition: "color 140ms ease, box-shadow 200ms ease",
+                  }}
+                  onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.color = C.text; }}
+                  onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.color = C.textSubtle; }}
+                >{label}</button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Right — primary CTA pill. Copy switched from "Sign In" to
             "Create an Account" so the logged-out chrome leads with the
