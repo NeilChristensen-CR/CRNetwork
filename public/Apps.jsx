@@ -2208,21 +2208,37 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
 // ---- Popular events near you — carousel of event cards. Each card:
 // club brand mark, spots-left badge, title, club row, distance, schedule,
 // tag pills, and price + spots-remaining footer.
-function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false, viewport = "desktop" }) {
+// Default carousel data — distinct clubs, titles, dates, prices, and
+// tags per card so the carousel reads as a real list rather than a
+// repeated stub. Hoisted out of the component so callers (Trending,
+// Events for Beginners, Recurring) can either accept it or pass their
+// own `events` prop without re-running this allocation on every render.
+const POPULAR_EVENTS_DEFAULT = [
+  { id: "e1", logoMark: "OC", logoBg: "#2E5D52", logoFg: "#F2A93B", logoLine1: "OLD COAST",  logoLine2: "PICKLEBALL", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", date: "Wed, May 13", duration: "6:00 PM – 7:00 PM",  spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 DUPR", "Men's Only", "Ages 12-15"] },
+  { id: "e2", logoMark: "VB", logoBg: "#7C3AED", logoFg: "#FBBF24", logoLine1: "VILANO",     logoLine2: "BEACH",      title: "Saturday Morning Doubles League",          club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", date: "Sat, May 16", duration: "8:00 AM – 10:00 AM", spotsLeft: 4, totalSpots: 24, taken: 20, price: "$25",       tags: ["3.5 - 4.0 DUPR", "Mixed", "League"] },
+  { id: "e3", logoMark: "DD", logoBg: "#8E5BE8", logoFg: "#FFD166", logoLine1: "DILL",       logoLine2: "DINKERS",    title: "Beginner-Friendly Open Play",              club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", date: "Thu, May 14", duration: "5:30 PM – 7:00 PM", spotsLeft: 6, totalSpots: 12, taken: 6,  price: "$10",       tags: ["2.5 - 3.0 DUPR", "All Ages", "Open Play"] },
+  { id: "e4", logoMark: "AT", logoBg: "#1F4ED8", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "Singles Ladder Match Night",               club: "Anastasia Tennis Club",     city: "St. Augustine, FL", distance: "2.4 mi", date: "Tue, May 12", duration: "6:30 PM – 9:00 PM", spotsLeft: 3, totalSpots: 8,  taken: 5,  price: "$20",       tags: ["4.0+ DUPR", "Singles", "Ladder"] },
+  { id: "e5", logoMark: "TP", logoBg: "#0F1214", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Kids Pickleball Clinic",                   club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:00 AM", spotsLeft: 5, totalSpots: 10, taken: 5,  price: "Free",      tags: ["Ages 8-12", "Coach-led", "Free"] },
+  { id: "e6", logoMark: "HP", logoBg: "#D6573B", logoFg: "#FFFFFF", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Drop-In Round Robin",                club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Fri, May 15", duration: "7:00 PM – 9:00 PM", spotsLeft: 2, totalSpots: 8,  taken: 6,  price: "$30",       tags: ["3.0 - 4.0 DUPR", "Doubles", "Drop-In"] },
+];
+
+// Beginner-focused carousel data — low DUPR ranges (≤3.0), "All Levels"
+// / "Beginner" / "Intro" tags, and forgiving formats (open play, drop-
+// in, clinic). All cards stay under the 50% fill threshold so the
+// trending pill resolves to "DUPR Rated" or "Open Spots" rather than
+// urgency — beginners shouldn't see scarcity-heavy framing.
+const BEGINNER_EVENTS_DEFAULT = [
+  { id: "b1", logoMark: "OC", logoBg: "#2E5D52", logoFg: "#F2A93B", logoLine1: "OLD COAST",  logoLine2: "PICKLEBALL", title: "Intro to Pickleball — 60-Minute Clinic",   club: "Old Coast Pickleball",      city: "St. Augustine, FL",  distance: "2.1 mi", date: "Sun, May 17", duration: "9:00 AM – 10:00 AM",  spotsLeft: 8,  totalSpots: 12, taken: 4,  price: "$15",  tags: ["2.0 - 2.5 DUPR", "Beginner", "Coach-led"] },
+  { id: "b2", logoMark: "TP", logoBg: "#0F1214", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Beginner Bootcamp — Skills + Match Play", club: "Treaty Park Tennis",        city: "St. Augustine, FL",  distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:30 AM", spotsLeft: 6,  totalSpots: 10, taken: 4,  price: "$25",  tags: ["2.5 - 3.0 DUPR", "Beginner", "Doubles"] },
+  { id: "b3", logoMark: "DD", logoBg: "#8E5BE8", logoFg: "#FFD166", logoLine1: "DILL",       logoLine2: "DINKERS",    title: "Newcomer Open Play — All Welcome",         club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",   distance: "8.4 mi", date: "Thu, May 14", duration: "5:30 PM – 7:00 PM",  spotsLeft: 10, totalSpots: 16, taken: 6,  price: "$10",  tags: ["All Levels", "Open Play", "Casual"] },
+  { id: "b4", logoMark: "VB", logoBg: "#7C3AED", logoFg: "#FBBF24", logoLine1: "VILANO",     logoLine2: "BEACH",      title: "Tennis 101 — Rules, Grip & Rally",         club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",   distance: "2.6 mi", date: "Mon, May 18", duration: "6:00 PM – 7:30 PM",  spotsLeft: 7,  totalSpots: 8,  taken: 1,  price: "$30",  tags: ["Beginner", "Coach-led", "Adult"] },
+  { id: "b5", logoMark: "HP", logoBg: "#D6573B", logoFg: "#FFFFFF", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Intro — Try the Sport for $5",       club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Wed, May 13", duration: "7:00 PM – 8:00 PM",  spotsLeft: 9,  totalSpots: 12, taken: 3,  price: "$5",   tags: ["Beginner", "Drop-In", "Free Loaner Gear"] },
+  { id: "b6", logoMark: "AT", logoBg: "#1F4ED8", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "First Serve — New Player Social",          club: "Anastasia Tennis Club",     city: "St. Augustine, FL",  distance: "2.4 mi", date: "Fri, May 15", duration: "5:00 PM – 6:30 PM",  spotsLeft: 8,  totalSpots: 10, taken: 2,  price: "Free", tags: ["2.0 - 2.5 DUPR", "Social", "All Ages"] },
+];
+
+function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false, viewport = "desktop", events = POPULAR_EVENTS_DEFAULT }) {
   const isMobile = viewport === "mobile";
   const trackRef = React.useRef(null);
-  // Varied event data — distinct clubs, titles, dates, prices, and tags per
-  // card so the carousel reads as a real list rather than a repeated stub.
-  // Each event carries its own brandmark colors so the header logo varies
-  // per card.
-  const events = [
-    { id: "e1", logoMark: "OC", logoBg: "#2E5D52", logoFg: "#F2A93B", logoLine1: "OLD COAST",  logoLine2: "PICKLEBALL", title: "Intermediate Strategies with Coach Ray", club: "Old Coast Pickleball",      city: "St. Augustine, FL", distance: "2.1 mi", date: "Wed, May 13", duration: "6:00 PM – 7:00 PM",  spotsLeft: 2, totalSpots: 16, taken: 14, price: "$15 - $60", tags: ["3.0 - 3.25 DUPR", "Men's Only", "Ages 12-15"] },
-    { id: "e2", logoMark: "VB", logoBg: "#7C3AED", logoFg: "#FBBF24", logoLine1: "VILANO",     logoLine2: "BEACH",      title: "Saturday Morning Doubles League",          club: "Vilano Beach Racquet",      city: "Vilano Beach, FL",  distance: "2.6 mi", date: "Sat, May 16", duration: "8:00 AM – 10:00 AM", spotsLeft: 4, totalSpots: 24, taken: 20, price: "$25",       tags: ["3.5 - 4.0 DUPR", "Mixed", "League"] },
-    { id: "e3", logoMark: "DD", logoBg: "#8E5BE8", logoFg: "#FFD166", logoLine1: "DILL",       logoLine2: "DINKERS",    title: "Beginner-Friendly Open Play",              club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", date: "Thu, May 14", duration: "5:30 PM – 7:00 PM", spotsLeft: 6, totalSpots: 12, taken: 6,  price: "$10",       tags: ["2.5 - 3.0 DUPR", "All Ages", "Open Play"] },
-    { id: "e4", logoMark: "AT", logoBg: "#1F4ED8", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "Singles Ladder Match Night",               club: "Anastasia Tennis Club",     city: "St. Augustine, FL", distance: "2.4 mi", date: "Tue, May 12", duration: "6:30 PM – 9:00 PM", spotsLeft: 3, totalSpots: 8,  taken: 5,  price: "$20",       tags: ["4.0+ DUPR", "Singles", "Ladder"] },
-    { id: "e5", logoMark: "TP", logoBg: "#0F1214", logoFg: "#FFDA44", logoLine1: "TREATY",     logoLine2: "PARK",       title: "Kids Pickleball Clinic",                   club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", date: "Sat, May 16", duration: "10:00 AM – 11:00 AM", spotsLeft: 5, totalSpots: 10, taken: 5,  price: "Free",      tags: ["Ages 8-12", "Coach-led", "Free"] },
-    { id: "e6", logoMark: "HP", logoBg: "#D6573B", logoFg: "#FFFFFF", logoLine1: "THE HUB",    logoLine2: "PADEL",      title: "Padel Drop-In Round Robin",                club: "The Hub Padel",             city: "Jacksonville Beach, FL", distance: "5.1 mi", date: "Fri, May 15", duration: "7:00 PM – 9:00 PM", spotsLeft: 2, totalSpots: 8,  taken: 6,  price: "$30",       tags: ["3.0 - 4.0 DUPR", "Doubles", "Drop-In"] },
-  ];
   const scrollBy = (dx) => {
     const el = trackRef.current; if (!el) return;
     el.scrollBy({ left: dx, behavior: "smooth" });
@@ -2915,6 +2931,15 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
         }
         {isCR &&
         <PopularEventsNearYou theme={theme} viewport={viewport} title="Trending events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        }
+        {/* Events for Beginners — second carousel using the same
+            PopularEventsNearYou component with a beginner-tuned dataset.
+            Sits between Trending (more advanced / scarce) and More
+            Events (long-tail list) so the page progresses from "for
+            you" to "everything else." Beginner cards are intentionally
+            ≤50% filled so the trending pill never reads as urgent. */}
+        {isCR &&
+        <PopularEventsNearYou theme={theme} viewport={viewport} title="Events for Beginners" events={BEGINNER_EVENTS_DEFAULT} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
         <MoreEventsNearYou theme={theme} viewport={viewport} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
