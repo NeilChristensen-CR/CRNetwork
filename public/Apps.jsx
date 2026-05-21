@@ -2954,7 +2954,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             "Welcome back to {club}!" with the "More info about {club}"
             outline button to the right. */}
         {isCR ?
-        <div style={{ marginBottom: isMobile ? 32 : 48 }}>
+        <div style={{ marginBottom: isMobile ? 32 : 48, textAlign: "center" }}>
           <h1 style={{
             margin: 0,
             fontFamily: theme.display, fontWeight: 800,
