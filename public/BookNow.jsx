@@ -839,19 +839,22 @@ function MiniMap({ venue, theme }) {
       }}>
         {venue.distance != null ? `${venue.distance}mi` : `${venue.city}, ${venue.state} ${venue.zip}`}
       </span>
-      {/* Top-right active-players pill — white capsule with a solid 8px
-          green dot. On card hover the existing positive [data-tag] CSS
-          rule inverts it to the vibrant solid green (with white dot). */}
+      {/* Top-right active-players pill, per updated Figma spec
+          (node 8035-9185): a single neutral `tagschips/default` chip
+          (#F4F5F6 bg, #2F3436 text) with an inner 8px solid-green dot
+          inset by 4px on the left. No white capsule any more — the
+          chip carries the same surface tone as the distance pill on
+          the opposite corner, so the two pills read as a pair instead
+          of competing materials. */}
       {venue.activePlayers != null && (
         <span data-tag="positive" style={{
           position: "absolute", top: 12, right: 12,
-          display: "inline-flex", alignItems: "center", gap: 4,
-          padding: "4px 12px 4px 4px", borderRadius: 9999,
-          background: "#FFFFFF",
-          color: "#1E5521",
-          fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
+          display: "inline-flex", alignItems: "center",
+          padding: "4px 8px", borderRadius: 9999,
+          background: "#F4F5F6",
+          color: "#2F3436",
+          fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
           fontWeight: 400,
-          boxShadow: "0 2px 4px rgba(0,0,0,.08)",
           whiteSpace: "nowrap",
         }}>
           <span style={{ display: "inline-flex", alignItems: "center", padding: 4 }}>
