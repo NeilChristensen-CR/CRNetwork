@@ -464,8 +464,8 @@
                               )
                           : (screen === "home"
                               ? (app === "cr"
-                                  ? <HomeCR viewport="desktop" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={() => setScreen("reserve-court")} />
-                                  : <HomeOC viewport="desktop" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={() => setScreen("reserve-court")} />)
+                                  ? <HomeCR viewport="desktop" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />
+                                  : <HomeOC viewport="desktop" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />)
                               : <BrowseDesktop theme={theme} app={app} setApp={setApp} onFindClubs={() => setScreen("clubs")} onBack={() => setScreen("home")} />))))))))))))}
               </div>
             </div>
@@ -510,8 +510,8 @@
                                 ? (window.TwoFactorPage && <window.TwoFactorPage theme={theme} viewport="mobile" onBack={() => setScreen("privacy-security")} />)
                             : (screen === "home"
                                 ? (app === "cr"
-                                    ? <HomeCR viewport="mobile" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={() => setScreen("reserve-court")} />
-                                    : <HomeOC viewport="mobile" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={() => setScreen("reserve-court")} />)
+                                    ? <HomeCR viewport="mobile" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />
+                                    : <HomeOC viewport="mobile" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />)
                                 : <BrowseMobileInline />)))))))))))}
                 </div>
               </div>

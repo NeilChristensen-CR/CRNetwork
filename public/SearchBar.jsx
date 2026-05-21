@@ -39,15 +39,16 @@ const SB_LOCATIONS = [
 // matches against name + sub so a user can type "32084" to find any club
 // or city that resolves to that zip.
 const SB_WHERE_SUGGESTIONS = [
-  // Clubs
-  { kind: "club", name: "Old Coast Pickleball",       sub: "St. Augustine, FL · 32084" },
-  { kind: "club", name: "Anastasia Tennis Club",      sub: "St. Augustine, FL · 32080" },
-  { kind: "club", name: "Vilano Beach Racquet",       sub: "Vilano Beach, FL · 32084" },
-  { kind: "club", name: "Dill Dinkers Jacksonville",  sub: "Jacksonville, FL · 32256" },
-  { kind: "club", name: "Treaty Park Tennis",         sub: "St. Augustine, FL · 32084" },
-  { kind: "club", name: "South St. Augustine",        sub: "St. Augustine, FL · 32086" },
-  { kind: "club", name: "The Hub Padel",              sub: "Jacksonville Beach, FL · 32250" },
-  { kind: "club", name: "World Golf Village Tennis",  sub: "St. Augustine, FL · 32092" },
+  // Clubs — `distance` is rendered alongside the city on mobile rows
+  // so the user sees how far each match is from them at a glance.
+  { kind: "club", name: "Old Coast Pickleball",       sub: "St. Augustine, FL · 32084",      distance: "2.1" },
+  { kind: "club", name: "Anastasia Tennis Club",      sub: "St. Augustine, FL · 32080",      distance: "2.4" },
+  { kind: "club", name: "Vilano Beach Racquet",       sub: "Vilano Beach, FL · 32084",       distance: "2.6" },
+  { kind: "club", name: "Dill Dinkers Jacksonville",  sub: "Jacksonville, FL · 32256",       distance: "8.4" },
+  { kind: "club", name: "Treaty Park Tennis",         sub: "St. Augustine, FL · 32084",      distance: "3.2" },
+  { kind: "club", name: "South St. Augustine",        sub: "St. Augustine, FL · 32086",      distance: "3.6" },
+  { kind: "club", name: "The Hub Padel",              sub: "Jacksonville Beach, FL · 32250", distance: "5.1" },
+  { kind: "club", name: "World Golf Village Tennis",  sub: "St. Augustine, FL · 32092",      distance: "6.8" },
   // Cities
   { kind: "city", name: "Oakland, CA",                sub: "Alameda County" },
   { kind: "city", name: "San Francisco, CA",          sub: "Bay Area" },
@@ -95,16 +96,32 @@ const SB_SPORTS = [
   { id: "Platform Tennis", icon: "Grid3X3" },
 ];
 const SB_WHEN_OPTIONS = [
-  { id: "Any Day • Any Time", label: "Any time" },
-  { id: "Today",              label: "Today" },
-  { id: "Tomorrow",           label: "Tomorrow" },
-  { id: "This Weekend",       label: "This weekend" },
-  { id: "Next 7 Days",        label: "Next 7 days" },
+  { id: "Any day",      label: "Any day" },
+  { id: "Today",        label: "Today" },
+  { id: "Tomorrow",     label: "Tomorrow" },
+  { id: "This weekend", label: "This weekend" },
+  { id: "Next 7 days",  label: "Next 7 days" },
 ];
 const SB_WHEN_TIME_BUCKETS = [
+  { id: "Any time",  sub: "Whenever you can play" },
   { id: "Morning",   sub: "6 AM – 12 PM" },
   { id: "Afternoon", sub: "12 PM – 5 PM" },
   { id: "Evening",   sub: "5 PM – 10 PM" },
+];
+
+// Rich club dataset for the search-results modal/sheet. Shape matches
+// what BookNowCard expects so the desktop modal can render the full
+// "club card" UI from the logged-out home (MiniMap header, sport tag,
+// booked count, 2x2 time slots, "See Events & Info" footer).
+const SB_RESULTS_CLUBS = [
+  { id: "old-coast",      name: "Old Coast Pickleball",      city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 23, distance: "2.1", times: ["9:00 AM", "9:30 AM", "10:00 AM", "11:30 AM"] },
+  { id: "anastasia",      name: "Anastasia Tennis Club",     city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 14, distance: "2.4", times: ["8:00 AM", "8:30 AM", "12:00 PM",  "2:00 PM"] },
+  { id: "vilano-beach",   name: "Vilano Beach Racquet",      city: "Vilano Beach",       state: "FL", sport: "Tennis",     booked: 41, distance: "2.6", times: ["10:00 AM", "10:30 AM", "11:00 AM", "12:30 PM"] },
+  { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", city: "Jacksonville",       state: "FL", sport: "Pickleball", booked: 18, distance: "8.4", times: ["8:00 AM", "12:00 PM", "2:30 PM", "4:00 PM"] },
+  { id: "treaty-park",    name: "Treaty Park Tennis",        city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 9,  distance: "3.2", times: ["7:00 AM", "9:00 AM", "3:00 PM", "5:30 PM"] },
+  { id: "south-st-aug",   name: "South St. Augustine",       city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 27, distance: "3.6", times: ["8:30 AM", "11:00 AM", "1:30 PM", "4:30 PM"] },
+  { id: "the-hub-padel",  name: "The Hub Padel",             city: "Jacksonville Beach", state: "FL", sport: "Padel",      booked: 12, distance: "5.1", times: ["9:00 AM", "10:30 AM", "1:00 PM", "6:00 PM"] },
+  { id: "world-golf",     name: "World Golf Village Tennis", city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 31, distance: "6.8", times: ["7:30 AM", "9:00 AM", "2:00 PM", "6:30 PM"] },
 ];
 
 // ---- Stars helper ---------------------------------------------------------
@@ -288,7 +305,12 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   const [internal, setInternal] = useStateSB({
     where: "Oakland, CA",
     activity: "Any Sport",
-    when: "Any Day • Any Time",
+    // WHEN is two-dimensional — `whenDay` and `whenTime` track each
+    // sub-facet independently so the user can pick both; `when` is the
+    // combined display string the rest of the page reads.
+    whenDay: "Any day",
+    whenTime: "Any time",
+    when: "Any day · Any time",
     who: "1 Player",
     whoCount: 1,
   });
@@ -301,6 +323,23 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     setTouched((prev) => ({ ...prev, [key]: true }));
     if (values && onChange) onChange({ ...values, [key]: val });
     else setInternal((prev) => ({ ...prev, [key]: val }));
+  };
+  // Multi-key update so the WHEN popover can write both whenDay/whenTime
+  // and the combined `when` display string in a single onChange — avoids
+  // stale-closure clobber when each row commits.
+  const setValues = (updates) => {
+    setTouched((prev) => {
+      const next = { ...prev };
+      Object.keys(updates).forEach((k) => {
+        // Touch the parent facet ("when") whenever any of its
+        // sub-facets are written through.
+        if (k === "whenDay" || k === "whenTime") next.when = true;
+        else next[k] = true;
+      });
+      return next;
+    });
+    if (values && onChange) onChange({ ...values, ...updates });
+    else setInternal((prev) => ({ ...prev, ...updates }));
   };
 
   // Placeholder copy per segment — shown until the user selects something.
@@ -315,6 +354,21 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
 
   // Which segment is currently focused. `null` = default state.
   const [active, setActive] = useStateSB(null);
+
+  // Desktop results modal — opens after the user taps Search. Mirrors
+  // the mobile flow: filter values are committed first, then the user
+  // picks a club from a modal listing matched clubs, then we route into
+  // the booking flow.
+  const [resultsOpen, setResultsOpen] = useStateSB(false);
+  // Expose a global opener so non-SearchBar triggers (the bottom action
+  // bar's "Find an Event", trending event card arrows, etc) can route
+  // through the same modal instead of jumping straight to the booking
+  // flow. Cleared on unmount.
+  useEffectSB(() => {
+    if (!desktop) return;
+    window.__openResultsModal = () => setResultsOpen(true);
+    return () => { if (window.__openResultsModal) delete window.__openResultsModal; };
+  }, [desktop]);
   const containerRef = useRefSB(null);
 
   // Type-ahead state for the WHERE segment. The query is the user's
@@ -426,7 +480,27 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     <button
       type="button"
       aria-label="Search"
-      onClick={(e) => { e.stopPropagation(); onSubmit && onSubmit(v); }}
+      onClick={(e) => {
+        e.stopPropagation();
+        // Desktop: tapping Search opens the results modal (user picks a
+        // club, then the parent's onSubmit fires to route into booking).
+        // Mobile bar (rare — mobile uses SearchBarCompact instead) falls
+        // back to the parent's onSubmit immediately.
+        if (desktop) {
+          // Stash the committed filter set so the booking flow can
+          // pick it up after the user selects a club.
+          window.__searchPrefill = {
+            where: v.where || null,
+            sport: v.activity || null,
+            whenDay: v.whenDay || null,
+            whenTime: v.whenTime || null,
+            players: v.whoCount || 1,
+          };
+          setResultsOpen(true);
+        } else {
+          onSubmit && onSubmit(v);
+        }
+      }}
       onMouseEnter={(e) => { e.currentTarget.style.background = "#212425"; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.submitBg; }}
       style={{
@@ -683,18 +757,25 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
       );
     }
     if (active === "when") {
+      // Dual-select: WHEN has two independent sub-facets (day range +
+      // time of day). Each row commits its own facet and recomputes
+      // the combined `when` display string. The popover stays OPEN so
+      // the user can also set the other sub-facet before tabbing out.
+      const day = v.whenDay || "Any day";
+      const time = v.whenTime || "Any time";
+      const recombine = (d, t) => `${d} · ${t}`;
       return (
         <SBPopover anchorRef={anchorRef}>
           <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
-            When
+            Day range
           </div>
           {SB_WHEN_OPTIONS.map((opt) => (
             <SBRow
               key={opt.id}
               icon="Calendar"
               label={opt.label}
-              selected={v.when === opt.id}
-              onClick={() => { setValue("when", opt.id); setActive(null); }}
+              selected={day === opt.id}
+              onClick={() => setValues({ whenDay: opt.id, when: recombine(opt.id, time) })}
             />
           ))}
           <div style={{ height: 1, background: "#F0F0F0", margin: "6px 4px" }} />
@@ -707,27 +788,90 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
               icon="Clock"
               label={b.id}
               sub={b.sub}
-              selected={v.when === b.id}
-              onClick={() => { setValue("when", b.id); setActive(null); }}
+              selected={time === b.id}
+              onClick={() => setValues({ whenTime: b.id, when: recombine(day, b.id) })}
             />
           ))}
         </SBPopover>
       );
     }
     if (active === "who") {
+      // Desktop Who popover — uses the same contained pill stepper as
+      // the mobile sheet's Who row. Single grey rounded capsule holding
+      // [− N players +]; minus and plus glyphs sit inside without their
+      // own strokes.
+      const whoCount = v.whoCount || 1;
+      const setWhoCount = (n) => {
+        const next = Math.max(1, Math.min(8, n));
+        const label = next === 1 ? "1 Player" : `${next} Players`;
+        if (values && onChange) onChange({ ...values, who: label, whoCount: next });
+        else setInternal((prev) => ({ ...prev, who: label, whoCount: next }));
+        setTouched((prev) => ({ ...prev, who: true }));
+      };
       return (
-        <SBPopover anchorRef={anchorRef}>
-          <SBStepper
-            value={v.whoCount || 1}
-            min={1}
-            max={8}
-            label="Players"
-            onChange={(n) => {
-              const label = n === 1 ? "1 Player" : `${n} Players`;
-              if (values && onChange) onChange({ ...values, who: label, whoCount: n });
-              else setInternal((prev) => ({ ...prev, who: label, whoCount: n }));
-            }}
-          />
+        <SBPopover anchorRef={anchorRef} minWidth={260}>
+          <div style={{ padding: "10px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
+            Players
+          </div>
+          {/* The +/- buttons disable at 1 and 8 (`whoCount <= 1` /
+              `whoCount >= 8`), so the range is enforced by interaction
+              alone — no separate "1–8 players" label needed. */}
+          <div style={{
+            padding: "8px 12px 12px 12px",
+            display: "flex", alignItems: "center", justifyContent: "flex-end",
+            gap: 12,
+          }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center",
+              background: "#F4F5F6",
+              borderRadius: 999,
+              padding: 4,
+              height: 44,
+            }}>
+              <button
+                type="button"
+                onClick={() => setWhoCount(whoCount - 1)}
+                disabled={whoCount <= 1}
+                aria-label="Fewer players"
+                style={{
+                  width: 36, height: 36, borderRadius: 999,
+                  border: 0, background: "transparent",
+                  color: "#0F1214",
+                  cursor: whoCount <= 1 ? "not-allowed" : "pointer",
+                  opacity: whoCount <= 1 ? 0.35 : 1,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  padding: 0,
+                }}
+              >
+                {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="#0F1214" />}
+              </button>
+              <span style={{
+                minWidth: 80, textAlign: "center",
+                fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+                fontWeight: 700, fontSize: 14, color: "#0F1214",
+                fontVariantNumeric: "tabular-nums",
+                padding: "0 6px",
+                whiteSpace: "nowrap",
+              }}>{whoCount} {whoCount === 1 ? "player" : "players"}</span>
+              <button
+                type="button"
+                onClick={() => setWhoCount(whoCount + 1)}
+                disabled={whoCount >= 8}
+                aria-label="More players"
+                style={{
+                  width: 36, height: 36, borderRadius: 999,
+                  border: 0, background: "transparent",
+                  color: "#0F1214",
+                  cursor: whoCount >= 8 ? "not-allowed" : "pointer",
+                  opacity: whoCount >= 8 ? 0.35 : 1,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  padding: 0,
+                }}
+              >
+                {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#0F1214" />}
+              </button>
+            </div>
+          </div>
         </SBPopover>
       );
     }
@@ -769,6 +913,31 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
         ))}
       </div>
       {renderPopover()}
+      {/* Desktop results modal — picks a club after Search is tapped.
+          Renders only on desktop; mobile uses SearchBarCompact +
+          SearchResultsSheet instead. */}
+      {desktop && (
+        <SearchResultsModal
+          open={resultsOpen}
+          onClose={() => setResultsOpen(false)}
+          values={v}
+          onSelectClub={(clubName, clubId) => {
+            // Stash both human-readable club + the canonical id on the
+            // prefill payload. The parent's onBookCourt(prefill) is then
+            // expected to setSelectedClubId(prefill.clubId) before
+            // routing to the reserve-court screen, so the user lands
+            // directly on the picked club's booking flow.
+            window.__searchPrefill = {
+              ...(window.__searchPrefill || {}),
+              club: clubName,
+              clubId,
+            };
+            setResultsOpen(false);
+            onSubmit && onSubmit({ ...v, club: clubName, clubId });
+          }}
+          theme={theme}
+        />
+      )}
     </div>
   );
 }
@@ -795,77 +964,70 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   const v = values;
   const set = (k, val) => onChange({ ...v, [k]: val });
 
-  // Type-ahead state for the WHERE section. Same model as the desktop
-  // popover — local query separate from the committed v.where value.
+  // ---- Accordion state ----------------------------------------------------
+  // openSection: which accordion is expanded. null = all closed.
+  // The sheet enters with everything collapsed so the user sees a clean
+  // four-section list; tapping a row opens that section. Selecting a value
+  // auto-advances (where → what → when → who).
+  const [openSection, setOpenSection] = useStateSB(null);
+
+  // ---- WHERE state --------------------------------------------------------
+  // Type-ahead query (separate from the committed v.where value) +
+  // show-all toggle (renders the "5mi radius" expansion).
   const [whereQuery, setWhereQuery] = useStateSB("");
-  // Seed query with the current committed value when the sheet opens so
-  // the user sees what they last picked + can edit; reset on close.
+
+  // ---- WHAT / WHEN single-select state -----------------------------------
+  // Every facet is single-select now — tapping a row commits and
+  // auto-advances to the next section. WHEN has two sub-facets (day range
+  // + time of day) that work the same way: pick a day range → focus
+  // shifts to time of day → pick a time → advance to WHO.
+  const [activity, setActivity] = useStateSB("");
+  const [whenDay, setWhenDay] = useStateSB("");
+  const [whenTime, setWhenTime] = useStateSB("");
+  // Which WHEN sub-accordion is open. "day" by default when WHEN opens.
+  const [openWhenSub, setOpenWhenSub] = useStateSB("day");
+
+  // Reset on open — every facet starts with a sensible default so the
+  // sheet shows a populated "what you'd search for if you tapped Search
+  // right now" state. The user only edits what they want to refine.
+  //
+  // WHERE opens by default since it's the most common refinement; the
+  // other three sections sit collapsed with their default chips visible.
+  //
+  // Parent-owned facets (where, activity, who) are all written through a
+  // SINGLE onChange call to avoid stale-closure clobber — multiple
+  // independent set/setPlayers calls inside the same effect each see the
+  // pre-effect `v` and the last one wins.
   useEffectSB(() => {
     if (open) {
-      // Skip seeding when the value is still the placeholder.
-      const isPlaceholder = v && (v.where === "Oakland, CA" || !v.where);
-      setWhereQuery(isPlaceholder ? "" : (v && v.where) || "");
-    } else {
+      setOpenSection("where");
       setWhereQuery("");
+      setActivity("Any Sport");
+      setWhenDay("Any day");
+      setWhenTime("Any time");
+      setOpenWhenSub("day");
+      onChange({
+        ...v,
+        where: "Current location",
+        activity: "Any Sport",
+        who: "1 Player",
+        whoCount: 1,
+      });
     }
   }, [open]);
 
-  // Section heading row — uppercase microlabel + current value, separated
-  // by a hairline. Used for every facet so the four sections read uniformly.
-  const SectionHeader = ({ label, value }) => (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
-      <span style={{
-        fontSize: 11, fontWeight: 800, color: "#858F8F",
-        letterSpacing: 1, textTransform: "uppercase",
-      }}>{label}</span>
-      <span style={{
-        fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-        fontWeight: 700, fontSize: 13, color: "#0F1214",
-        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60%",
-      }}>{value}</span>
-    </div>
-  );
+  // Mirror single-select state back to the committed values so the pill
+  // subtitle reflects what the user picked.
+  useEffectSB(() => {
+    if (activity) set("activity", activity);
+  }, [activity]);
+  useEffectSB(() => {
+    if (!whenDay && !whenTime) return;
+    const combined = whenDay && whenTime ? `${whenDay} · ${whenTime}` : (whenDay || whenTime);
+    set("when", combined);
+  }, [whenDay, whenTime]);
 
-  // Generic option-row: full-width left-aligned button, leading icon,
-  // active state inverts to dark.
-  const OptionRow = ({ active, icon, label, sub, onClick }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        display: "flex", alignItems: "center", gap: 12,
-        width: "100%",
-        // Rows with a sub line grow to fit two stacked lines + padding;
-        // single-line rows keep the 48px target.
-        minHeight: 48,
-        padding: sub ? "8px 14px" : "0 14px",
-        borderRadius: 10,
-        border: active ? "1px solid #0F1214" : "1px solid #E9EBEC",
-        background: active ? "#0F1214" : "#FFFFFF",
-        color: active ? "#FFFFFF" : "#0F1214",
-        fontFamily: "inherit", fontSize: 14, fontWeight: 600,
-        textAlign: "left", cursor: "pointer",
-        transition: "background 140ms ease, color 140ms ease, border-color 140ms ease",
-      }}
-    >
-      {icon && window.Icon && (
-        <window.Icon name={icon} size={16} strokeWidth={2.2} color={active ? "#fff" : "#0F1214"} />
-      )}
-      <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{label}</span>
-        {sub && (
-          <span style={{
-            fontSize: 12, fontWeight: 500, lineHeight: 1.2,
-            color: active ? "rgba(255,255,255,.7)" : "#4B5052",
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-          }}>{sub}</span>
-        )}
-      </span>
-    </button>
-  );
-
-  // Player stepper — sub-component because we need local count state synced
-  // with the formatted `who` string.
+  // ---- Player stepper -----------------------------------------------------
   const playerCount = (() => {
     const m = /^(\d+)/.exec(v.who || "");
     return m ? Number(m[1]) : 1;
@@ -874,6 +1036,155 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
     const next = Math.max(1, Math.min(8, n));
     set("who", `${next} ${next === 1 ? "Player" : "Players"}`);
   };
+
+  // ---- Section accordion shell --------------------------------------------
+  // Section header reads as a full question ("Where would you like to
+  // reserve") so the type carries the intent. Size 16/800 gives clean
+  // hierarchy below the 22px sheet title without crowding row labels at
+  // 15. No chevron — chip on the right shows the current pick when
+  // collapsed, and tapping the header (with min-height: 56 hit area)
+  // toggles. No inter-section borders.
+  const SectionAccordion = ({ id, label, chip, children }) => {
+    const isOpen = openSection === id;
+    return (
+      <section>
+        <button
+          type="button"
+          onClick={() => setOpenSection(isOpen ? null : id)}
+          aria-expanded={isOpen}
+          style={{
+            width: "100%", minHeight: 56,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: 12,
+            padding: "12px 0",
+            border: 0, background: "transparent",
+            fontFamily: "inherit", cursor: "pointer", textAlign: "left",
+          }}
+        >
+          <span style={{
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+            fontWeight: 800,
+            fontSize: 16, lineHeight: 1.25, letterSpacing: -0.2,
+            color: "#0F1214",
+            // Long section labels — keep on one line, ellipsize if the
+            // chip + label combine wider than the row.
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            flex: 1, minWidth: 0,
+          }}>{label}</span>
+          {chip && !isOpen && (
+            <span style={{
+              height: 22, padding: "0 10px", borderRadius: 6,
+              background: "#F4F5F6", color: "#0F1214",
+              fontSize: 11.5, fontWeight: 600,
+              display: "inline-flex", alignItems: "center",
+              maxWidth: 160,
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}>{chip}</span>
+          )}
+        </button>
+        {isOpen && (
+          <div style={{ paddingBottom: 16 }}>
+            {children}
+          </div>
+        )}
+      </section>
+    );
+  };
+
+  // ---- List row ----------------------------------------------------------
+  // Uniform anatomy across every section so the list reads as a single
+  // group regardless of which facet you're looking at:
+  //
+  //   [leading icon, optional]   Label                       (radio)
+  //                              Sub line (optional)
+  //
+  // Radio sits on the RIGHT — primary content reads left-to-right
+  // naturally, the selection state lives at the trailing edge.
+  // min-height: 56 keeps 1-line and 2-line rows visually balanced.
+  // Picked rows get a subtle #F4F5F6 fill so the selection reads even
+  // without looking at the dot.
+  const Row = ({ active, icon, label, sub, onClick, accent = "#0F1214" }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        display: "flex", alignItems: "center", gap: 12,
+        width: "100%",
+        minHeight: 56,
+        // 12px horizontal padding insets the selected-state fill from
+        // the sheet edges, so picked rows visibly inset while any
+        // section-level strokes (eyebrow border, etc.) sit edge-to-edge.
+        // Radio still aligns with the close X (both at sheet right - 16
+        // - 12 = body content right - 12 from the row's right edge).
+        padding: "10px 12px",
+        border: 0,
+        background: active ? "#F4F5F6" : "transparent",
+        borderRadius: 10,
+        color: "#0F1214",
+        fontFamily: "inherit", textAlign: "left", cursor: "pointer",
+        transition: "background 120ms ease",
+      }}
+    >
+      {icon && window.Icon && (
+        <span style={{ display: "inline-flex", flexShrink: 0 }}>
+          <window.Icon name={icon} size={18} strokeWidth={2} color={accent === "#1F4ED8" ? accent : "#4B5052"} />
+        </span>
+      )}
+      <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+        <span style={{
+          fontSize: 15,
+          fontWeight: active ? 600 : 500,
+          color: accent === "#1F4ED8" ? accent : "#0F1214",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          lineHeight: 1.3,
+        }}>{label}</span>
+        {sub && (
+          <span style={{
+            fontSize: 13, color: "#4B5052", lineHeight: 1.3,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>{sub}</span>
+        )}
+      </span>
+      {/* Trailing radio indicator — outline ring with a filled dot when
+          active. `accent` lets specialty rows (e.g. blue actions) swap in. */}
+      <span style={{
+        width: 20, height: 20, borderRadius: 999,
+        border: `2px solid ${active ? accent : "#C8CDCD"}`,
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        flexShrink: 0,
+        transition: "border-color 120ms ease",
+      }}>
+        {active && (
+          <span style={{
+            width: 8, height: 8, borderRadius: 999,
+            background: accent,
+          }} />
+        )}
+      </span>
+    </button>
+  );
+
+  // ---- Chip text per section ---------------------------------------------
+  // Every section ALWAYS shows its current value as a chip on the closed
+  // accordion — even when that value is the default (Current location,
+  // Any Sport, Any day · Any time, 1 Player). Reads as "here's what
+  // you'd be searching for; tap to refine."
+  const whereChip = v.where || null;
+  const whatChip = activity || null;
+  const whenChip = whenDay && whenTime ? `${whenDay} · ${whenTime}`
+    : (whenDay || whenTime || null);
+  const whoChip = v.who || null;
+
+  // ---- WHERE suggestions -------------------------------------------------
+  // Mobile sheet shows the 3 nearest clubs/cities at rest — bigger
+  // selection surface, faster to tap. Zip-code matches are filtered
+  // out entirely (clubs and cities cover the same physical area; the
+  // raw zip codes added noise). Typing in the input still filters,
+  // and the cap lifts so the user can see all matching results.
+  const whereMatches = filterWhereSuggestions(whereQuery, 50)
+    .filter((s) => s.kind !== "zip");
+  const whereVisible = whereQuery ? whereMatches : whereMatches.slice(0, 3);
 
   // Portal target — the device frame's inner container has
   // `position: relative` and `overflow: hidden`, so anchoring the sheet
@@ -924,62 +1235,65 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           pointerEvents: open ? "auto" : "none",
         }}
       >
-        {/* Drag handle + header row */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 0 0" }}>
+        {/* Drag handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px 0" }}>
           <div style={{ width: 40, height: 4, borderRadius: 999, background: "#E9EBEC" }} />
         </div>
+        {/* Header row — sheet title (largest in the hierarchy) + ghost X.
+            Hierarchy now reads:
+              Title (24/800)  ──  largest
+              Section (17/800) ──  step down
+              Subsection (11.5/800 uppercase) ── eyebrow
+            so the user's eye lands on the title first, then the section
+            currently in focus. */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "10px 16px 12px 16px",
+          padding: "8px 16px 12px 16px",
         }}>
-          {/* Heading — matches the desktop segment label style (small,
-              uppercase, grey, bold, letter-spaced 1.3) so the sheet reads
-              as "this is the search facet bar, expanded". */}
-          <span style={{
+          <h2 style={{
+            margin: 0,
             fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-            fontWeight: 800,
-            fontSize: 10.5,
-            color: "#858F8F",
-            letterSpacing: 1.3,
-            textTransform: "uppercase",
-            lineHeight: 1,
-          }}>Search for anything</span>
+            fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
+            color: "#0F1214",
+          }}>Search for anything</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
             style={{
-              width: 44, height: 44, borderRadius: 999, border: 0,
-              background: "#F4F5F6", color: "#0F1214",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              width: 44, height: 44, border: 0,
+              padding: 0,
+              background: "transparent",
+              // Icon right-aligned inside the button so its right edge
+              // sits at the body content's right edge (16px from sheet
+              // right) — matches the row radios' right edge for a clean
+              // vertical alignment down the trailing column.
+              display: "inline-flex", alignItems: "center", justifyContent: "flex-end",
               cursor: "pointer",
             }}
           >
-            {window.Icon && <window.Icon name="X" size={18} strokeWidth={2.2} color="#0F1214" />}
+            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="#0F1214" />}
           </button>
         </div>
 
-        {/* Scrollable body — flex: 1 + overflowY makes the four sections
-            scroll while the sticky Search button at the bottom stays
-            pinned. */}
+        {/* Scrollable body — four accordion sections, all start closed.
+            Selecting a value in one auto-advances to the next; multiselect
+            sections (WHAT, WHEN) advance via Continue. */}
         <div style={{
           flex: 1,
           overflowY: "auto",
-          padding: "8px 16px 16px 16px",
-          display: "flex", flexDirection: "column", gap: 20,
+          padding: "0 16px 8px 16px",
         }}>
-          {/* ---- WHERE — type-ahead with club / city / zip matches ---- */}
-          <section>
-            <SectionHeader label="Where" value={v.where} />
-            {/* Search input — typing filters the list below. Free-text
-                Enter commits whatever's typed. */}
+          {/* ---- WHERE ----------------------------------------------------- */}
+          <SectionAccordion id="where" label="Where" chip={whereChip}>
+            {/* Search input with the new copy. */}
             <div style={{
               display: "flex", alignItems: "center", gap: 8,
               padding: "0 14px",
               height: 48, borderRadius: 10,
               border: "1px solid #E9EBEC",
               background: "#FFFFFF",
-              marginBottom: 8,
+              marginBottom: 4,
             }}>
               {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2} color="#4B5052" />}
               <input
@@ -990,11 +1304,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                   if (e.key === "Enter") {
                     e.preventDefault();
                     const first = filterWhereSuggestions(whereQuery)[0];
-                    if (first) set("where", first.name);
-                    else if (whereQuery.trim()) set("where", whereQuery.trim());
+                    if (first) { set("where", first.name); setOpenSection("what"); }
+                    else if (whereQuery.trim()) { set("where", whereQuery.trim()); setOpenSection("what"); }
                   }
                 }}
-                placeholder="Club, city, or zip"
+                placeholder="Search for location, club, zip code..."
                 aria-label="Search location"
                 style={{
                   flex: 1, minWidth: 0,
@@ -1018,146 +1332,229 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               )}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {/* Always-visible "Use current location" — sits above filter
-                  results so it's always reachable. */}
-              <OptionRow
+            {/* Borderless stacked list — Current location at the top
+                (with the user's resolved address as sub line), then the
+                nearby club / city / zip matches. 16px gap between the
+                search input above and the list below. No "Show more"
+                row — typing in the input is the way to surface more. */}
+            <div style={{ paddingTop: 16 }}>
+              <Row
                 active={v.where === "Current location"}
                 icon="Navigation"
-                label="Use current location"
-                onClick={() => set("where", "Current location")}
+                label="Current location"
+                sub="Oakland, CA"
+                onClick={() => { set("where", "Current location"); setOpenSection("what"); }}
               />
-              {(() => {
-                const matches = filterWhereSuggestions(whereQuery);
-                if (matches.length === 0) {
-                  return (
-                    <div style={{ padding: "16px 14px", fontSize: 13, color: "#858F8F" }}>
-                      No matches for "{whereQuery}"
-                    </div>
-                  );
-                }
-                return matches.map((s) => (
-                  <OptionRow
+              {whereVisible.length === 0 ? (
+                <div style={{ padding: "16px 0", fontSize: 13, color: "#858F8F" }}>
+                  No matches for "{whereQuery}"
+                </div>
+              ) : (
+                whereVisible.map((s) => (
+                  <Row
                     key={`${s.kind}-${s.name}`}
                     active={v.where === s.name}
                     icon={SB_WHERE_KIND_ICON[s.kind] || "MapPin"}
                     label={s.name}
-                    sub={s.sub}
-                    onClick={() => set("where", s.name)}
+                    // Strip the trailing zip code from the sub and append
+                    // the distance so the row reads "City, ST · 2.1 mi".
+                    // Desktop popover still gets the full sub from the
+                    // same data.
+                    sub={`${(s.sub || "").replace(/\s·\s\d{5}.*$/, "")}${s.distance ? ` · ${s.distance} mi` : ""}`}
+                    onClick={() => { set("where", s.name); setOpenSection("what"); }}
                   />
-                ));
-              })()}
+                ))
+              )}
             </div>
-          </section>
+          </SectionAccordion>
 
-          {/* ---- ACTIVITY ---- */}
-          <section>
-            <SectionHeader label="Activity" value={v.activity} />
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+          {/* ---- WHAT — radio single-select, auto-advance to WHEN -------- */}
+          <SectionAccordion id="what" label="What" chip={whatChip}>
+            <div>
               {SB_SPORTS.map((s) => (
-                <OptionRow
+                <Row
                   key={s.id}
-                  active={v.activity === s.id}
-                  icon={s.icon}
+
+                  active={activity === s.id}
                   label={s.id}
-                  onClick={() => set("activity", s.id)}
+                  onClick={() => {
+                    setActivity(s.id);
+                    setOpenSection("when");
+                    setOpenWhenSub("day");
+                  }}
                 />
               ))}
             </div>
-          </section>
+          </SectionAccordion>
 
-          {/* ---- WHEN ---- */}
-          <section>
-            <SectionHeader label="When" value={v.when} />
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {SB_WHEN_OPTIONS.map((w) => (
-                <OptionRow
-                  key={w.id}
-                  active={v.when === w.id}
-                  icon="Calendar"
-                  label={w.label}
-                  onClick={() => set("when", w.id)}
-                />
-              ))}
-              <div style={{ marginTop: 4, fontSize: 11, fontWeight: 800, color: "#858F8F", letterSpacing: 1, textTransform: "uppercase" }}>Time of day</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
-                {SB_WHEN_TIME_BUCKETS.map((tb) => (
-                  <OptionRow
-                    key={tb.id}
-                    active={v.when === tb.id}
-                    label={tb.id}
-                    sub={tb.sub}
-                    onClick={() => set("when", tb.id)}
-                  />
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* ---- WHO ---- */}
-          <section>
-            <SectionHeader label="Who" value={v.who} />
+          {/* ---- WHEN — two radio subsections, always visible ----------- */}
+          {/* Subsection labels are now eyebrows (small uppercase + 1px
+              underline). Both lists are rendered at once so the user can
+              jump between Day range and Time of day without an extra tap.
+              Defaults are seeded to "Any day" / "Any time" on open. */}
+          <SectionAccordion id="when" label="When" chip={whenChip}>
+            {/* ---- Day range eyebrow ---- */}
             <div style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "8px 14px", borderRadius: 10,
-              border: "1px solid #E9EBEC", background: "#FFFFFF",
-              height: 56,
+              // Extend the eyebrow's border-bottom edge-to-edge: -16px
+              // margins on each side reach the sheet edges (body has
+              // padding-right: 16). The label keeps its 16px inset via
+              // padding so it lines up vertically with row content.
+              margin: "0 -16px",
+              padding: "12px 16px 6px 16px",
+              borderBottom: "1px solid #E9EBEC",
+              fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+              fontSize: 10.5, fontWeight: 800,
+              letterSpacing: 1.2, textTransform: "uppercase",
+              color: "#858F8F", lineHeight: 1,
+            }}>Day range</div>
+            <div style={{ paddingTop: 4, paddingBottom: 8 }}>
+              {SB_WHEN_OPTIONS.map((w) => (
+                <Row
+                  key={w.id}
+                  active={whenDay === w.id}
+                  label={w.label}
+                  onClick={() => {
+                    setWhenDay(w.id);
+                    // Time of day already defaults to "Any time", so
+                    // picking a day satisfies both WHEN sub-facets and
+                    // advances to WHO. User can re-open WHEN to refine.
+                    setOpenSection("who");
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* ---- Time of day eyebrow ---- */}
+            <div style={{
+              // Extend the eyebrow's border-bottom edge-to-edge: -16px
+              // margins on each side reach the sheet edges (body has
+              // padding-right: 16). The label keeps its 16px inset via
+              // padding so it lines up vertically with row content.
+              margin: "0 -16px",
+              padding: "12px 16px 6px 16px",
+              borderBottom: "1px solid #E9EBEC",
+              fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+              fontSize: 10.5, fontWeight: 800,
+              letterSpacing: 1.2, textTransform: "uppercase",
+              color: "#858F8F", lineHeight: 1,
+            }}>Time of day</div>
+            <div style={{ paddingTop: 4 }}>
+              {SB_WHEN_TIME_BUCKETS.map((tb) => (
+                <Row
+                  key={tb.id}
+                  active={whenTime === tb.id}
+                  label={tb.id}
+                  sub={tb.sub}
+                  onClick={() => {
+                    setWhenTime(tb.id);
+                    // Picking from Time of day advances to WHO since both
+                    // sub-facets have a committed value at that point.
+                    setOpenSection("who");
+                  }}
+                />
+              ))}
+            </div>
+          </SectionAccordion>
+
+          {/* ---- WHO — inline header, no accordion expand ----------------- */}
+          {/* The stepper pill lives directly across from the "Who" title;
+              no expanded body. Counter renders as "N players" and caps
+              at 8. Matches the section-header height + typography of the
+              accordion sections above so the row reads as part of the
+              same list. */}
+          <section style={{
+            minHeight: 56,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: 12,
+            padding: "12px 0",
+          }}>
+            <span style={{
+              fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+              fontWeight: 800,
+              fontSize: 16, lineHeight: 1.25, letterSpacing: -0.2,
+              color: "#0F1214",
+            }}>Who</span>
+            {/* Single contained pill: [−] [N players] [+]. Cap at 8. */}
+            <div style={{
+              display: "inline-flex", alignItems: "center",
+              background: "#F4F5F6",
+              borderRadius: 999,
+              padding: 4,
+              gap: 0,
+              height: 44,
             }}>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 14, color: "#0F1214" }}>Players</span>
-                <span style={{ fontSize: 12, color: "#4B5052" }}>1–8</span>
-              </div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 14 }}>
-                <button
-                  type="button"
-                  onClick={() => setPlayers(playerCount - 1)}
-                  disabled={playerCount <= 1}
-                  aria-label="Fewer players"
-                  style={{
-                    width: 44, height: 44, borderRadius: 999,
-                    border: "1px solid #E9EBEC", background: "#FFFFFF",
-                    color: "#0F1214", cursor: playerCount <= 1 ? "not-allowed" : "pointer",
-                    opacity: playerCount <= 1 ? 0.4 : 1,
-                    display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  }}
-                >
-                  {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.2} color="#0F1214" />}
-                </button>
-                <span style={{
-                  minWidth: 24, textAlign: "center",
-                  fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-                  fontWeight: 800, fontSize: 18, color: "#0F1214",
-                  fontVariantNumeric: "tabular-nums",
-                }}>{playerCount}</span>
-                <button
-                  type="button"
-                  onClick={() => setPlayers(playerCount + 1)}
-                  disabled={playerCount >= 8}
-                  aria-label="More players"
-                  style={{
-                    width: 44, height: 44, borderRadius: 999,
-                    border: "1px solid #E9EBEC", background: "#FFFFFF",
-                    color: "#0F1214", cursor: playerCount >= 8 ? "not-allowed" : "pointer",
-                    opacity: playerCount >= 8 ? 0.4 : 1,
-                    display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  }}
-                >
-                  {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.2} color="#0F1214" />}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setPlayers(playerCount - 1)}
+                disabled={playerCount <= 1}
+                aria-label="Fewer players"
+                style={{
+                  width: 36, height: 36, borderRadius: 999,
+                  border: 0, background: "transparent",
+                  color: "#0F1214",
+                  cursor: playerCount <= 1 ? "not-allowed" : "pointer",
+                  opacity: playerCount <= 1 ? 0.35 : 1,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  padding: 0,
+                }}
+              >
+                {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="#0F1214" />}
+              </button>
+              <span style={{
+                minWidth: 76, textAlign: "center",
+                fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+                fontWeight: 700, fontSize: 14, color: "#0F1214",
+                fontVariantNumeric: "tabular-nums",
+                padding: "0 6px",
+                whiteSpace: "nowrap",
+              }}>{playerCount} players</span>
+              <button
+                type="button"
+                onClick={() => setPlayers(playerCount + 1)}
+                disabled={playerCount >= 8}
+                aria-label="More players"
+                style={{
+                  width: 36, height: 36, borderRadius: 999,
+                  border: 0, background: "transparent",
+                  color: "#0F1214",
+                  cursor: playerCount >= 8 ? "not-allowed" : "pointer",
+                  opacity: playerCount >= 8 ? 0.35 : 1,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  padding: 0,
+                }}
+              >
+                {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#0F1214" />}
+              </button>
             </div>
           </section>
         </div>
 
-        {/* Sticky footer — full-width Search button with safe-area cushion. */}
+        {/* Sticky footer — Search button sits on a gradient fade so the
+            scrolling content above dissolves into white instead of clipping
+            against a hard hairline. No top border. */}
         <div style={{
-          padding: "12px 16px calc(12px + env(safe-area-inset-bottom)) 16px",
-          borderTop: "1px solid #E9EBEC",
-          background: "#FFFFFF",
+          padding: "20px 16px calc(12px + env(safe-area-inset-bottom)) 16px",
+          background: "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 35%, #FFFFFF 100%)",
         }}>
           <button
             type="button"
-            onClick={() => { onSubmit && onSubmit(v); onClose && onClose(); }}
+            onClick={() => {
+              // Build a normalized prefill payload — the booking flow can
+              // pick up `where / sport / day / time / players` and pre-
+              // populate its fields. We also stash on window for the
+              // prototype's navigation handoff, since onBookCourt currently
+              // calls setScreen("reserve-court") without a data channel.
+              const prefill = {
+                where: v.where || null,
+                sport: activity || v.activity || null,
+                whenDay: whenDay || null,
+                whenTime: whenTime || null,
+                players: playerCount,
+              };
+              window.__searchPrefill = prefill;
+              onSubmit && onSubmit(prefill);
+              onClose && onClose();
+            }}
             style={{
               width: "100%", height: 52, borderRadius: 12,
               border: 0, background: "#0F1214", color: "#FFFFFF",
@@ -1180,6 +1577,418 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   return ReactDOM.createPortal(sheet, portalTarget);
 }
 
+// ---- Mobile results sheet ------------------------------------------------
+// Slides up after the user taps Search in MobileSearchSheet. Shows the
+// clubs that match the committed filter set (Where / What / When / Who).
+// Tapping a club closes the sheet and routes the user into the booking
+// flow with the prefill payload already on window.__searchPrefill.
+//
+// Visual model mirrors MobileSearchSheet so the two read as one design:
+// same backdrop + slide animation, same 24/800 title, same ghost X,
+// same row anatomy. Difference: no radios — each club row is a direct
+// navigation target with a trailing chevron.
+function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
+  useEffectSB(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
+  const portalTarget = typeof document !== "undefined"
+    ? document.getElementById("device-frame-inner")
+    : null;
+  if (!portalTarget) return null;
+
+  // For the prototype, all clubs in SB_RESULTS_CLUBS are considered
+  // "matched" — real filtering against where/activity/when isn't wired
+  // through. SB_RESULTS_CLUBS carries the canonical `id` field so the
+  // booking flow downstream can set selectedClubId from the prefill
+  // payload after the user picks one.
+  const clubs = SB_RESULTS_CLUBS;
+  const v = values || {};
+  const filterChips = [v.where, v.activity, v.when, v.who].filter(Boolean);
+
+  const sheet = (
+    <>
+      <div
+        onClick={onClose}
+        aria-hidden={!open}
+        style={{
+          position: "absolute", inset: 0,
+          background: "rgba(15,18,20,.45)",
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 220ms ease",
+          zIndex: 100,
+        }}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Available clubs"
+        style={{
+          position: "absolute", left: 0, right: 0, bottom: 0,
+          height: "92%",
+          background: "#FFFFFF",
+          borderTopLeftRadius: 20, borderTopRightRadius: 20,
+          boxShadow: "0 -8px 32px rgba(15,18,20,.22)",
+          transform: open ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 320ms cubic-bezier(.2,.8,.2,1)",
+          zIndex: 101,
+          display: "flex", flexDirection: "column",
+          fontFamily: "Inter, system-ui, sans-serif",
+          pointerEvents: open ? "auto" : "none",
+        }}
+      >
+        {/* Drag handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px 0" }}>
+          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#E9EBEC" }} />
+        </div>
+        {/* Header — same scale as MobileSearchSheet's title */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "8px 16px 12px 16px",
+        }}>
+          <h2 style={{
+            margin: 0,
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+            fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
+            color: "#0F1214",
+          }}>Available clubs</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: 44, height: 44, border: 0, padding: 0,
+              background: "transparent",
+              display: "inline-flex", alignItems: "center", justifyContent: "flex-end",
+              cursor: "pointer",
+            }}
+          >
+            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="#0F1214" />}
+          </button>
+        </div>
+
+        {/* Filter chip row — surfaces the committed filters at the top
+            so the user sees the connection from search to results. */}
+        {filterChips.length > 0 && (
+          <div style={{
+            padding: "0 16px 12px 16px",
+            display: "flex", flexWrap: "wrap", gap: 6,
+          }}>
+            {filterChips.map((c, i) => (
+              <span key={i} style={{
+                height: 22, padding: "0 10px", borderRadius: 6,
+                background: "#F4F5F6", color: "#0F1214",
+                fontSize: 11.5, fontWeight: 600,
+                display: "inline-flex", alignItems: "center",
+                whiteSpace: "nowrap",
+              }}>{c}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Scrollable club list — each row navigates on tap. */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 16px 16px" }}>
+          {clubs.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => onSelectClub && onSelectClub(c.name, c.id)}
+              style={{
+                display: "flex", alignItems: "center", gap: 12,
+                width: "100%",
+                minHeight: 56,
+                padding: "12px 12px",
+                border: 0, background: "transparent",
+                borderRadius: 10,
+                color: "#0F1214",
+                fontFamily: "inherit", textAlign: "left", cursor: "pointer",
+                transition: "background 120ms ease",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              {window.Icon && <window.Icon name="Building2" size={18} strokeWidth={2} color="#4B5052" />}
+              <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+                <span style={{
+                  fontSize: 15, fontWeight: 600, color: "#0F1214",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  lineHeight: 1.3,
+                }}>{c.name}</span>
+                <span style={{
+                  fontSize: 13, color: "#4B5052", lineHeight: 1.3,
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>
+                  {c.city}{c.state ? `, ${c.state}` : ""}
+                  {c.distance ? ` · ${c.distance} mi` : ""}
+                </span>
+              </span>
+              {window.Icon && <window.Icon name="ChevronRight" size={18} strokeWidth={2} color="#4B5052" />}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
+  return ReactDOM.createPortal(sheet, portalTarget);
+}
+
+// ---- Carousel section ---------------------------------------------------
+// Used inside SearchResultsModal to render a themed strip of club cards.
+// Title + sub copy header (h2-style, smaller than the modal title) with
+// optional Prev/Next arrows when more than 2 cards exist.
+function SBResultsCarousel({ title, sub, clubs, theme, onSelectClub }) {
+  const trackRef = useRefSB(null);
+  if (!clubs || clubs.length === 0) return null;
+  const scroll = (dx) => {
+    const el = trackRef.current; if (!el) return;
+    el.scrollBy({ left: dx, behavior: "smooth" });
+  };
+  return (
+    <section style={{ padding: "0 0 16px 0" }}>
+      <div style={{
+        display: "flex", alignItems: "flex-end", justifyContent: "space-between",
+        padding: "16px 24px 8px 24px", gap: 16,
+      }}>
+        <div style={{ minWidth: 0 }}>
+          <h3 style={{
+            margin: 0,
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+            fontWeight: 800, fontSize: 17, letterSpacing: -0.3,
+            color: "#0F1214", lineHeight: 1.2,
+          }}>{title}</h3>
+          {sub && (
+            <div style={{
+              marginTop: 2, fontSize: 12.5, color: "#4B5052", lineHeight: 1.3,
+            }}>{sub}</div>
+          )}
+        </div>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <button
+            type="button"
+            onClick={() => scroll(-340)}
+            aria-label="Previous"
+            style={{
+              width: 36, height: 36, borderRadius: 999, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            {window.Icon && <window.Icon name="ChevronLeft" size={16} strokeWidth={2} color="#0F1214" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => scroll(340)}
+            aria-label="Next"
+            style={{
+              width: 36, height: 36, borderRadius: 999, border: 0,
+              background: "transparent", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            {window.Icon && <window.Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />}
+          </button>
+        </div>
+      </div>
+      <div
+        ref={trackRef}
+        style={{
+          display: "flex", gap: 16,
+          overflowX: "auto", scrollSnapType: "x mandatory",
+          padding: "8px 24px 16px 24px",
+          scrollbarWidth: "none",
+        }}
+      >
+        {clubs.map((c) => (
+          <div
+            key={c.id}
+            onClick={() => onSelectClub && onSelectClub(c.name, c.id)}
+            style={{
+              flex: "0 0 280px", scrollSnapAlign: "start",
+              cursor: "pointer", display: "flex",
+            }}
+          >
+            {window.BookNowCard && (
+              <window.BookNowCard
+                v={c}
+                theme={theme}
+                viewport="desktop"
+                onPickSlot={() => onSelectClub && onSelectClub(c.name, c.id)}
+                onOpenClub={() => onSelectClub && onSelectClub(c.name, c.id)}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ---- Desktop results modal -----------------------------------------------
+// Centered modal that opens after the user taps Search in the desktop
+// SearchBar (or any "Find a club" / event-list trigger that calls
+// window.__openResultsModal). Renders SB_RESULTS_CLUBS in themed
+// carousel sections (Popular near you, Ready to book today, Closest)
+// using the BookNowCard from the logged-out home.
+//
+// Picking a card stashes the club on window.__searchPrefill and calls
+// onSelectClub (parent routes into the booking flow).
+function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
+  useEffectSB(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
+  // Close on Escape — modal accessibility basics.
+  useEffectSB(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") onClose && onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (typeof document === "undefined") return null;
+  const portalTarget = document.body;
+
+  const v = values || {};
+  const filterChips = [v.where, v.activity, v.when, v.who].filter(Boolean);
+
+  const modal = (
+    <>
+      {/* Backdrop — covers the whole browser viewport on desktop.
+          position: fixed (not absolute) so it anchors to the viewport,
+          not the closest positioned ancestor. */}
+      <div
+        onClick={onClose}
+        aria-hidden={!open}
+        style={{
+          position: "fixed", inset: 0,
+          background: "rgba(15,18,20,.55)",
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 220ms ease",
+          zIndex: 200,
+        }}
+      />
+      {/* Modal — capped at 920px wide so it sits inside the desktop's
+          1200px content column with breathing room on each side, and
+          75vh tall so it doesn't push past the visible viewport even
+          on shorter desktop windows. With carousel sections the body
+          doesn't need to grow vertically — horizontal scroll absorbs
+          the volume per section. */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Available clubs"
+        style={{
+          position: "fixed",
+          left: "50%", top: "50%",
+          transform: open ? "translate(-50%, -50%) scale(1)" : "translate(-50%, -50%) scale(.96)",
+          opacity: open ? 1 : 0,
+          width: "min(920px, calc(100vw - 48px))",
+          maxHeight: "min(75vh, 720px)",
+          background: "#FFFFFF",
+          borderRadius: 16,
+          boxShadow: "0 24px 64px rgba(15,18,20,.32), 0 4px 16px rgba(15,18,20,.16)",
+          transition: "opacity 220ms ease, transform 220ms cubic-bezier(.2,.8,.2,1)",
+          pointerEvents: open ? "auto" : "none",
+          zIndex: 201,
+          display: "flex", flexDirection: "column",
+          fontFamily: "Inter, system-ui, sans-serif",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "20px 24px 16px 24px",
+        }}>
+          <h2 style={{
+            margin: 0,
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+            fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
+            color: "#0F1214",
+          }}>Available clubs</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: 44, height: 44, border: 0, padding: 0,
+              background: "transparent",
+              display: "inline-flex", alignItems: "center", justifyContent: "flex-end",
+              cursor: "pointer",
+            }}
+          >
+            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="#0F1214" />}
+          </button>
+        </div>
+
+        {/* Filter chip row */}
+        {filterChips.length > 0 && (
+          <div style={{
+            padding: "0 24px 16px 24px",
+            display: "flex", flexWrap: "wrap", gap: 6,
+          }}>
+            {filterChips.map((c, i) => (
+              <span key={i} style={{
+                height: 22, padding: "0 10px", borderRadius: 6,
+                background: "#F4F5F6", color: "#0F1214",
+                fontSize: 11.5, fontWeight: 600,
+                display: "inline-flex", alignItems: "center",
+                whiteSpace: "nowrap",
+              }}>{c}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Scrollable body — broken into themed carousel sections so
+            the list reads as curated picks rather than a single grid. */}
+        <div style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "0 0 24px 0",
+        }}>
+          {[
+            {
+              title: "Popular near you",
+              sub: "Most booked clubs in your area",
+              clubs: SB_RESULTS_CLUBS.filter((c) => c.booked >= 20),
+            },
+            {
+              title: "Ready to book today",
+              sub: "Open courts in the next few hours",
+              clubs: SB_RESULTS_CLUBS.filter((c) => c.times && c.times.length >= 4).slice(0, 5),
+            },
+            {
+              title: "Closest to you",
+              sub: "Under 5 miles away",
+              clubs: SB_RESULTS_CLUBS.filter((c) => parseFloat(c.distance) <= 5),
+            },
+          ].map((section, sIdx) => (
+            <SBResultsCarousel
+              key={sIdx}
+              title={section.title}
+              sub={section.sub}
+              clubs={section.clubs}
+              theme={theme}
+              onSelectClub={onSelectClub}
+            />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
+  return ReactDOM.createPortal(modal, portalTarget);
+}
+
 // ---- Mobile compact variant ----------------------------------------------
 // Single-row pill that opens the MobileSearchSheet on tap. The pill shows
 // the title "Search for anything" plus the four current facet values on a
@@ -1199,6 +2008,10 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
   };
 
   const [open, setOpen] = useStateSB(false);
+  // Results sheet — shown after the user taps Search inside the filter
+  // sheet. Listing matched clubs; selecting one routes to the booking
+  // flow via the parent's onSubmit.
+  const [resultsOpen, setResultsOpen] = useStateSB(false);
   return (
     <>
     <button
@@ -1212,12 +2025,14 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
       }}
       style={{
         width: "100%",
-        height: 52,
+        // Auto height with 12px vertical padding gives the pill a more
+        // generous shape — content (label + value) is two stacked lines
+        // ≈ 36px tall, so total pill ≈ 60px tall.
         borderRadius: 999,
         background: "#fff",
         border: 0,
         boxShadow: "0 1px 2px rgba(15,18,20,.06), 0 4px 14px rgba(15,18,20,.08), inset 0 0 0 1px rgba(15,18,20,.06)",
-        padding: "0 8px 0 18px",
+        padding: "12px 8px 12px 18px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -1225,27 +2040,40 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
         fontFamily: "Inter, system-ui, sans-serif",
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 3, overflow: "hidden", flex: 1, minWidth: 0 }}>
-        {/* Title — uppercase micro-label matching the desktop SearchBar's
-            segment headers (WHERE / ACTIVITY / etc) so the pill reads as
-            "this is the search facet bar, compacted". */}
+      <div style={{
+        display: "flex", flexDirection: "column", alignItems: "flex-start",
+        gap: 4,
+        overflow: "hidden",
+        flex: 1, minWidth: 0,
+        // gutter so the truncating value text doesn't visually collide
+        // with the search button on the right.
+        paddingRight: 8,
+      }}>
+        {/* Label — matches the desktop segment label exactly:
+            Axiforma 800 / 10.5px / letter-spacing 1.3 / uppercase /
+            color #858F8F. */}
         <div style={{
           fontFamily: "Axiforma, Inter, system-ui, sans-serif",
           fontWeight: 800,
-          fontSize: 9.5, color: "#858F8F",
-          letterSpacing: 1.2, textTransform: "uppercase",
+          fontSize: 10.5, color: "#858F8F",
+          letterSpacing: 1.3, textTransform: "uppercase",
           lineHeight: 1,
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%",
+          maxWidth: "100%",
         }}>
           Search for anything
         </div>
-        {/* Subtitle — all four current values joined on a single line by
-            bullets. Truncates with ellipsis if it can't fit. */}
+        {/* Value — matches the desktop segment value style:
+            Inter 500 / 14px / color #0F1214. All four facet values join
+            on a single line with bullets; ellipsis kicks in before the
+            row reaches the search button so it never visually overlaps. */}
         <div style={{
-          fontSize: 11, fontWeight: 500, color: "#4B5052",
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%",
+          fontFamily: "Inter, system-ui, sans-serif",
+          fontSize: 14, fontWeight: 500, color: "#0F1214",
+          lineHeight: 1.2,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          maxWidth: "100%", width: "100%",
         }}>
-          {v.where} <span style={{ color: "#C8CDCD" }}>•</span> {v.activity} <span style={{ color: "#C8CDCD" }}>•</span> {v.when} <span style={{ color: "#C8CDCD" }}>•</span> {v.who}
+          {v.where}<span style={{ color: "#C8CDCD", margin: "0 6px" }}>•</span>{v.activity}<span style={{ color: "#C8CDCD", margin: "0 6px" }}>•</span>{v.when}<span style={{ color: "#C8CDCD", margin: "0 6px" }}>•</span>{v.who}
         </div>
       </div>
       <span style={{
@@ -1260,11 +2088,34 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
       onClose={() => setOpen(false)}
       values={v}
       onChange={update}
-      onSubmit={(committed) => onSubmit && onSubmit(committed)}
+      onSubmit={(committed) => {
+        // Tapping Search in the filter sheet now opens the results
+        // sheet listing matched clubs. Parent's onSubmit fires later,
+        // once the user picks a club.
+        setOpen(false);
+        setResultsOpen(true);
+      }}
+      theme={theme}
+    />
+    <SearchResultsSheet
+      open={resultsOpen}
+      onClose={() => setResultsOpen(false)}
+      values={v}
+      onSelectClub={(clubName, clubId) => {
+        // Stash club + canonical id so the booking flow can route the
+        // user directly to that club's reservation screen.
+        window.__searchPrefill = {
+          ...(window.__searchPrefill || {}),
+          club: clubName,
+          clubId,
+        };
+        setResultsOpen(false);
+        onSubmit && onSubmit({ ...v, club: clubName, clubId });
+      }}
       theme={theme}
     />
     </>
   );
 }
 
-Object.assign(window, { SearchBar, SearchBarCompact, MobileSearchSheet });
+Object.assign(window, { SearchBar, SearchBarCompact, MobileSearchSheet, SearchResultsSheet, SearchResultsModal });

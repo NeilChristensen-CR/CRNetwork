@@ -262,7 +262,7 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
           }}>
             {ordered.map((v) => (
               <div key={v.id} style={{ flex: "0 0 280px", scrollSnapAlign: "start", display: "flex" }}>
-                <BookNowCard v={v} theme={theme} onPickSlot={(timeLabel) => setPendingSlot({ venue: v, time: timeLabel })} />
+                <BookNowCard v={v} theme={theme} viewport={viewport} onPickSlot={(timeLabel) => setPendingSlot({ venue: v, time: timeLabel })} />
               </div>
             ))}
           </div>
@@ -385,8 +385,9 @@ function SearchPill({ placeholder, value, onChange, theme }) {
 // AND by "Popular clubs near you". MiniMap header on top, pin + stacked
 // name/city block, sport + booked caption, 2x2 time-slot grid, and a
 // grey footer CTA. Pure presentational — parents own the slot/CTA wiring.
-function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
+function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub }) {
   const t = theme.t || {};
+  const isMobile = viewport === "mobile";
 
   // Deterministic distance + active-players count per venue. These are
   // prototype demo numbers — stable across renders so the cards don't churn.
@@ -395,8 +396,28 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
   const activePlayers = v.activePlayers != null ? v.activePlayers : (30 + hash % 35);
   const venueForMap = { ...v, distance, activePlayers };
 
+  // Mobile carousel focus state — touch devices don't get :hover, so the
+  // "elevated" look (shadow + lift) is driven by an IntersectionObserver
+  // that flags the card as focused when it's ≥70% visible in the carousel
+  // viewport. Desktop keeps its onMouseEnter/Leave handlers.
+  const cardRef = React.useRef(null);
+  const [inFocus, setInFocus] = React.useState(false);
+  React.useEffect(() => {
+    if (!isMobile) return;
+    const el = cardRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setInFocus(entry.intersectionRatio >= 0.7),
+      { threshold: [0, 0.4, 0.7, 1] }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [isMobile]);
+
+  const elevated = isMobile ? inFocus : false; // desktop uses :hover handlers
   return (
     <div
+      ref={cardRef}
       data-card-hover
       style={{
         width: "100%",
@@ -406,10 +427,14 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
         borderRadius: 8,
         display: "flex", flexDirection: "column",
         overflow: "hidden",
-        transition: "box-shadow 160ms, transform 160ms"
+        transition: "box-shadow 160ms, transform 160ms",
+        boxShadow: elevated ? "0 8px 24px rgba(15,18,20,0.10)" : "none",
+        transform: elevated ? "translateY(-2px)" : "translateY(0)",
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
+      // Desktop only — onMouse handlers don't fire on touch but we
+      // skip wiring them on mobile to make the intent explicit.
+      onMouseEnter={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+      onMouseLeave={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
     >
       
       {/* Mini map — distance pill top-left, "X Active" green pill top-right.
@@ -448,7 +473,10 @@ function BookNowCard({ v, theme, onPickSlot, onOpenClub }) {
             fontSize: 11.5, fontWeight: 600,
             whiteSpace: "nowrap",
           }}>{v.sport}</span>
-          <span>Booked {v.booked} × Today</span>
+          {/* "23 plays today" — replaces the cryptic "Booked 23 × Today"
+              shorthand. Reads as a one-glance popularity cue: how many
+              games have been booked at this club today. */}
+          <span>{v.booked} plays today</span>
         </div>
 
         {/* Time slot pills — 2x2 grid, simple gray outlined boxes. Clicking

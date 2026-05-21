@@ -95,34 +95,39 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
           </span>
         </button>
 
-        {/* Right — Sign In dark pill with person icon. Sign Up text link
-            removed; Sign In carries both "register" and "log in" entry
-            intents to keep chrome tight. 44px tall so it meets the
-            primary-auth touch-target floor on mobile. */}
+        {/* Right — primary CTA pill. Copy switched from "Sign In" to
+            "Create an Account" so the logged-out chrome leads with the
+            acquisition intent. Mobile compacts to 36h / 12px to fit the
+            longer label inside the 56px chrome without crowding the
+            brandmark. */}
         <button
           type="button"
           onClick={() => onNav && onNav("Sign In")}
           style={{
-            height: 44,
-            padding: "0 18px 0 14px",
+            // Desktop trimmed 44 → 36 so the CTA sits as a chip in the
+            // chrome rather than a primary button — leaves the green
+            // brandmark + page as the focal point.
+            height: desktop ? 36 : 30,
+            padding: desktop ? "0 14px 0 12px" : "0 12px 0 10px",
             borderRadius: 999,
             background: C.pillBg,
             color: C.pillFg,
             border: 0,
             display: "inline-flex",
             alignItems: "center",
-            gap: 8,
+            gap: desktop ? 6 : 5,
             cursor: "pointer",
             fontFamily: "Inter, system-ui, sans-serif",
             fontWeight: 600,
-            fontSize: 13,
+            fontSize: desktop ? 12.5 : 11.5,
             flexShrink: 0,
+            whiteSpace: "nowrap",
           }}
         >
           {window.Icon && (
-            <window.Icon name="User" size={16} strokeWidth={2} color={C.pillFg} />
+            <window.Icon name="User" size={desktop ? 14 : 12} strokeWidth={2} color={C.pillFg} />
           )}
-          Sign In
+          Create Account
         </button>
       </div>
     </div>
