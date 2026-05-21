@@ -2963,7 +2963,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             letterSpacing: isMobile ? -0.6 : -0.8,
             color: theme.t.text,
           }}>
-            Welcome to Court Reserve
+            Welcome to CourtReserve
           </h1>
         </div> :
         <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>
