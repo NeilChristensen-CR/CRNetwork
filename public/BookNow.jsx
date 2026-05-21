@@ -441,89 +441,118 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
               Same SVG illustration underneath. */}
       <MiniMap venue={venueForMap} theme={theme} />
 
-      {/* Card body — equal top and bottom padding so the time slots have
-          breathing room before the gray footer below them. */}
-      <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-        {/* Title — own row, full width. */}
-        <div style={{
-          fontFamily: theme.display, fontWeight: 800, fontSize: 17,
-          color: "#0F1214", letterSpacing: -0.3, lineHeight: 1.2,
-        }}>{v.name}</div>
+      {/* Card body, per Figma spec (node 8035-9185):
+          - 12px uniform padding, border-bottom #E9EBEC
+          - inner gap 12 between info-block and time-slot-grid
+          - info-block gap 8 between title, ratings row, and sport row */}
+      <div style={{
+        padding: 12,
+        borderBottom: "1px solid #E9EBEC",
+        display: "flex", flexDirection: "column", gap: 12,
+      }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {/* Title — display/d6 20/700/28, letter-spacing 0. */}
+          <div style={{
+            fontFamily: theme.display, fontWeight: 700, fontSize: 20,
+            color: "#0F1214", letterSpacing: 0, lineHeight: "28px",
+          }}>{v.name}</div>
 
-        {/* Location row — pin icon + "City, State" sitting beneath the title. */}
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: 6,
-          fontSize: 13, fontWeight: 500, color: "#4B5052",
-        }}>
-          <Icon name="MapPin" size={13} strokeWidth={2.2} color="#4B5052" />
-          <span>{v.city}{v.state ? `, ${v.state}` : ""}</span>
+          {/* Star + rating + price row — 5 stars (16px each, gap 4), then
+              gap 8 to "4.8" bold + " (256)" regular muted + bullet + "$$$"
+              bold muted. Reads as the venue's social proof. Falls back to
+              4.7 / 100 / "$$" when the underlying venue lacks rating data. */}
+          {(() => {
+            const rating = v.rating != null ? v.rating : 4.7;
+            const reviews = v.reviews != null ? v.reviews : 100;
+            const price = v.price || "$$";
+            const full = Math.floor(rating);
+            return (
+              <div style={{
+                display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8,
+                fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
+              }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < full ? "#FFB400" : "#E9EBEC"} style={{ display: "block" }}>
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 6.91-1.01z" />
+                    </svg>
+                  ))}
+                </span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ fontWeight: 700, color: "#0F1214", fontVariantNumeric: "tabular-nums" }}>{rating.toFixed(1)}</span>
+                  <span style={{ color: "#4B5052" }}>({reviews})</span>
+                </span>
+                <span style={{ color: "#0F1214", fontWeight: 700 }}>·</span>
+                <span style={{ color: "#4B5052", fontWeight: 700 }}>{price}</span>
+              </div>
+            );
+          })()}
+
+          {/* Sport tag + "Booked N x Today" caption. Sport tag is the
+              Figma tagschips/neutral/sm variant: 6/2 padding, fully
+              rounded, caption typography (12/0.3 ls, lh 16). */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8,
+            fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
+          }}>
+            <span data-tag="default" style={{
+              display: "inline-flex", alignItems: "center",
+              padding: "2px 6px", borderRadius: 9999,
+              background: "#F4F5F6", color: "#2F3436",
+              fontSize: 12, fontWeight: 400, lineHeight: "16px",
+              letterSpacing: 0.3,
+              whiteSpace: "nowrap",
+            }}>{v.sport}</span>
+            <span style={{ color: "#0F1214", fontWeight: 700 }}>·</span>
+            <span style={{ color: "#2F3436", fontWeight: 400 }}>
+              Booked {v.booked} x Today
+            </span>
+          </div>
         </div>
 
-        {/* Sport tag + booked-today caption. Sport is rendered as a pill
-            tag matching the Popular clubs styling so the metadata reads as
-            a discrete attribute. */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: 8,
-          fontSize: 13, color: "#4B5052", fontWeight: 500,
-        }}>
-          <span data-tag="default" style={{
-            display: "inline-flex", alignItems: "center",
-            height: 22, padding: "0 10px", borderRadius: 6,
-            background: "#F4F5F6", color: "#0F1214",
-            fontSize: 11.5, fontWeight: 600,
-            whiteSpace: "nowrap",
-          }}>{v.sport}</span>
-          {/* "23 plays today" — replaces the cryptic "Booked 23 × Today"
-              shorthand. Reads as a one-glance popularity cue: how many
-              games have been booked at this club today. */}
-          <span>{v.booked} plays today</span>
-        </div>
-
-        {/* Time slot pills — 2x2 grid, simple gray outlined boxes. Clicking
-            opens the customize modal pre-filled with this slot. */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 4 }}>
+        {/* Time slot pills — flex-wrap with min-width 88 + flex: 1 so 4
+            slots either fit in a single row (when the card is wide) or
+            wrap into a 2x2 layout. Border uses the spec's dark
+            buttons/primary/border token #222424; text is 13/medium. */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {v.times.slice(0, 4).map((time) =>
             <button key={time} onClick={() => onPickSlot(time)} style={{
-              height: 44, padding: "0 8px", borderRadius: 8,
-              border: "1px solid #DEE1E5",
-              background: "#FFFFFF", color: "#0F1214",
-              fontFamily: "inherit", fontWeight: 600, fontSize: 12,
+              flex: "1 0 0", minWidth: 88,
+              padding: 8, borderRadius: 8,
+              border: "1px solid #222424",
+              background: "#FFFFFF", color: "#222424",
+              fontFamily: "inherit", fontWeight: 500, fontSize: 13, lineHeight: "16px",
+              letterSpacing: 0.2,
               cursor: "pointer",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
-              transition: "border-color 120ms, background 120ms"
+              transition: "background 120ms",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#0F1214";
-              e.currentTarget.style.background = "#F4F5F6";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "#DEE1E5";
-              e.currentTarget.style.background = "#FFFFFF";
-            }}>
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; }}>
               {time}
             </button>
           )}
         </div>
       </div>
 
-      {/* See Events & Info — full-width footer with subtle grey background,
-          matching the Popular clubs / Trending events footers + the
-          SearchBar's selected-state track for cross-section consistency. */}
-      <button onClick={(e) => {e.stopPropagation();onOpenClub && onOpenClub(v.id);}} style={{
+      {/* See Events & Info — Figma footer: bg #F4F5F6, 12px uniform
+          padding, 13/regular text + ChevronRight 16px on the right. */}
+      <button onClick={(e) => { e.stopPropagation(); onOpenClub && onOpenClub(v.id); }} style={{
         marginTop: "auto",
-        padding: "12px 16px",
+        padding: 12,
         border: 0,
-        borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: "#E9EBEC",
         background: "#F4F5F6",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: "#0F1214",
+        gap: 12,
+        fontFamily: "inherit", fontSize: 13, fontWeight: 400, color: "#0F1214",
+        lineHeight: "16px", letterSpacing: 0.2,
         cursor: "pointer",
         transition: "background 120ms",
       }}
       onMouseEnter={(e) => { e.currentTarget.style.background = "#E9EBEC"; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}>
         See Events & Info
-        <Icon name="ArrowRight" size={14} strokeWidth={2} color="#0F1214" />
+        <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
       </button>
     </div>);
 
@@ -809,38 +838,45 @@ function MiniMap({ venue, theme }) {
         </g>
       </svg>
 
-      {/* Top-left distance pill — anchored to where players sit relative to
-          the club. Falls back to city/state/zip if no distance is provided
-          so the legacy callers still render. */}
+      {/* Map-overlay pills, per Figma spec (node 8035-9185):
+          - 12px gradient-overlay container at the top of the map
+          - distance pill = neutral tagschips/default (#F4F5F6 bg) sm size
+          - active pill = white with 8px solid-green dot at left, inset
+            white pill shape (4px outer left pad, 12px right pad) */}
       <span data-tag="default" style={{
-        position: "absolute", top: 10, left: 10,
+        position: "absolute", top: 12, left: 12,
         display: "inline-flex", alignItems: "center",
-        height: 22, padding: "0 10px", borderRadius: 6,
-        background: "#FFFFFF",
-        color: "#0F1214",
-        fontSize: 11.5, fontWeight: 600,
-        boxShadow: "0 1px 3px rgba(15,18,20,.12)",
+        padding: "4px 8px", borderRadius: 9999,
+        background: "#F4F5F6",
+        color: "#2F3436",
+        fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
+        fontWeight: 400,
         whiteSpace: "nowrap",
       }}>
         {venue.distance != null ? `${venue.distance}mi` : `${venue.city}, ${venue.state} ${venue.zip}`}
       </span>
-      {/* Top-right active-players pill — pale "positive" tone at rest,
-          flips to the vibrant solid green via the [data-card-hover]:hover
-          rule when the parent card is hovered. */}
+      {/* Top-right active-players pill — white capsule with a solid 8px
+          green dot. On card hover the existing positive [data-tag] CSS
+          rule inverts it to the vibrant solid green (with white dot). */}
       {venue.activePlayers != null && (
         <span data-tag="positive" style={{
-          position: "absolute", top: 10, right: 10,
-          display: "inline-flex", alignItems: "center", gap: 6,
-          height: 22, padding: "0 10px 0 8px", borderRadius: 6,
-          background: "#DCFCE7",
-          color: "#166534",
-          fontSize: 11.5, fontWeight: 600,
-          boxShadow: "0 1px 3px rgba(15,18,20,.08)",
+          position: "absolute", top: 12, right: 12,
+          display: "inline-flex", alignItems: "center", gap: 4,
+          padding: "4px 12px 4px 4px", borderRadius: 9999,
+          background: "#FFFFFF",
+          color: "#1E5521",
+          fontSize: 13, lineHeight: "16px", letterSpacing: 0.2,
+          fontWeight: 400,
+          boxShadow: "0 2px 4px rgba(0,0,0,.08)",
           whiteSpace: "nowrap",
         }}>
-          <span data-tag-dot style={{
-            width: 6, height: 6, borderRadius: 999, background: "#166534", flexShrink: 0,
-          }} />
+          <span style={{ display: "inline-flex", alignItems: "center", padding: 4 }}>
+            <span data-tag-dot style={{
+              width: 8, height: 8, borderRadius: 9999,
+              background: "#2E7D32", flexShrink: 0,
+              boxShadow: "0 1px 1px rgba(0,0,0,.08)",
+            }} />
+          </span>
           {venue.activePlayers} Active
         </span>
       )}
