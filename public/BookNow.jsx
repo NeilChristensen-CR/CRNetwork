@@ -473,7 +473,10 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
             fontSize: 11.5, fontWeight: 600,
             whiteSpace: "nowrap",
           }}>{v.sport}</span>
-          <span>Booked {v.booked} × Today</span>
+          {/* "23 plays today" — replaces the cryptic "Booked 23 × Today"
+              shorthand. Reads as a one-glance popularity cue: how many
+              games have been booked at this club today. */}
+          <span>{v.booked} plays today</span>
         </div>
 
         {/* Time slot pills — 2x2 grid, simple gray outlined boxes. Clicking

@@ -813,15 +813,14 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
           <div style={{ padding: "10px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
             Players
           </div>
+          {/* The +/- buttons disable at 1 and 8 (`whoCount <= 1` /
+              `whoCount >= 8`), so the range is enforced by interaction
+              alone — no separate "1–8 players" label needed. */}
           <div style={{
             padding: "8px 12px 12px 12px",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
+            display: "flex", alignItems: "center", justifyContent: "flex-end",
             gap: 12,
           }}>
-            <span style={{
-              fontFamily: "Inter, system-ui, sans-serif",
-              fontSize: 14, fontWeight: 500, color: "#0F1214",
-            }}>1–8 players</span>
             <div style={{
               display: "inline-flex", alignItems: "center",
               background: "#F4F5F6",
