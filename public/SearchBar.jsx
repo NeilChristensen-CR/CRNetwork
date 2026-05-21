@@ -1874,7 +1874,7 @@ function SBClubListRow({ club, onSelect }) {
         }}>{club.name}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
           {window.Icon && <window.Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />}
-          <span>{club.city}, {club.state} • {club.distance} mi away</span>
+          <span>{club.city}, {club.state}</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <span style={{
@@ -1912,31 +1912,9 @@ function SBClubListRow({ club, onSelect }) {
   );
 }
 
-// ---- Club list section --------------------------------------------------
-// Renders one themed section inside SearchResultsModal: display/d5
-// section title (matching the homepage) + a list of SBClubListRow
-// items. Replaces the carousel-of-cards pattern with the same vertical
-// list rhythm used on MoreEventsNearYou.
-function SBClubListSection({ title, clubs, onSelectClub }) {
-  if (!clubs || clubs.length === 0) return null;
-  return (
-    <section style={{ padding: "0 0 24px 0" }}>
-      <div style={{ padding: "16px 24px 12px 24px" }}>
-        <h3 style={{
-          margin: 0,
-          fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-          fontWeight: 700, fontSize: 24, lineHeight: "32px", letterSpacing: 0,
-          color: "#0F1214",
-        }}>{title}</h3>
-      </div>
-      <div>
-        {clubs.map((c) => (
-          <SBClubListRow key={c.id} club={c} onSelect={onSelectClub} />
-        ))}
-      </div>
-    </section>
-  );
-}
+// (SBClubListSection was used when the modal stacked per-cut H3
+// section titles; that role moved to the segmented controller in the
+// header so the section wrapper is no longer needed.)
 
 // ---- Desktop results modal -----------------------------------------------
 // Centered modal that opens after the user taps Search in the desktop
@@ -1969,6 +1947,26 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
   const v = values || {};
   const filterChips = [v.where, v.activity, v.when, v.who].filter(Boolean);
 
+  // Tab segments — segmented controller replaces the previous H2 +
+  // per-section H3 headings. Each tab filters SB_RESULTS_CLUBS by a
+  // different intent so the modal stays a single scannable list at a
+  // time instead of three stacked carousels.
+  //   Recommended    full set; intentionally a curated "for you" mix
+  //   Popular        booked ≥ 20 (the prior "Popular near you" cut)
+  //   Closest to you distance ≤ 5 mi
+  //   Relevant       narrowed to clubs matching the SearchBar's
+  //                  activity filter when one is set; otherwise the
+  //                  full set so the tab still renders content.
+  const sportFilter = v.activity && v.activity !== "Any Sport" ? v.activity : null;
+  const TABS = [
+    { key: "recommended",  label: "Recommended",   clubs: SB_RESULTS_CLUBS },
+    { key: "popular",      label: "Popular",       clubs: SB_RESULTS_CLUBS.filter((c) => c.booked >= 20) },
+    { key: "closest",      label: "Closest to you", clubs: SB_RESULTS_CLUBS.filter((c) => parseFloat(c.distance) <= 5) },
+    { key: "relevant",     label: "Relevant",      clubs: sportFilter ? SB_RESULTS_CLUBS.filter((c) => c.sport === sportFilter) : SB_RESULTS_CLUBS },
+  ];
+  const [activeTabKey, setActiveTabKey] = useStateSB("recommended");
+  const activeTab = TABS.find((t) => t.key === activeTabKey) || TABS[0];
+
   const modal = (
     <>
       {/* Backdrop — covers the whole browser viewport on desktop.
@@ -1986,22 +1984,20 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           zIndex: 200,
         }}
       />
-      {/* Modal — capped at 920px wide so it sits inside the desktop's
-          1200px content column with breathing room on each side, and
-          75vh tall so it doesn't push past the visible viewport even
-          on shorter desktop windows. With carousel sections the body
-          doesn't need to grow vertically — horizontal scroll absorbs
-          the volume per section. */}
+      {/* Modal — capped at 640px wide. Rows are vertical-list shape now
+          (no multi-card carousels), so a narrower column reads as a
+          dialog rather than a full-bleed listing. 75vh tall caps the
+          vertical so the modal stays inside even shorter windows. */}
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Available clubs"
+        aria-label="Search results"
         style={{
           position: "fixed",
           left: "50%", top: "50%",
           transform: open ? "translate(-50%, -50%) scale(1)" : "translate(-50%, -50%) scale(.96)",
           opacity: open ? 1 : 0,
-          width: "min(920px, calc(100vw - 48px))",
+          width: "min(640px, calc(100vw - 48px))",
           maxHeight: "min(75vh, 720px)",
           background: "#FFFFFF",
           borderRadius: 16,
@@ -2014,43 +2010,79 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           overflow: "hidden",
         }}
       >
-        {/* Header */}
+        {/* Header — segmented controller + close X. The H2 title is
+            gone; the active tab label IS the title. */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "20px 24px 16px 24px",
+          padding: "16px 16px 12px 24px", gap: 12,
         }}>
-          <h2 style={{
-            margin: 0,
-            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-            fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
-            color: "#0F1214",
-          }}>Available clubs</h2>
+          {/* Segmented controller — 4 tabs inside a #F4F5F6 track.
+              Active tab lifts to a white pill with elevation/200
+              shadow; inactive tabs sit transparent and recede. Same
+              recipe as the hero SearchBar's segment track. */}
+          <div role="tablist" aria-label="Filter clubs" style={{
+            display: "inline-flex", alignItems: "center",
+            padding: 4, gap: 4,
+            background: "#F4F5F6", borderRadius: 999,
+            flexShrink: 1, minWidth: 0,
+            overflowX: "auto", scrollbarWidth: "none",
+          }}>
+            {TABS.map((tab) => {
+              const isActive = tab.key === activeTabKey;
+              return (
+                <button
+                  key={tab.key}
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveTabKey(tab.key)}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: 999, border: 0,
+                    background: isActive ? "#FFFFFF" : "transparent",
+                    boxShadow: isActive ? "0 2px 4px rgba(0,0,0,.08)" : "none",
+                    color: isActive ? "#0F1214" : "#4B5052",
+                    fontFamily: "inherit",
+                    fontWeight: isActive ? 600 : 500, fontSize: 13, lineHeight: "20px",
+                    letterSpacing: 0,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    transition: "background 160ms ease, box-shadow 200ms ease, color 160ms ease",
+                  }}
+                >{tab.label}</button>
+              );
+            })}
+          </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
             style={{
-              width: 44, height: 44, border: 0, padding: 0,
+              width: 40, height: 40, border: 0, padding: 0,
               background: "transparent",
-              display: "inline-flex", alignItems: "center", justifyContent: "flex-end",
-              cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", borderRadius: 999, flexShrink: 0,
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
           >
-            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="#0F1214" />}
+            {window.Icon && <window.Icon name="X" size={20} strokeWidth={2} color="#0F1214" />}
           </button>
         </div>
 
-        {/* Filter chip row */}
+        {/* Filter chip row — tokens match the homepage neutral tag
+            (tagschips/neutral/sm): 2/6 padding, fully rounded, fontSize
+            12 / 0.3 ls, #F4F5F6 bg, #2F3436 text. */}
         {filterChips.length > 0 && (
           <div style={{
             padding: "0 24px 16px 24px",
             display: "flex", flexWrap: "wrap", gap: 6,
           }}>
             {filterChips.map((c, i) => (
-              <span key={i} style={{
-                height: 22, padding: "0 10px", borderRadius: 6,
-                background: "#F4F5F6", color: "#0F1214",
-                fontSize: 11.5, fontWeight: 600,
+              <span key={i} data-tag="default" style={{
+                padding: "2px 6px", borderRadius: 9999,
+                background: "#F4F5F6", color: "#2F3436",
+                fontSize: 12, lineHeight: "16px", letterSpacing: 0.3, fontWeight: 400,
                 display: "inline-flex", alignItems: "center",
                 whiteSpace: "nowrap",
               }}>{c}</span>
@@ -2058,27 +2090,16 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           </div>
         )}
 
-        {/* Scrollable body — themed list sections styled to match the
-            logged-out home (display/d5 section titles + MoreEventsNearYou
-            row rhythm). Replaces the prior carousel of BookNowCard
-            tiles; a list reads more efficiently for a "pick a club"
-            decision than a side-scrolling deck of cards. */}
+        {/* Scrollable body — single list of rows for the active tab.
+            No section H3 headings (the segmented controller above
+            already names the cut), no carousels. Pure scannable list. */}
         <div style={{
           flex: 1,
           overflowY: "auto",
-          padding: "0 0 24px 0",
+          padding: "0 0 12px 0",
         }}>
-          {[
-            { title: "Popular near you",     clubs: SB_RESULTS_CLUBS.filter((c) => c.booked >= 20) },
-            { title: "Ready to book today",  clubs: SB_RESULTS_CLUBS.filter((c) => c.times && c.times.length >= 4).slice(0, 5) },
-            { title: "Closest to you",       clubs: SB_RESULTS_CLUBS.filter((c) => parseFloat(c.distance) <= 5) },
-          ].map((section, sIdx) => (
-            <SBClubListSection
-              key={sIdx}
-              title={section.title}
-              clubs={section.clubs}
-              onSelectClub={onSelectClub}
-            />
+          {activeTab.clubs.map((c) => (
+            <SBClubListRow key={c.id} club={c} onSelect={onSelectClub} />
           ))}
         </div>
       </div>
