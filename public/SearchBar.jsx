@@ -39,15 +39,16 @@ const SB_LOCATIONS = [
 // matches against name + sub so a user can type "32084" to find any club
 // or city that resolves to that zip.
 const SB_WHERE_SUGGESTIONS = [
-  // Clubs
-  { kind: "club", name: "Old Coast Pickleball",       sub: "St. Augustine, FL · 32084" },
-  { kind: "club", name: "Anastasia Tennis Club",      sub: "St. Augustine, FL · 32080" },
-  { kind: "club", name: "Vilano Beach Racquet",       sub: "Vilano Beach, FL · 32084" },
-  { kind: "club", name: "Dill Dinkers Jacksonville",  sub: "Jacksonville, FL · 32256" },
-  { kind: "club", name: "Treaty Park Tennis",         sub: "St. Augustine, FL · 32084" },
-  { kind: "club", name: "South St. Augustine",        sub: "St. Augustine, FL · 32086" },
-  { kind: "club", name: "The Hub Padel",              sub: "Jacksonville Beach, FL · 32250" },
-  { kind: "club", name: "World Golf Village Tennis",  sub: "St. Augustine, FL · 32092" },
+  // Clubs — `distance` is rendered alongside the city on mobile rows
+  // so the user sees how far each match is from them at a glance.
+  { kind: "club", name: "Old Coast Pickleball",       sub: "St. Augustine, FL · 32084",      distance: "2.1" },
+  { kind: "club", name: "Anastasia Tennis Club",      sub: "St. Augustine, FL · 32080",      distance: "2.4" },
+  { kind: "club", name: "Vilano Beach Racquet",       sub: "Vilano Beach, FL · 32084",       distance: "2.6" },
+  { kind: "club", name: "Dill Dinkers Jacksonville",  sub: "Jacksonville, FL · 32256",       distance: "8.4" },
+  { kind: "club", name: "Treaty Park Tennis",         sub: "St. Augustine, FL · 32084",      distance: "3.2" },
+  { kind: "club", name: "South St. Augustine",        sub: "St. Augustine, FL · 32086",      distance: "3.6" },
+  { kind: "club", name: "The Hub Padel",              sub: "Jacksonville Beach, FL · 32250", distance: "5.1" },
+  { kind: "club", name: "World Golf Village Tennis",  sub: "St. Augustine, FL · 32092",      distance: "6.8" },
   // Cities
   { kind: "city", name: "Oakland, CA",                sub: "Alameda County" },
   { kind: "city", name: "San Francisco, CA",          sub: "Bay Area" },
@@ -106,6 +107,21 @@ const SB_WHEN_TIME_BUCKETS = [
   { id: "Morning",   sub: "6 AM – 12 PM" },
   { id: "Afternoon", sub: "12 PM – 5 PM" },
   { id: "Evening",   sub: "5 PM – 10 PM" },
+];
+
+// Rich club dataset for the search-results modal/sheet. Shape matches
+// what BookNowCard expects so the desktop modal can render the full
+// "club card" UI from the logged-out home (MiniMap header, sport tag,
+// booked count, 2x2 time slots, "See Events & Info" footer).
+const SB_RESULTS_CLUBS = [
+  { id: "old-coast",      name: "Old Coast Pickleball",      city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 23, distance: "2.1", times: ["9:00 AM", "9:30 AM", "10:00 AM", "11:30 AM"] },
+  { id: "anastasia",      name: "Anastasia Tennis Club",     city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 14, distance: "2.4", times: ["8:00 AM", "8:30 AM", "12:00 PM",  "2:00 PM"] },
+  { id: "vilano-beach",   name: "Vilano Beach Racquet",      city: "Vilano Beach",       state: "FL", sport: "Tennis",     booked: 41, distance: "2.6", times: ["10:00 AM", "10:30 AM", "11:00 AM", "12:30 PM"] },
+  { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", city: "Jacksonville",       state: "FL", sport: "Pickleball", booked: 18, distance: "8.4", times: ["8:00 AM", "12:00 PM", "2:30 PM", "4:00 PM"] },
+  { id: "treaty-park",    name: "Treaty Park Tennis",        city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 9,  distance: "3.2", times: ["7:00 AM", "9:00 AM", "3:00 PM", "5:30 PM"] },
+  { id: "south-st-aug",   name: "South St. Augustine",       city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 27, distance: "3.6", times: ["8:30 AM", "11:00 AM", "1:30 PM", "4:30 PM"] },
+  { id: "the-hub-padel",  name: "The Hub Padel",             city: "Jacksonville Beach", state: "FL", sport: "Padel",      booked: 12, distance: "5.1", times: ["9:00 AM", "10:30 AM", "1:00 PM", "6:00 PM"] },
+  { id: "world-golf",     name: "World Golf Village Tennis", city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 31, distance: "6.8", times: ["7:30 AM", "9:00 AM", "2:00 PM", "6:30 PM"] },
 ];
 
 // ---- Stars helper ---------------------------------------------------------
@@ -289,7 +305,12 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   const [internal, setInternal] = useStateSB({
     where: "Oakland, CA",
     activity: "Any Sport",
-    when: "Any Day • Any Time",
+    // WHEN is two-dimensional — `whenDay` and `whenTime` track each
+    // sub-facet independently so the user can pick both; `when` is the
+    // combined display string the rest of the page reads.
+    whenDay: "Any day",
+    whenTime: "Any time",
+    when: "Any day · Any time",
     who: "1 Player",
     whoCount: 1,
   });
@@ -302,6 +323,23 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     setTouched((prev) => ({ ...prev, [key]: true }));
     if (values && onChange) onChange({ ...values, [key]: val });
     else setInternal((prev) => ({ ...prev, [key]: val }));
+  };
+  // Multi-key update so the WHEN popover can write both whenDay/whenTime
+  // and the combined `when` display string in a single onChange — avoids
+  // stale-closure clobber when each row commits.
+  const setValues = (updates) => {
+    setTouched((prev) => {
+      const next = { ...prev };
+      Object.keys(updates).forEach((k) => {
+        // Touch the parent facet ("when") whenever any of its
+        // sub-facets are written through.
+        if (k === "whenDay" || k === "whenTime") next.when = true;
+        else next[k] = true;
+      });
+      return next;
+    });
+    if (values && onChange) onChange({ ...values, ...updates });
+    else setInternal((prev) => ({ ...prev, ...updates }));
   };
 
   // Placeholder copy per segment — shown until the user selects something.
@@ -316,6 +354,21 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
 
   // Which segment is currently focused. `null` = default state.
   const [active, setActive] = useStateSB(null);
+
+  // Desktop results modal — opens after the user taps Search. Mirrors
+  // the mobile flow: filter values are committed first, then the user
+  // picks a club from a modal listing matched clubs, then we route into
+  // the booking flow.
+  const [resultsOpen, setResultsOpen] = useStateSB(false);
+  // Expose a global opener so non-SearchBar triggers (the bottom action
+  // bar's "Find an Event", trending event card arrows, etc) can route
+  // through the same modal instead of jumping straight to the booking
+  // flow. Cleared on unmount.
+  useEffectSB(() => {
+    if (!desktop) return;
+    window.__openResultsModal = () => setResultsOpen(true);
+    return () => { if (window.__openResultsModal) delete window.__openResultsModal; };
+  }, [desktop]);
   const containerRef = useRefSB(null);
 
   // Type-ahead state for the WHERE segment. The query is the user's
@@ -427,7 +480,27 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     <button
       type="button"
       aria-label="Search"
-      onClick={(e) => { e.stopPropagation(); onSubmit && onSubmit(v); }}
+      onClick={(e) => {
+        e.stopPropagation();
+        // Desktop: tapping Search opens the results modal (user picks a
+        // club, then the parent's onSubmit fires to route into booking).
+        // Mobile bar (rare — mobile uses SearchBarCompact instead) falls
+        // back to the parent's onSubmit immediately.
+        if (desktop) {
+          // Stash the committed filter set so the booking flow can
+          // pick it up after the user selects a club.
+          window.__searchPrefill = {
+            where: v.where || null,
+            sport: v.activity || null,
+            whenDay: v.whenDay || null,
+            whenTime: v.whenTime || null,
+            players: v.whoCount || 1,
+          };
+          setResultsOpen(true);
+        } else {
+          onSubmit && onSubmit(v);
+        }
+      }}
       onMouseEnter={(e) => { e.currentTarget.style.background = "#212425"; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.submitBg; }}
       style={{
@@ -684,18 +757,25 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
       );
     }
     if (active === "when") {
+      // Dual-select: WHEN has two independent sub-facets (day range +
+      // time of day). Each row commits its own facet and recomputes
+      // the combined `when` display string. The popover stays OPEN so
+      // the user can also set the other sub-facet before tabbing out.
+      const day = v.whenDay || "Any day";
+      const time = v.whenTime || "Any time";
+      const recombine = (d, t) => `${d} · ${t}`;
       return (
         <SBPopover anchorRef={anchorRef}>
           <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
-            When
+            Day range
           </div>
           {SB_WHEN_OPTIONS.map((opt) => (
             <SBRow
               key={opt.id}
               icon="Calendar"
               label={opt.label}
-              selected={v.when === opt.id}
-              onClick={() => { setValue("when", opt.id); setActive(null); }}
+              selected={day === opt.id}
+              onClick={() => setValues({ whenDay: opt.id, when: recombine(opt.id, time) })}
             />
           ))}
           <div style={{ height: 1, background: "#F0F0F0", margin: "6px 4px" }} />
@@ -708,8 +788,8 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
               icon="Clock"
               label={b.id}
               sub={b.sub}
-              selected={v.when === b.id}
-              onClick={() => { setValue("when", b.id); setActive(null); }}
+              selected={time === b.id}
+              onClick={() => setValues({ whenTime: b.id, when: recombine(day, b.id) })}
             />
           ))}
         </SBPopover>
@@ -770,6 +850,22 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
         ))}
       </div>
       {renderPopover()}
+      {/* Desktop results modal — picks a club after Search is tapped.
+          Renders only on desktop; mobile uses SearchBarCompact +
+          SearchResultsSheet instead. */}
+      {desktop && (
+        <SearchResultsModal
+          open={resultsOpen}
+          onClose={() => setResultsOpen(false)}
+          values={v}
+          onSelectClub={(clubName) => {
+            window.__searchPrefill = { ...(window.__searchPrefill || {}), club: clubName };
+            setResultsOpen(false);
+            onSubmit && onSubmit({ ...v, club: clubName });
+          }}
+          theme={theme}
+        />
+      )}
     </div>
   );
 }
@@ -1188,11 +1284,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                     active={v.where === s.name}
                     icon={SB_WHERE_KIND_ICON[s.kind] || "MapPin"}
                     label={s.name}
-                    // Strip the trailing zip code from the sub line — the
-                    // raw data is "City, ST · 32084", mobile sheet wants
-                    // just the city/state. Desktop popover still gets
-                    // the full sub from the same data.
-                    sub={(s.sub || "").replace(/\s·\s\d{5}.*$/, "")}
+                    // Strip the trailing zip code from the sub and append
+                    // the distance so the row reads "City, ST · 2.1 mi".
+                    // Desktop popover still gets the full sub from the
+                    // same data.
+                    sub={`${(s.sub || "").replace(/\s·\s\d{5}.*$/, "")}${s.distance ? ` · ${s.distance} mi` : ""}`}
                     onClick={() => { set("where", s.name); setOpenSection("what"); }}
                   />
                 ))
@@ -1553,7 +1649,10 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
                 <span style={{
                   fontSize: 13, color: "#4B5052", lineHeight: 1.3,
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                }}>{(c.sub || "").replace(/\s·\s\d{5}.*$/, "")}</span>
+                }}>
+                  {(c.sub || "").replace(/\s·\s\d{5}.*$/, "")}
+                  {c.distance ? ` · ${c.distance} mi` : ""}
+                </span>
               </span>
               {window.Icon && <window.Icon name="ChevronRight" size={18} strokeWidth={2} color="#4B5052" />}
             </button>
@@ -1564,6 +1663,164 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
   );
 
   return ReactDOM.createPortal(sheet, portalTarget);
+}
+
+// ---- Desktop results modal -----------------------------------------------
+// Centered modal that opens after the user taps Search in the desktop
+// SearchBar (or any "Find a club" / event-list trigger that calls
+// window.__openResultsModal). Renders the same SB_RESULTS_CLUBS dataset
+// as the mobile results sheet, but using the full BookNowCard layout
+// from the logged-out home so the user picks a club from the same
+// visual primitive they've already seen.
+//
+// Picking a card stashes the club on window.__searchPrefill and calls
+// onSelectClub (parent routes into the booking flow).
+function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
+  useEffectSB(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
+  // Close on Escape — modal accessibility basics.
+  useEffectSB(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") onClose && onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (typeof document === "undefined") return null;
+  const portalTarget = document.body;
+
+  const v = values || {};
+  const filterChips = [v.where, v.activity, v.when, v.who].filter(Boolean);
+
+  const modal = (
+    <>
+      {/* Backdrop — covers the whole browser viewport on desktop.
+          position: fixed (not absolute) so it anchors to the viewport,
+          not the closest positioned ancestor. */}
+      <div
+        onClick={onClose}
+        aria-hidden={!open}
+        style={{
+          position: "fixed", inset: 0,
+          background: "rgba(15,18,20,.55)",
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 220ms ease",
+          zIndex: 200,
+        }}
+      />
+      {/* Modal — centered, 800px wide, capped at 88vh so the body
+          scrolls when the club list overflows. Same header anatomy as
+          the mobile sheet (24/800 title + ghost X) so the two surfaces
+          read as one design. */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Available clubs"
+        style={{
+          position: "fixed",
+          left: "50%", top: "50%",
+          transform: open ? "translate(-50%, -50%) scale(1)" : "translate(-50%, -50%) scale(.96)",
+          opacity: open ? 1 : 0,
+          width: "min(800px, calc(100vw - 48px))",
+          maxHeight: "88vh",
+          background: "#FFFFFF",
+          borderRadius: 16,
+          boxShadow: "0 24px 64px rgba(15,18,20,.32), 0 4px 16px rgba(15,18,20,.16)",
+          transition: "opacity 220ms ease, transform 220ms cubic-bezier(.2,.8,.2,1)",
+          pointerEvents: open ? "auto" : "none",
+          zIndex: 201,
+          display: "flex", flexDirection: "column",
+          fontFamily: "Inter, system-ui, sans-serif",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "20px 24px 16px 24px",
+        }}>
+          <h2 style={{
+            margin: 0,
+            fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+            fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
+            color: "#0F1214",
+          }}>Available clubs</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: 44, height: 44, border: 0, padding: 0,
+              background: "transparent",
+              display: "inline-flex", alignItems: "center", justifyContent: "flex-end",
+              cursor: "pointer",
+            }}
+          >
+            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="#0F1214" />}
+          </button>
+        </div>
+
+        {/* Filter chip row */}
+        {filterChips.length > 0 && (
+          <div style={{
+            padding: "0 24px 16px 24px",
+            display: "flex", flexWrap: "wrap", gap: 6,
+          }}>
+            {filterChips.map((c, i) => (
+              <span key={i} style={{
+                height: 22, padding: "0 10px", borderRadius: 6,
+                background: "#F4F5F6", color: "#0F1214",
+                fontSize: 11.5, fontWeight: 600,
+                display: "inline-flex", alignItems: "center",
+                whiteSpace: "nowrap",
+              }}>{c}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Scrollable club grid — 2 columns of BookNowCards. Each card's
+            footer "See Events & Info" is wired to onSelectClub so any
+            tap inside the card body or footer commits the pick. */}
+        <div style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "0 24px 24px 24px",
+        }}>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 16,
+          }}>
+            {SB_RESULTS_CLUBS.map((c) => (
+              <div
+                key={c.id}
+                onClick={() => onSelectClub && onSelectClub(c.name)}
+                style={{ cursor: "pointer", display: "flex" }}
+              >
+                {window.BookNowCard && (
+                  <window.BookNowCard
+                    v={c}
+                    theme={theme}
+                    viewport="desktop"
+                    onPickSlot={() => onSelectClub && onSelectClub(c.name)}
+                    onOpenClub={() => onSelectClub && onSelectClub(c.name)}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
+  return ReactDOM.createPortal(modal, portalTarget);
 }
 
 // ---- Mobile compact variant ----------------------------------------------
@@ -1691,4 +1948,4 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
   );
 }
 
-Object.assign(window, { SearchBar, SearchBarCompact, MobileSearchSheet, SearchResultsSheet });
+Object.assign(window, { SearchBar, SearchBarCompact, MobileSearchSheet, SearchResultsSheet, SearchResultsModal });

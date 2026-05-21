@@ -1878,18 +1878,31 @@ function Dashboard({ theme, viewport, onOpenEventList, onOpenClub, onFindClubs, 
 // grid above. Hidden when the grid is still in view.
 function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, isCR, viewport = "desktop" }) {
   const isMobile = viewport === "mobile";
+  // Desktop "Book a Court" / "Find an Event" route through the SearchBar's
+  // results modal (window.__openResultsModal, exposed by SearchBar.jsx)
+  // so the user picks a club from the same modal that fires after the
+  // SearchBar's Search button. Falls back to onOpenEventList (the
+  // dedicated events screen) when the modal isn't mounted yet — e.g.
+  // mobile, or surfaces without a desktop SearchBar in scope.
+  const openResults = () => {
+    if (typeof window !== "undefined" && typeof window.__openResultsModal === "function") {
+      window.__openResultsModal();
+    } else {
+      onOpenEventList && onOpenEventList();
+    }
+  };
   // Each action carries a long label (desktop) and a short label (mobile) so
   // the 4-action bar fits inside the 410px device frame without truncating.
   const items = isCR ?
   [
-  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: onOpenEventList, primary: true },
-  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: onOpenEventList },
+  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: openResults, primary: true },
+  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: openResults },
   { icon: "MapPin",    label: "Find a Club",   shortLabel: "Find Club",  onClick: onFindClubs },
   { icon: "User",      label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }] :
 
   [
-  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: onOpenEventList, primary: true },
-  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: onOpenEventList },
+  { icon: "Calendar",  label: "Book a Court",  shortLabel: "Book Court", onClick: openResults, primary: true },
+  { icon: "Lightbulb", label: "Find an Event", shortLabel: "Find Event", onClick: openResults },
   { icon: "Users",     label: "Open Play",     shortLabel: "Open Play",  onClick: null },
   { icon: "User",      label: "Book a Pro",    shortLabel: "Book Pro",   onClick: null }];
 
