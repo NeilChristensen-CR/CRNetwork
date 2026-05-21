@@ -211,6 +211,13 @@
     // panel for state changes.
     const [controlsOpen, setControlsOpen] = useState(false);
 
+    // Color mode — light / dark / branded. The theme system doesn't
+    // currently wire dark/branded surfaces through to all components,
+    // so this is presented as a stub today: the ControlPanel toggles
+    // state but the canvas only reflects whatever `THEMES[app]` ships.
+    // Wired here for future plumbing.
+    const [mode, setMode] = useState("light");
+
     const theme = window.THEMES[app];
 
     React.useEffect(() => {
@@ -337,6 +344,30 @@
       </div>
     );
 
+    // Nested sub-item row — indented under a parent RadioRow. Smaller
+    // type, lighter inactive color. Used for the Area sub-views
+    // (Club/Event/Profile breakdowns).
+    const NestedRow = ({ on, onClick, label }) => (
+      <button onClick={onClick} style={{
+        width: "100%", display: "flex", alignItems: "center", gap: 8,
+        padding: "6px 10px 6px 32px", borderRadius: 8, border: 0,
+        background: on ? "#F4F5F6" : "transparent",
+        cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+        transition: "background 120ms",
+      }}
+        onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = "#F4F5F6"; }}
+        onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = "transparent"; }}>
+        <span style={{
+          width: 8, height: 8, borderRadius: 999,
+          background: on ? "#0F1214" : "transparent",
+          border: on ? "0" : "1.5px solid #BBBFC1",
+          flexShrink: 0,
+          transition: "background 140ms, border 140ms",
+        }} />
+        <span style={{ fontSize: 12, fontWeight: on ? 600 : 500, color: on ? "#0F1214" : "#4B5052" }}>{label}</span>
+      </button>
+    );
+
     // Reusable switcher panel — flyout anchored center-right of the
     // viewport, opened by the gear button. Settings live behind one
     // affordance so they don't compete with the prototype canvas.
@@ -393,39 +424,83 @@
               </button>
             </div>
             <Group label="Device">
-              <RadioRow on={device === "desktop"} onClick={() => setDeviceManual("desktop")} icon="Monitor" label="Desktop" />
-              <RadioRow on={device === "mobile"}  onClick={() => setDeviceManual("mobile")}  icon="Smartphone" label="Mobile" />
+              {/* Tablet + Wide desktop are visual labels for now — the
+                  prototype renders all desktop-class widths through the
+                  same viewport="desktop" code path. Mobile uniquely
+                  triggers viewport="mobile" + 410-cap layout. */}
+              <RadioRow on={device === "mobile"}  onClick={() => setDeviceManual("mobile")}   icon="Smartphone" label="Mobile" />
+              <RadioRow on={device === "tablet"}  onClick={() => setDeviceManual("tablet")}   icon="Tablet"     label="Tablet" />
+              <RadioRow on={device === "desktop"} onClick={() => setDeviceManual("desktop")}  icon="Monitor"    label="Desktop" />
+              <RadioRow on={device === "wide"}    onClick={() => setDeviceManual("wide")}     icon="Tv"         label="Wide desktop" />
+            </Group>
+            <Group label="Mode">
+              {/* Mode wiring is stubbed — light is the only theme the
+                  prototype currently surfaces fully. Dark/branded
+                  toggles flip the state for future plumbing. */}
+              <RadioRow on={mode === "light"}    onClick={() => setMode("light")}    icon="Sun"     label="Light" />
+              <RadioRow on={mode === "dark"}     onClick={() => setMode("dark")}     icon="Moon"    label="Dark" />
+              <RadioRow on={mode === "branded"}  onClick={() => setMode("branded")}  icon="Palette" label="Branded" />
             </Group>
             <Group label="Session">
-              <RadioRow on={!loggedIn} onClick={() => setLoggedIn(false)} icon="LogIn" label="Logged out" />
               <RadioRow on={loggedIn}  onClick={() => setLoggedIn(true)}  icon="UserCheck" label="Logged in" />
+              <RadioRow on={!loggedIn} onClick={() => setLoggedIn(false)} icon="LogIn"     label="Logged out" />
             </Group>
             <Group label="Club">
-              <RadioRow on={app === "cr"} onClick={() => setApp("cr")} label="CourtReserve" />
-              <RadioRow on={app === "oc"} onClick={() => setApp("oc")} label="Old Coast" />
+              <RadioRow on={app === "cr"} onClick={() => setApp("cr")} label="CourtReserve (agnostic)" />
+              <RadioRow on={app === "oc"} onClick={() => setApp("oc")} label="Old Coast Pickleball" />
               <RadioRow on={app === "dd"} onClick={() => setApp("dd")} label="Dill Dinkers" />
             </Group>
-            <Group label="Area">
-              <RadioRow on={screen === "home" && !forceType} onClick={() => { setScreen("home"); setForceType(null); }} label="Home" />
-              <RadioRow on={(screen === "clubs" || screen === "club")} onClick={() => { setScreen("clubs"); setForceType(null); }} label="Club" />
-              <RadioRow on={!!forceType || screen === "events"} onClick={() => { setScreen("events"); setForceType(null); }} label="Event" />
-              <RadioRow on={screen === "reserve-court"} onClick={() => { setScreen("reserve-court"); setForceType(null); }} label="Reserve a court" />
-              <RadioRow on={screen === "profile"} onClick={() => { setScreen("profile"); setForceType(null); }} label="My profile" />
+            <Group label="Areas">
+              {/* Areas are nested. Each parent jumps to its default
+                  sub-view; the nested rows below pick a specific
+                  sub-view. Player profile / Coach profile route to
+                  the existing profile screen until dedicated routes
+                  exist. */}
+              <RadioRow
+                on={screen === "home" && !forceType}
+                onClick={() => { setScreen("home"); setForceType(null); }}
+                label="Home"
+              />
+              <RadioRow
+                on={(screen === "clubs" || screen === "club")}
+                onClick={() => { setScreen("clubs"); setForceType(null); }}
+                label="Club"
+              />
+              {(screen === "clubs" || screen === "club") && (
+                <React.Fragment>
+                  <NestedRow on={screen === "clubs"} onClick={() => { setScreen("clubs"); setForceType(null); }} label="List" />
+                  <NestedRow on={screen === "club"}  onClick={() => { setScreen("club");  setForceType(null); }} label="Detail" />
+                  <NestedRow on={screen === "reserve-court"} onClick={() => { setScreen("reserve-court"); setForceType(null); }} label="Book" />
+                </React.Fragment>
+              )}
+              <RadioRow
+                on={!!forceType || screen === "events"}
+                onClick={() => { setScreen("events"); setForceType(null); }}
+                label="Event"
+              />
+              {(screen === "events" || !!forceType) && (
+                <React.Fragment>
+                  <NestedRow on={screen === "events" && !forceType} onClick={() => { setScreen("events"); setForceType(null); }} label="List" />
+                  <NestedRow on={!!forceType && forceType !== "register"} onClick={() => { setForceType(lastDetailType || "hybrid"); }} label="Detail" />
+                  <NestedRow on={forceType === "register"} onClick={() => { setForceType("register"); }} label="Book" />
+                </React.Fragment>
+              )}
+              <RadioRow
+                on={screen === "profile"}
+                onClick={() => { setScreen("profile"); setForceType(null); }}
+                label="Profile"
+              />
+              {screen === "profile" && (
+                <React.Fragment>
+                  <NestedRow on={true} onClick={() => { setScreen("profile"); }} label="Personal" />
+                  {/* Player profile (not you) + Coach profile don't
+                      have dedicated screens yet — fall through to the
+                      personal profile so the toggle is non-destructive. */}
+                  <NestedRow on={false} onClick={() => { setScreen("profile"); }} label="Player profile (not you)" />
+                  <NestedRow on={false} onClick={() => { setScreen("profile"); }} label="Coach profile" />
+                </React.Fragment>
+              )}
             </Group>
-            {(screen === "clubs" || screen === "club") && (
-              <Group label="Club view">
-                <RadioRow on={screen === "clubs"} onClick={() => setScreen("clubs")} label="List" />
-                <RadioRow on={screen === "club"}  onClick={() => setScreen("club")}  label="Detail" />
-                <RadioRow on={false} onClick={() => { setScreen("events"); }} label="Book" />
-              </Group>
-            )}
-            {(screen === "events" || !!forceType) && (
-              <Group label="Event view">
-                <RadioRow on={screen === "events" && !forceType} onClick={() => { setScreen("events"); setForceType(null); }} label="List" />
-                <RadioRow on={!!forceType && forceType !== "register"} onClick={() => { setForceType(lastDetailType || "hybrid"); }} label="Detail" />
-                <RadioRow on={forceType === "register"} onClick={() => { setForceType("register"); }} label="Book" />
-              </Group>
-            )}
           </div>
         )}
       </React.Fragment>
@@ -440,7 +515,7 @@
       // for consistency (portal lookups return whichever node mounts).
       <div style={{ background: "#F4F5F6", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
         <div style={{ display: "flex", justifyContent: "center" }}>
-          {device === "desktop" ? (
+          {device !== "mobile" ? (
             <div id="device-frame-inner" ref={deviceFrameRef} style={{
               // Fills the viewport edge-to-edge — `height: 100vh` (not
               // just minHeight) so the nested `flex: 1 overflowY: auto`
