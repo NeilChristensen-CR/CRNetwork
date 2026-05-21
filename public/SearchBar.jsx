@@ -454,15 +454,20 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // medium` (16/0 ls, lh 24). Mobile drops one notch on each (9/0.7 ls,
   // 14/0 ls) so the bar still fits within a 360px column without crushing
   // the value text.
+  // Per the updated Figma spec (revisited node 8059-57624), each segment
+  // wrapper has only 4px padding (vs the 8px first pass) — the bar reads
+  // tighter and the lifted-pill focus state sits closer to its neighbors.
+  // Container height shrinks accordingly: segH 60 (=12+24-text+12+4*2) →
+  // overall pillH 68 desktop.
   const SIZES = desktop
-    ? { pillH: 80, pad: 8, gap: 0,
+    ? { pillH: 68, pad: 4, gap: 0,
         segPadX: 24, segPadY: 12, whoPadRight: 8,
         segGapY: 4, labelFs: 10, labelLs: 0.8,
-        valueFs: 16, btn: 40, btnExpW: 112, radius: 999 }
-    : { pillH: 76, pad: 8, gap: 0,
+        valueFs: 16, btn: 32, btnExpW: 104, radius: 999 }
+    : { pillH: 64, pad: 4, gap: 0,
         segPadX: 16, segPadY: 10, whoPadRight: 8,
         segGapY: 3, labelFs: 9, labelLs: 0.7,
-        valueFs: 14, btn: 36, btnExpW: 100, radius: 999 };
+        valueFs: 14, btn: 30, btnExpW: 92, radius: 999 };
   const pillH = SIZES.pillH;
 
   // ---- Segments ----------------------------------------------------------
@@ -477,12 +482,14 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
 
   // Track background flips to the mint surfaceSoft tone (#EDF3F3) once any
   // segment is focused — matches the Figma spec's `bg/default/primary`
-  // token. The unfocused track is plain white with a 4/4 soft drop shadow
-  // and a 1px border (Figma elevation/200).
+  // token. The unfocused track is plain white with the buttons/primary
+  // elevation/200 shadow (0/2/4 alpha 8) — no border. Focused state adds
+  // a subtle inset white highlight per the spec's elevation/subtle/inset
+  // recipe so the mint track reads as a frame around the lifted pill.
   const trackBg = active ? COLORS.trackBg : COLORS.pillBg;
   const trackShadow = active
-    ? "inset 0 0 0 1px " + COLORS.border
-    : "0 4px 4px rgba(0,0,0,.16), inset 0 0 0 1px " + COLORS.border;
+    ? "inset 0 1px 0 rgba(255,255,255,.12), inset 0 1px 1px rgba(0,0,0,.08)"
+    : "0 2px 4px rgba(0,0,0,.08)";
 
   // ---- Search submit button (lives inside the WHO segment) ---------------
   // Default state: 40px dark capsule with a search icon. When WHO is the
@@ -517,32 +524,39 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
       onMouseEnter={(e) => { e.currentTarget.style.background = "#212425"; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.submitBg; }}
       style={{
+        // Submit button matches the Figma spec's p-8 + min-w-72
+        // recipe — 8px padding all sides, 16px icon glyph, so unfocused
+        // state is 32×32 with a 72px min-width that only applies once
+        // the "Search" label rolls out. Stays fully rounded (999).
         height: SIZES.btn,
         width: expanded ? SIZES.btnExpW : SIZES.btn,
         borderRadius: SIZES.radius,
         background: COLORS.submitBg,
         color: COLORS.submitFg,
         border: 0,
-        padding: expanded ? "0 14px 0 16px" : 0,
+        padding: expanded ? "0 12px" : 0,
         display: "inline-flex",
         alignItems: "center",
-        justifyContent: expanded ? "space-between" : "center",
-        gap: expanded ? 8 : 0,
+        justifyContent: "center",
+        gap: 6,
         cursor: "pointer",
         flexShrink: 0,
-        boxShadow: "0 2px 6px rgba(15,18,20,.18)",
+        // elevation/200 (buttons): 0 2px 4px alpha 8.
+        boxShadow: "0 2px 4px rgba(0,0,0,.08)",
         fontFamily: "Inter, system-ui, sans-serif",
-        fontWeight: 700,
+        // Per Figma label is p3/medium = 13/0.2 ls / 16 lh.
+        fontWeight: 500,
         fontSize: 13,
+        letterSpacing: 0.2,
         whiteSpace: "nowrap",
         overflow: "hidden",
         transition: "background 160ms ease, width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
       }}
     >
-      {expanded && <span>Search</span>}
       {window.Icon && (
-        <window.Icon name={expanded ? "ArrowRight" : "Search"} size={14} strokeWidth={2.2} color={COLORS.submitFg} />
+        <window.Icon name="Search" size={16} strokeWidth={2} color={COLORS.submitFg} />
       )}
+      {expanded && <span>Search</span>}
     </button>
   );
 
@@ -608,12 +622,12 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                 : hover
                   ? COLORS.hoverBg
                   : "transparent",
-              // Focused-segment elevation: soft 4/4 drop shadow per Figma
-              // spec (color/alpha/black/200 at offset 0,4 radius 4). Lighter
-              // than the previous two-layer treatment so it floats above
-              // the EDF3F3 track without dominating.
+              // Focused-segment elevation matches the bar's own
+              // elevation/200 token (0 2px 4px alpha 8) so the lifted
+              // pill reads as the same material as the bar, not a heavier
+              // popover on top of it.
               boxShadow: focused
-                ? "0 4px 4px rgba(0,0,0,.16)"
+                ? "0 2px 4px rgba(0,0,0,.08)"
                 : "none",
               transition: "background 160ms ease, box-shadow 200ms ease",
             }}
@@ -654,10 +668,14 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   whiteSpace: "nowrap",
                 }}
               >
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{seg.display}</span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>{seg.display}</span>
+                {/* Per Figma, the trailing icon (WHERE only) lives at the
+                    value-row level inside a 20px box at the right edge of
+                    the segment — same size as the WHO submit button glyph
+                    so the two right-side affordances feel paired. */}
                 {seg.icon && window.Icon && (
-                  <span style={{ display: "inline-flex", color: COLORS.arrowAccent }}>
-                    <window.Icon name={seg.icon} size={13} strokeWidth={2.2} color={COLORS.arrowAccent} />
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, flexShrink: 0, color: COLORS.arrowAccent }}>
+                    <window.Icon name={seg.icon} size={16} strokeWidth={2} color={COLORS.arrowAccent} />
                   </span>
                 )}
               </div>
