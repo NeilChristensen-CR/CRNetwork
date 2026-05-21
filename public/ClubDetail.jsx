@@ -19,17 +19,17 @@ function CDSectionHead({ children, sub, action, theme }) {
       <span style={{
         fontFamily: theme.display, fontWeight: 800,
         fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase",
-        color: "#0F1214", whiteSpace: "nowrap"
+        color: "var(--pp-fg-default)", whiteSpace: "nowrap"
       }}>{children}</span>
-      <span style={{ flex: 1, height: 1, background: "#E9EBEC" }} aria-hidden="true" />
-      {sub && <span style={{ fontSize: 12, color: "#858F8F", fontWeight: 500, whiteSpace: "nowrap" }}>{sub}</span>}
+      <span style={{ flex: 1, height: 1, background: "var(--pp-border-subtle)" }} aria-hidden="true" />
+      {sub && <span style={{ fontSize: 12, color: "var(--pp-fg-subtle)", fontWeight: 500, whiteSpace: "nowrap" }}>{sub}</span>}
       {action}
     </div>);
 
 }
 
 function CDDivider({ mt = 40, mb = 28 }) {
-  return <div style={{ height: 1, background: "#E9EBEC", marginTop: mt, marginBottom: mb }} />;
+  return <div style={{ height: 1, background: "var(--pp-border-subtle)", marginTop: mt, marginBottom: mb }} />;
 }
 
 // ── Photo carousel — main image + thumbnail strip below for navigation.
@@ -38,9 +38,9 @@ function CDPhotoCarousel({ club, theme }) {
   const [idx, setIdx] = useStateCD(0);
   const slides = club.photos || [
   { bg: club.color, tone: "#7CE0B5" },
-  { bg: "#0F1214", tone: "#FFDA44" },
-  { bg: theme.primary, tone: theme.accent || "#fff" },
-  { bg: "#1F4ED8", tone: "#8AB6FF" }];
+  { bg: "var(--pp-fg-default)", tone: "#FFDA44" },
+  { bg: theme.primary, tone: theme.accent || "var(--pp-bg-default)" },
+  { bg: "var(--pp-blue-600)", tone: "#8AB6FF" }];
 
   return (
     <div>
@@ -50,10 +50,10 @@ function CDPhotoCarousel({ club, theme }) {
         position: "relative",
         aspectRatio: "16 / 9",
         borderRadius: 8, overflow: "hidden",
-        background: "#F4F5F6",
+        background: "var(--pp-bg-subtle)",
         display: "flex", alignItems: "center", justifyContent: "center"
       }}>
-        <Icon name="ImageOff" size={36} color="#BBBFC1" strokeWidth={1.6} />
+        <Icon name="ImageOff" size={36} color="var(--pp-fg-subtle)" strokeWidth={1.6} />
       </div>
 
       {/* Thumbnail strip on the left, Verified tag on the right — a
@@ -68,9 +68,9 @@ function CDPhotoCarousel({ club, theme }) {
                 flex: "0 0 auto",
                 width: 40, height: 40, padding: 0,
                 borderRadius: 8,
-                border: on ? "2px solid #0F1214" : "1px solid #E9EBEC",
-                background: "#F4F5F6",
-                color: "#BBBFC1",
+                border: on ? "2px solid var(--pp-fg-default)" : "1px solid var(--pp-border-subtle)",
+                background: "var(--pp-bg-subtle)",
+                color: "var(--pp-fg-subtle)",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer",
                 opacity: on ? 1 : 0.7,
@@ -78,7 +78,7 @@ function CDPhotoCarousel({ club, theme }) {
               }}
               onMouseEnter={(e) => {if (!on) e.currentTarget.style.opacity = 1;}}
               onMouseLeave={(e) => {if (!on) e.currentTarget.style.opacity = 0.7;}}>
-                <Icon name="ImageOff" size={14} color="#BBBFC1" strokeWidth={1.6} />
+                <Icon name="ImageOff" size={14} color="var(--pp-fg-subtle)" strokeWidth={1.6} />
               </button>);
 
           })}
@@ -106,7 +106,7 @@ function CDMapCard({ club, theme }) {
         position: "relative",
         aspectRatio: "3 / 2",
         borderRadius: 8,
-        border: "1px solid #E9EBEC",
+        border: "1px solid var(--pp-border-subtle)",
         background: theme.softTint || "#E7F2EC",
         overflow: "hidden"
       }}>
@@ -130,29 +130,29 @@ function CDMapCard({ club, theme }) {
           boxShadow: "0 2px 6px rgba(15,18,20,.35), 0 0 0 2px #fff",
           display: "inline-flex", alignItems: "center", justifyContent: "center"
         }}>
-          <span style={{ rotate: "45deg", fontFamily: theme.display, fontWeight: 800, fontSize: 11, color: "#fff" }}>{club.logoMark}</span>
+          <span style={{ rotate: "45deg", fontFamily: theme.display, fontWeight: 800, fontSize: 11, color: "var(--pp-bg-default)" }}>{club.logoMark}</span>
         </div>
       </div>
 
       {/* Address — plain typography below the map, no card wrapper. */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "2px 2px" }}>
         <Icon name="MapPin" size={14} color={theme.primary} strokeWidth={2.2} />
-        <span style={{ fontSize: 13, color: "#0F1214", fontWeight: 600, lineHeight: 1.4 }}>{club.address}</span>
+        <span style={{ fontSize: 13, color: "var(--pp-fg-default)", fontWeight: 600, lineHeight: 1.4 }}>{club.address}</span>
       </div>
 
       {/* Get directions — quiet outline action so it doesn't compete
                   with the brand-colored "Become a member" CTA up top. */}
       <button style={{
         height: 38, padding: "0 14px", borderRadius: 8,
-        border: "1px solid #E9EBEC", background: "#fff", color: "#0F1214",
+        border: "1px solid var(--pp-border-subtle)", background: "var(--pp-bg-default)", color: "var(--pp-fg-default)",
         fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer",
         display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
         transition: "border-color 120ms"
       }}
-      onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#0F1214";}}
-      onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";}}>
+      onMouseEnter={(e) => {e.currentTarget.style.borderColor = "var(--pp-fg-default)";}}
+      onMouseLeave={(e) => {e.currentTarget.style.borderColor = "var(--pp-border-subtle)";}}>
         Get directions
-        <Icon name="ArrowUpRight" size={12} color="#0F1214" strokeWidth={2.2} />
+        <Icon name="ArrowUpRight" size={12} color="var(--pp-fg-default)" strokeWidth={2.2} />
       </button>
 
       {/* Secondary actions — Call / Email as a 1:1 outline pair below. */}
@@ -161,26 +161,26 @@ function CDMapCard({ club, theme }) {
       }}>
         <button style={{
           height: 38, padding: "0 12px", borderRadius: 8,
-          border: "1px solid #E9EBEC", background: "#fff", color: "#0F1214",
+          border: "1px solid var(--pp-border-subtle)", background: "var(--pp-bg-default)", color: "var(--pp-fg-default)",
           display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
           fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer",
           transition: "border-color 120ms"
         }}
-        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#0F1214";}}
-        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";}}>
-          <Icon name="Phone" size={12} strokeWidth={2.2} color="#0F1214" />
+        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "var(--pp-fg-default)";}}
+        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "var(--pp-border-subtle)";}}>
+          <Icon name="Phone" size={12} strokeWidth={2.2} color="var(--pp-fg-default)" />
           Call
         </button>
         <button style={{
           height: 38, padding: "0 12px", borderRadius: 8,
-          border: "1px solid #E9EBEC", background: "#fff", color: "#0F1214",
+          border: "1px solid var(--pp-border-subtle)", background: "var(--pp-bg-default)", color: "var(--pp-fg-default)",
           display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
           fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer",
           transition: "border-color 120ms"
         }}
-        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#0F1214";}}
-        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";}}>
-          <Icon name="Mail" size={12} strokeWidth={2.2} color="#0F1214" />
+        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "var(--pp-fg-default)";}}
+        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "var(--pp-border-subtle)";}}>
+          <Icon name="Mail" size={12} strokeWidth={2.2} color="var(--pp-fg-default)" />
           Email
         </button>
       </div>
@@ -194,22 +194,22 @@ function CDMapCard({ club, theme }) {
         <button style={{
           height: 32, padding: 0, border: 0, background: "transparent",
           display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-          color: "#4B5052", fontFamily: "inherit", fontWeight: 600, fontSize: 12,
+          color: "var(--pp-fg-muted)", fontFamily: "inherit", fontWeight: 600, fontSize: 12,
           cursor: "pointer", transition: "color 120ms"
         }}
-        onMouseEnter={(e) => {e.currentTarget.style.color = "#0F1214";}}
-        onMouseLeave={(e) => {e.currentTarget.style.color = "#4B5052";}}>
+        onMouseEnter={(e) => {e.currentTarget.style.color = "var(--pp-fg-default)";}}
+        onMouseLeave={(e) => {e.currentTarget.style.color = "var(--pp-fg-muted)";}}>
           <Icon name="Share2" size={12} strokeWidth={2.2} color="currentColor" />
           Share
         </button>
         <button style={{
           height: 32, padding: 0, border: 0, background: "transparent",
           display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-          color: "#4B5052", fontFamily: "inherit", fontWeight: 600, fontSize: 12,
+          color: "var(--pp-fg-muted)", fontFamily: "inherit", fontWeight: 600, fontSize: 12,
           cursor: "pointer", transition: "color 120ms"
         }}
-        onMouseEnter={(e) => {e.currentTarget.style.color = "#0F1214";}}
-        onMouseLeave={(e) => {e.currentTarget.style.color = "#4B5052";}}>
+        onMouseEnter={(e) => {e.currentTarget.style.color = "var(--pp-fg-default)";}}
+        onMouseLeave={(e) => {e.currentTarget.style.color = "var(--pp-fg-muted)";}}>
           <Icon name="Heart" size={12} strokeWidth={2.2} color="currentColor" />
           Save
         </button>
@@ -225,7 +225,7 @@ function CDMapCard({ club, theme }) {
 function CDFriendsHereCard({ club, theme }) {
   const friends = club.friendsHere || [
   { i: "MR", c: theme.primary },
-  { i: "SC", c: "#1F4ED8" },
+  { i: "SC", c: "var(--pp-blue-600)" },
   { i: "DP", c: "#D6573B" },
   { i: "EJ", c: "#8E5BE8" },
   { i: "TO", c: "#C77700" }];
@@ -234,18 +234,18 @@ function CDFriendsHereCard({ club, theme }) {
   return (
     <div style={{
       padding: "18px 20px", borderRadius: 8,
-      background: "#fff", border: "1px solid #E9EBEC",
+      background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)",
       display: "flex", flexDirection: "column", gap: 12
     }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-        <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 26, color: "#0F1214", letterSpacing: -0.5, lineHeight: 1 }}>{total}</span>
-        <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "#0F1214" }}>friends played here</span>
+        <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 26, color: "var(--pp-fg-default)", letterSpacing: -0.5, lineHeight: 1 }}>{total}</span>
+        <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "var(--pp-fg-default)" }}>friends played here</span>
       </div>
       <div style={{ display: "inline-flex", alignItems: "center" }}>
         {friends.slice(0, 5).map((f, i) =>
         <span key={i} style={{
           width: 32, height: 32, borderRadius: 999,
-          background: f.c, color: "#fff",
+          background: f.c, color: "var(--pp-bg-default)",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           fontFamily: theme.display, fontWeight: 800, fontSize: 11,
           border: "2px solid #fff",
@@ -256,7 +256,7 @@ function CDFriendsHereCard({ club, theme }) {
         {total > 5 &&
         <span style={{
           width: 32, height: 32, borderRadius: 999,
-          background: "#F4F5F6", color: "#4B5052",
+          background: "var(--pp-bg-subtle)", color: "var(--pp-fg-muted)",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           fontFamily: theme.display, fontWeight: 800, fontSize: 11,
           border: "2px solid #fff", marginLeft: -10
@@ -275,25 +275,25 @@ function CDTimesPlayedCard({ club, theme }) {
   return (
     <div style={{
       padding: "18px 20px", borderRadius: 8,
-      background: "#fff", border: "1px solid #E9EBEC",
+      background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)",
       display: "flex", flexDirection: "column", gap: 12
     }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-        <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 26, color: "#0F1214", letterSpacing: -0.5, lineHeight: 1 }}>{times}</span>
-        <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "#0F1214" }}>times played here</span>
+        <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 26, color: "var(--pp-fg-default)", letterSpacing: -0.5, lineHeight: 1 }}>{times}</span>
+        <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "var(--pp-fg-default)" }}>times played here</span>
       </div>
       <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
         <span style={{
           display: "inline-flex", alignItems: "center", gap: 4,
           height: 24, padding: "0 8px", borderRadius: 8,
-          background: same ? "#F4F5F6" : up ? "#E7F2EC" : "#FDE7E9",
-          color: same ? "#4B5052" : up ? "#1F8A5B" : "#C72530",
+          background: same ? "var(--pp-bg-subtle)" : up ? "#E7F2EC" : "#FDE7E9",
+          color: same ? "var(--pp-fg-muted)" : up ? "#1F8A5B" : "#C72530",
           fontFamily: theme.display, fontWeight: 800, fontSize: 11, letterSpacing: 0.2
         }}>
           <Icon name={same ? "Minus" : up ? "TrendingUp" : "TrendingDown"} size={11} strokeWidth={2.6} color="currentColor" />
           {same ? "—" : `${up ? "+" : ""}${deltaDupr.toFixed(1)}`}
         </span>
-        <span style={{ fontSize: 12, color: "#4B5052", fontWeight: 500 }}>
+        <span style={{ fontSize: 12, color: "var(--pp-fg-muted)", fontWeight: 500 }}>
           DUPR {up ? "trending up" : same ? "steady" : "trending down"} since joining
         </span>
       </div>
@@ -314,15 +314,15 @@ function CDQuickStats({ club, theme }) {
   { k: club.rating.toFixed(1), v: "Rating", delta: `${club.reviews} reviews` }];
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, borderTop: "1px solid #E9EBEC", borderBottom: "1px solid #E9EBEC" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, borderTop: "1px solid var(--pp-border-subtle)", borderBottom: "1px solid var(--pp-border-subtle)" }}>
       {items.map((s, i) =>
       <div key={s.v} style={{
         padding: "22px 24px",
-        borderRight: i < items.length - 1 ? "1px solid #E9EBEC" : 0
+        borderRight: i < items.length - 1 ? "1px solid var(--pp-border-subtle)" : 0
       }}>
-          <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, color: "#0F1214", letterSpacing: -0.5, lineHeight: 1 }}>{s.k}</div>
-          <div style={{ marginTop: 10, fontSize: 11, color: "#0F1214", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>{s.v}</div>
-          <div style={{ marginTop: 4, fontSize: 12, color: "#858F8F", fontWeight: 500 }}>{s.delta}</div>
+          <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 28, color: "var(--pp-fg-default)", letterSpacing: -0.5, lineHeight: 1 }}>{s.k}</div>
+          <div style={{ marginTop: 10, fontSize: 11, color: "var(--pp-fg-default)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>{s.v}</div>
+          <div style={{ marginTop: 4, fontSize: 12, color: "var(--pp-fg-subtle)", fontWeight: 500 }}>{s.delta}</div>
         </div>
       )}
     </div>);
@@ -399,7 +399,7 @@ function CDNetworkMeta({ club, theme }) {
               width: "100%", height: "100%", textAlign: "left",
               display: "flex", alignItems: "center", gap: 10,
               padding: "14px 16px", borderRadius: 8,
-              background: open ? "#fff" : "#F4F5F6",
+              background: open ? "var(--pp-bg-default)" : "var(--pp-bg-subtle)",
               border: 0,
               boxShadow: open ?
               "0 8px 24px rgba(15,18,20,.12), 0 2px 6px rgba(15,18,20,.06)" :
@@ -410,13 +410,13 @@ function CDNetworkMeta({ club, theme }) {
             }}
             onMouseEnter={(e) => {
               if (open) return;
-              e.currentTarget.style.background = "#EFF0F2";
+              e.currentTarget.style.background = "var(--pp-border-subtle)";
               e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,.12), 0 2px 6px rgba(15,18,20,.06)";
               e.currentTarget.style.transform = "translateY(-2px)";
             }}
             onMouseLeave={(e) => {
               if (open) return;
-              e.currentTarget.style.background = "#F4F5F6";
+              e.currentTarget.style.background = "var(--pp-bg-subtle)";
               e.currentTarget.style.boxShadow = "0 1px 3px rgba(15,18,20,.06)";
               e.currentTarget.style.transform = "translateY(0)";
             }}>
@@ -425,7 +425,7 @@ function CDNetworkMeta({ club, theme }) {
                   {a.avatars.map((av, k) =>
                 <span key={k} style={{
                   width: 22, height: 22, borderRadius: 999,
-                  background: av.c, color: "#fff",
+                  background: av.c, color: "var(--pp-bg-default)",
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   fontFamily: theme.display, fontWeight: 800, fontSize: 9,
                   border: "2px solid #fff",
@@ -434,25 +434,25 @@ function CDNetworkMeta({ club, theme }) {
                 )}
                 </div> :
 
-              <Icon name={a.icon} size={14} color="#4B5052" strokeWidth={2} />
+              <Icon name={a.icon} size={14} color="var(--pp-fg-muted)" strokeWidth={2} />
               }
-              <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: "#4B5052", fontWeight: 500, lineHeight: 1.35 }}>
-                <b style={{ color: "#0F1214", fontFamily: theme.display, fontWeight: 800, marginRight: 5 }}>{a.k}</b>
+              <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: "var(--pp-fg-muted)", fontWeight: 500, lineHeight: 1.35 }}>
+                <b style={{ color: "var(--pp-fg-default)", fontFamily: theme.display, fontWeight: 800, marginRight: 5 }}>{a.k}</b>
                 {a.label}
               </span>
-              <Icon name="ChevronDown" size={12} strokeWidth={2.4} color="#858F8F" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 180ms", flexShrink: 0 }} />
+              <Icon name="ChevronDown" size={12} strokeWidth={2.4} color="var(--pp-fg-subtle)" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 180ms", flexShrink: 0 }} />
             </button>
             {open &&
             <div style={{
               position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, zIndex: 30,
-              background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8,
+              background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)", borderRadius: 8,
               boxShadow: "0 12px 32px rgba(15,18,20,.12), 0 2px 6px rgba(15,18,20,.04)",
               padding: 8,
               maxHeight: 320, overflowY: "auto",
               animation: "cdNetMetaIn 180ms ease"
             }}>
                 <style>{`@keyframes cdNetMetaIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-                <div style={{ padding: "4px 8px 8px", fontSize: 10, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", color: "#858F8F" }}>
+                <div style={{ padding: "4px 8px 8px", fontSize: 10, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", color: "var(--pp-fg-subtle)" }}>
                   {a.panelTitle}
                 </div>
                 {a.rows.map((row) =>
@@ -462,21 +462,21 @@ function CDNetworkMeta({ club, theme }) {
                 borderRadius: 8, cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                 transition: "background 120ms"
               }}
-              onMouseEnter={(e) => {e.currentTarget.style.background = "#F4F5F6";}}
+              onMouseEnter={(e) => {e.currentTarget.style.background = "var(--pp-bg-subtle)";}}
               onMouseLeave={(e) => {e.currentTarget.style.background = "transparent";}}>
                     {row.avatar &&
                 <span style={{
                   width: 28, height: 28, borderRadius: 999,
-                  background: row.color || theme.primary, color: "#fff",
+                  background: row.color || theme.primary, color: "var(--pp-bg-default)",
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   fontFamily: theme.display, fontWeight: 800, fontSize: 10, flexShrink: 0
                 }}>{row.avatar}</span>
                 }
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "#0F1214", letterSpacing: -0.2 }}>{row.name}</div>
-                      <div style={{ marginTop: 1, fontSize: 11, color: "#858F8F", fontWeight: 500 }}>{row.meta}</div>
+                      <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>{row.name}</div>
+                      <div style={{ marginTop: 1, fontSize: 11, color: "var(--pp-fg-subtle)", fontWeight: 500 }}>{row.meta}</div>
                     </div>
-                    <Icon name="ChevronRight" size={12} strokeWidth={2.2} color="#858F8F" />
+                    <Icon name="ChevronRight" size={12} strokeWidth={2.2} color="var(--pp-fg-subtle)" />
                   </button>
               )}
               </div>
@@ -498,14 +498,14 @@ function CDFriendsCallout({ club, theme }) {
   return (
     <button style={{
       width: "100%", padding: "14px 18px", borderRadius: 8,
-      background: "#fff", border: "1px solid #E9EBEC", cursor: "pointer",
+      background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)", cursor: "pointer",
       display: "flex", alignItems: "center", gap: 14, fontFamily: "inherit", textAlign: "left"
     }}>
       <div style={{ display: "inline-flex" }}>
         {friends.slice(0, 3).map((f, i) =>
         <span key={i} style={{
           width: 28, height: 28, borderRadius: 999,
-          background: f.c, color: "#fff",
+          background: f.c, color: "var(--pp-bg-default)",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           fontFamily: theme.display, fontWeight: 800, fontSize: 10,
           border: "2px solid #fff", marginLeft: i === 0 ? 0 : -10
@@ -513,10 +513,10 @@ function CDFriendsCallout({ club, theme }) {
         )}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "#0F1214", letterSpacing: -0.2 }}>{friends.length} friends play here</div>
-        <div style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, marginTop: 1 }}>{club.matchesAreMembers || 12} of your matches are members</div>
+        <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>{friends.length} friends play here</div>
+        <div style={{ fontSize: 11, color: "var(--pp-fg-subtle)", fontWeight: 500, marginTop: 1 }}>{club.matchesAreMembers || 12} of your matches are members</div>
       </div>
-      <Icon name="ChevronRight" size={14} color="#858F8F" strokeWidth={2.2} />
+      <Icon name="ChevronRight" size={14} color="var(--pp-fg-subtle)" strokeWidth={2.2} />
     </button>);
 
 }
@@ -554,14 +554,14 @@ function CDCourtAvailability({ club, theme }) {
       <CDSectionHead theme={theme} sub={club.todayDate || "Sun, May 11"}>Reserve a court — Available today</CDSectionHead>
 
       {/* Sport filter pills */}
-      <div style={{ display: "inline-flex", padding: 3, background: "#fff", border: "1px solid #E9EBEC", borderRadius: 8, gap: 2, marginBottom: 14 }}>
+      <div style={{ display: "inline-flex", padding: 3, background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)", borderRadius: 8, gap: 2, marginBottom: 14 }}>
         {sports.map((s) => {
           const on = sport === s.k;
           return (
             <button key={s.k} onClick={() => setSport(s.k)} style={{
               height: 32, padding: "0 14px", borderRadius: 8, border: 0,
               background: on ? theme.primary : "transparent",
-              color: on ? "#fff" : "#0F1214",
+              color: on ? "var(--pp-bg-default)" : "var(--pp-fg-default)",
               fontFamily: "inherit", fontWeight: on ? 700 : 600, fontSize: 12, cursor: "pointer",
               whiteSpace: "nowrap"
             }}>{s.l}</button>);
@@ -575,25 +575,25 @@ function CDCourtAvailability({ club, theme }) {
           return (
             <div key={c.id} style={{
               padding: "14px 16px 12px", borderRadius: 8,
-              background: "#fff", border: "1px solid #E9EBEC",
+              background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)",
               opacity: taken ? 0.55 : 1,
               display: "flex", flexDirection: "column", gap: 8
             }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 11, letterSpacing: 0.4, textTransform: "uppercase", color: theme.primary }}>{c.sport === "tennis" ? "Tennis" : "Pickleball"}</span>
-                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: taken ? "#858F8F" : "#1F8A5B" }}>{taken ? "Taken" : "Open"}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: taken ? "var(--pp-fg-subtle)" : "#1F8A5B" }}>{taken ? "Taken" : "Open"}</span>
               </div>
               <div>
-                <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214", letterSpacing: -0.3 }}>{c.name}</div>
-                <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 2 }}>{c.time} · {c.duration}</div>
-                <div style={{ fontSize: 11, color: "#858F8F", fontWeight: 500 }}>{c.format}</div>
+                <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "var(--pp-fg-default)", letterSpacing: -0.3 }}>{c.name}</div>
+                <div style={{ fontSize: 11, color: "var(--pp-fg-muted)", fontWeight: 500, marginTop: 2 }}>{c.time} · {c.duration}</div>
+                <div style={{ fontSize: 11, color: "var(--pp-fg-subtle)", fontWeight: 500 }}>{c.format}</div>
               </div>
               <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "#0F1214" }}>${c.price}/hr</span>
+                <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "var(--pp-fg-default)" }}>${c.price}/hr</span>
                 {!taken &&
                 <button style={{
                   height: 28, padding: "0 14px", borderRadius: 8, border: 0,
-                  background: theme.primary, color: "#fff",
+                  background: theme.primary, color: "var(--pp-bg-default)",
                   fontFamily: "inherit", fontWeight: 700, fontSize: 11, cursor: "pointer"
                 }}>Reserve</button>
                 }
@@ -630,22 +630,22 @@ function CDPlayersYouMightKnow({ club, theme, desktop }) {
         {shown.map((p) =>
         <button key={p.name} style={{
           padding: "14px 16px", borderRadius: 8,
-          background: "#fff", border: "1px solid #E9EBEC", cursor: "pointer",
+          background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)", cursor: "pointer",
           display: "flex", flexDirection: "column", gap: 8, alignItems: "stretch",
           fontFamily: "inherit", textAlign: "left",
           transition: "border-color 120ms, box-shadow 120ms"
         }}
-        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#DEE1E5";e.currentTarget.style.boxShadow = "0 2px 8px rgba(15,18,20,.06)";}}
-        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";e.currentTarget.style.boxShadow = "none";}}>
+        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "var(--pp-border-default)";e.currentTarget.style.boxShadow = "0 2px 8px rgba(15,18,20,.06)";}}
+        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "var(--pp-border-subtle)";e.currentTarget.style.boxShadow = "none";}}>
             {/* Identity: avatar + name + level */}
             <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
               <span style={{
-              width: 36, height: 36, borderRadius: 999, background: theme.primary, color: "#fff",
+              width: 36, height: 36, borderRadius: 999, background: theme.primary, color: "var(--pp-bg-default)",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               fontFamily: theme.display, fontWeight: 800, fontSize: 12, flexShrink: 0
             }}>{p.avatar}</span>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "#0F1214", letterSpacing: -0.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</div>
+                <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)", letterSpacing: -0.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</div>
                 <div style={{ marginTop: 1, fontSize: 11, fontWeight: 700, color: theme.primary }}>{p.level}</div>
               </div>
             </div>
@@ -655,7 +655,7 @@ function CDPlayersYouMightKnow({ club, theme, desktop }) {
             <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "6px 10px", borderRadius: 8,
-            background: theme.softTint || "#F4F5F6",
+            background: theme.softTint || "var(--pp-bg-subtle)",
             fontSize: 11, color: theme.primary, fontWeight: 600,
             lineHeight: 1.3
           }}>
@@ -735,20 +735,20 @@ function CDProsPrograms({ club, theme }) {
           flex: "0 0 300px",
           scrollSnapAlign: "start",
           padding: "16px 18px", borderRadius: 8,
-          background: "#fff", border: "1px solid #E9EBEC",
+          background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)",
           display: "flex", flexDirection: "column", gap: 8
         }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-              <span style={{ width: 36, height: 36, borderRadius: 999, background: theme.primary, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11, flexShrink: 0 }}>{c.avatar}</span>
+              <span style={{ width: 36, height: 36, borderRadius: 999, background: theme.primary, color: "var(--pp-bg-default)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11, flexShrink: 0 }}>{c.avatar}</span>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
                 <Icon name="Star" size={12} color="#F2A93B" strokeWidth={2.2} />
-                <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 13, color: "#0F1214", fontVariantNumeric: "tabular-nums" }}>{c.rating}</span>
+                <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 13, color: "var(--pp-fg-default)", fontVariantNumeric: "tabular-nums" }}>{c.rating}</span>
               </div>
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>{c.name}</div>
+              <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "var(--pp-fg-default)", letterSpacing: -0.2 }}>{c.name}</div>
               <div style={{ marginTop: 2, fontSize: 11, fontWeight: 600, color: theme.primary }}>{c.credential}</div>
-              <div style={{ marginTop: 8, fontSize: 12, color: "#4B5052", fontWeight: 500, lineHeight: 1.45 }}>{c.blurb}</div>
+              <div style={{ marginTop: 8, fontSize: 12, color: "var(--pp-fg-muted)", fontWeight: 500, lineHeight: 1.45 }}>{c.blurb}</div>
             </div>
             {/* Action row — More info (ghost) + Book a lesson (primary).
             Two-button grid so the secondary "view profile" action
@@ -756,18 +756,18 @@ function CDProsPrograms({ club, theme }) {
             <div style={{ marginTop: 4, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
               <button style={{
               height: 36, padding: "0 12px", borderRadius: 8,
-              border: "1px solid #E9EBEC", background: "#fff", color: "#0F1214",
+              border: "1px solid var(--pp-border-subtle)", background: "var(--pp-bg-default)", color: "var(--pp-fg-default)",
               fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               transition: "border-color 120ms"
             }}
-            onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#0F1214";}}
-            onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";}}>
+            onMouseEnter={(e) => {e.currentTarget.style.borderColor = "var(--pp-fg-default)";}}
+            onMouseLeave={(e) => {e.currentTarget.style.borderColor = "var(--pp-border-subtle)";}}>
                 More info
               </button>
               <button style={{
               height: 36, padding: "0 12px", borderRadius: 8, border: 0,
-              background: "#0F1214", color: "#fff",
+              background: "var(--pp-fg-default)", color: "var(--pp-bg-default)",
               fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer",
               display: "inline-flex", alignItems: "center", justifyContent: "center"
             }}>
@@ -804,12 +804,12 @@ function CDProgramRow({ p, theme, last }) {
       onMouseLeave={() => setHover(false)}
       style={{
         padding: "20px 4px 20px 0",
-        borderBottom: last ? 0 : "1px solid #E9EBEC",
+        borderBottom: last ? 0 : "1px solid var(--pp-border-subtle)",
         display: "grid",
         gridTemplateColumns: "44px 1fr auto",
         gap: 16,
         alignItems: "center",
-        background: hover ? "#F4F5F6" : "transparent",
+        background: hover ? "var(--pp-bg-subtle)" : "transparent",
         transition: "background 120ms",
         cursor: "pointer"
       }}>
@@ -818,7 +818,7 @@ function CDProgramRow({ p, theme, last }) {
                   EventCard's left time column. */}
       <span style={{
         width: 44, height: 44, borderRadius: 8,
-        background: theme.softTint || "#F4F5F6",
+        background: theme.softTint || "var(--pp-bg-subtle)",
         display: "inline-flex", alignItems: "center", justifyContent: "center",
         flexShrink: 0
       }}>
@@ -829,25 +829,25 @@ function CDProgramRow({ p, theme, last }) {
                   quiet caption line; flex-wrap is allowed by leaving overflow
                   unclamped so "Mon/Wed/Fri 8–10am · Recreational" stays readable. */}
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 17, lineHeight: "22px", color: "#0F1214", letterSpacing: -0.3 }}>{p.name}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 17, lineHeight: "22px", color: "var(--pp-fg-default)", letterSpacing: -0.3 }}>{p.name}</div>
         {p.schedule &&
-        <div style={{ marginTop: 4, fontSize: 13, color: "#4B5052", fontWeight: 500, lineHeight: 1.4 }}>{p.schedule}</div>
+        <div style={{ marginTop: 4, fontSize: 13, color: "var(--pp-fg-muted)", fontWeight: 500, lineHeight: 1.4 }}>{p.schedule}</div>
         }
       </div>
 
       {/* Right rail — price + hover-reveal Join button. */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, position: "relative" }}>
-        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 17, color: "#0F1214", textAlign: "right", letterSpacing: -0.2, whiteSpace: "nowrap" }}>{p.price}</div>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 17, color: "var(--pp-fg-default)", textAlign: "right", letterSpacing: -0.2, whiteSpace: "nowrap" }}>{p.price}</div>
         <div style={{
           display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
           height: 36, padding: hover ? "0 16px" : 0,
           width: hover ? "auto" : 36,
-          background: "#0F1214", color: "#fff", borderRadius: 8,
+          background: "var(--pp-fg-default)", color: "var(--pp-bg-default)", borderRadius: 8,
           overflow: "hidden", whiteSpace: "nowrap",
           transition: "padding 180ms cubic-bezier(.2,.8,.2,1), width 180ms cubic-bezier(.2,.8,.2,1)"
         }}>
           {hover && <span style={{ fontFamily: "inherit", fontWeight: 600, fontSize: 12 }}>Join</span>}
-          <Icon name="ArrowRight" size={13} color="#fff" strokeWidth={2.5} />
+          <Icon name="ArrowRight" size={13} color="var(--pp-bg-default)" strokeWidth={2.5} />
         </div>
       </div>
     </div>);
@@ -871,15 +871,15 @@ function CDAmenities({ club, theme, desktop }) {
         {items.map((a) =>
         <div key={a.name} style={{
           padding: "14px 16px", borderRadius: 8,
-          background: "#fff", border: "1px solid #E9EBEC",
+          background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)",
           display: "grid", gridTemplateColumns: "auto 1fr", gap: 12, alignItems: "center"
         }}>
             <span style={{ width: 32, height: 32, borderRadius: 999, background: theme.softTint || "#E7F2EC", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name={a.icon} size={14} color={theme.primary} strokeWidth={2.2} />
             </span>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "#0F1214", letterSpacing: -0.1 }}>{a.name}</div>
-              <div style={{ fontSize: 11, color: "#858F8F", fontWeight: 500, marginTop: 1 }}>{a.sub}</div>
+              <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "var(--pp-fg-default)", letterSpacing: -0.1 }}>{a.name}</div>
+              <div style={{ fontSize: 11, color: "var(--pp-fg-subtle)", fontWeight: 500, marginTop: 1 }}>{a.sub}</div>
             </div>
           </div>
         )}
@@ -911,11 +911,11 @@ function CDAffiliateBar({ club, theme }) {
         display: "inline-flex", alignItems: "center", gap: 10,
         minWidth: 0
       }}>
-          <Icon name={it.icon} size={15} color="#4B5052" strokeWidth={1.6} />
+          <Icon name={it.icon} size={15} color="var(--pp-fg-muted)" strokeWidth={1.6} />
           <span style={{
           fontFamily: "inherit",
           fontWeight: 400, fontSize: 14,
-          color: "#4B5052",
+          color: "var(--pp-fg-muted)",
           lineHeight: "22px",
           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           lineHeight: 1.4
@@ -946,28 +946,28 @@ function ProShopAlert({ theme, desktop, onDismiss }) {
       <div style={{
         width: 36, height: 36, flexShrink: 0,
         display: "inline-flex", alignItems: "center", justifyContent: "center",
-        color: theme.primary || "#1F4ED8"
+        color: theme.primary || "var(--pp-blue-600)"
       }}>
-        <Icon name="PackageCheck" size={24} strokeWidth={1.6} color={theme.primary || "#1F4ED8"} />
+        <Icon name="PackageCheck" size={24} strokeWidth={1.6} color={theme.primary || "var(--pp-blue-600)"} />
       </div>
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: desktop ? "row" : "column", alignItems: desktop ? "center" : "flex-start", gap: desktop ? 12 : 4 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: "inherit", fontWeight: 700, fontSize: 14, color: "#0F1214", lineHeight: "20px" }}>
+          <div style={{ fontFamily: "inherit", fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)", lineHeight: "20px" }}>
             Your racquet is ready for pickup
           </div>
-          <div style={{ fontSize: 13, color: "#4B5052", fontWeight: 500, lineHeight: "18px", marginTop: 2 }}>
-            Wilson Blade 98 v9 <span style={{ color: "#858F8F" }}>·</span> Restring <span style={{ color: "#858F8F" }}>·</span> Old Coast Pro Shop
+          <div style={{ fontSize: 13, color: "var(--pp-fg-muted)", fontWeight: 500, lineHeight: "18px", marginTop: 2 }}>
+            Wilson Blade 98 v9 <span style={{ color: "var(--pp-fg-subtle)" }}>·</span> Restring <span style={{ color: "var(--pp-fg-subtle)" }}>·</span> Old Coast Pro Shop
           </div>
         </div>
         <a href="#" style={{
           flexShrink: 0,
-          color: theme.primary || "#1F4ED8", fontWeight: 600, fontSize: 13,
+          color: theme.primary || "var(--pp-blue-600)", fontWeight: 600, fontSize: 13,
           textDecoration: "none",
           display: "inline-flex", alignItems: "center", gap: 6,
           whiteSpace: "nowrap"
         }}>
           View details
-          <Icon name="ArrowRight" size={13} strokeWidth={2.2} color={theme.primary || "#1F4ED8"} />
+          <Icon name="ArrowRight" size={13} strokeWidth={2.2} color={theme.primary || "var(--pp-blue-600)"} />
         </a>
       </div>
       <button onClick={onDismiss} aria-label="Dismiss alert" style={{
@@ -975,12 +975,12 @@ function ProShopAlert({ theme, desktop, onDismiss }) {
         width: 28, height: 28, borderRadius: 6,
         background: "transparent", border: 0, cursor: "pointer",
         display: "inline-flex", alignItems: "center", justifyContent: "center",
-        color: "#858F8F",
+        color: "var(--pp-fg-subtle)",
         transition: "background 120ms"
       }}
       onMouseEnter={(e) => {e.currentTarget.style.background = "rgba(15,18,20,.04)";}}
       onMouseLeave={(e) => {e.currentTarget.style.background = "transparent";}}>
-        <Icon name="X" size={16} strokeWidth={2} color="#858F8F" />
+        <Icon name="X" size={16} strokeWidth={2} color="var(--pp-fg-subtle)" />
       </button>
     </div>);
 
@@ -1010,19 +1010,19 @@ function ClubDetailBody({ club, theme, viewport }) {
             fontSize: desktop ? 64 : 30,
             lineHeight: desktop ? "64px" : "34px",
             letterSpacing: desktop ? -2 : -0.8,
-            color: "#0F1214",
+            color: "var(--pp-fg-default)",
             maxWidth: "100%"
           }}>{club.name}</h1>
           {club.onCR !== false &&
           <span style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             height: 30, padding: "0 14px", borderRadius: 999,
-            background: "#1FA868", color: "#fff",
+            background: "#1FA868", color: "var(--pp-bg-default)",
             fontFamily: theme.display, fontWeight: 800, fontSize: 11,
             letterSpacing: 1, textTransform: "uppercase",
             boxShadow: "0 2px 8px rgba(31,168,104,.25)"
           }}>
-              <Icon name="BadgeCheck" size={14} strokeWidth={2.6} color="#fff" />
+              <Icon name="BadgeCheck" size={14} strokeWidth={2.6} color="var(--pp-bg-default)" />
               Verified on CourtReserve
             </span>
           }
@@ -1042,7 +1042,7 @@ function ClubDetailBody({ club, theme, viewport }) {
         gap: 32, alignItems: "start"
       }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 0 }}>
-          <p style={{ margin: 0, fontSize: 14, color: "#4B5052", lineHeight: "22px", fontWeight: 500 }}>{club.about}</p>
+          <p style={{ margin: 0, fontSize: 14, color: "var(--pp-fg-muted)", lineHeight: "22px", fontWeight: 500 }}>{club.about}</p>
           {/* Highlights grid — credentials + amenity signals that
                       answer "why would I join". Sits directly under the
                       description as a continuation of the same text block, above
@@ -1054,14 +1054,14 @@ function ClubDetailBody({ club, theme, viewport }) {
           {/* Tag row — sports + indoor/outdoor + total courts. */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {club.sports.map((s) =>
-            <span key={s} style={{ display: "inline-flex", alignItems: "center", height: 26, padding: "0 12px", borderRadius: 8, background: "#F4F5F6", color: "#4B5052", fontSize: 11, fontWeight: 600 }}>{s}</span>
+            <span key={s} style={{ display: "inline-flex", alignItems: "center", height: 26, padding: "0 12px", borderRadius: 8, background: "var(--pp-bg-subtle)", color: "var(--pp-fg-muted)", fontSize: 11, fontWeight: 600 }}>{s}</span>
             )}
             {[
             club.indoor > 0 ? "Indoor" : null,
             club.outdoor > 0 ? "Outdoor" : null,
             `${club.courts} Courts`].
             filter(Boolean).map((s) =>
-            <span key={s} style={{ display: "inline-flex", alignItems: "center", height: 26, padding: "0 12px", borderRadius: 8, background: "#F4F5F6", color: "#4B5052", fontSize: 11, fontWeight: 600 }}>{s}</span>
+            <span key={s} style={{ display: "inline-flex", alignItems: "center", height: 26, padding: "0 12px", borderRadius: 8, background: "var(--pp-bg-subtle)", color: "var(--pp-fg-muted)", fontSize: 11, fontWeight: 600 }}>{s}</span>
             )}
           </div>
         </div>
@@ -1125,11 +1125,11 @@ function ClubDetailBody({ club, theme, viewport }) {
 // ── Layout shells ───────────────────────────────────────────────────────
 function ClubDetailDesktop({ club, theme, onBack, onBookCourt, onBrowseEvents }) {
   return (
-    <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif", position: "relative" }}>
+    <div style={{ background: "var(--pp-bg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif", position: "relative" }}>
       {/* Top bar with Find Clubs back + share */}
       <div style={{
         position: "sticky", top: 0, zIndex: 20,
-        background: "#fff", borderBottom: "1px solid #E9EBEC",
+        background: "var(--pp-bg-default)", borderBottom: "1px solid var(--pp-border-subtle)",
         height: 56, display: "flex", alignItems: "center", padding: "0 24px", gap: 12
       }}>
         <button onClick={onBack} style={{
@@ -1140,8 +1140,8 @@ function ClubDetailDesktop({ club, theme, onBack, onBookCourt, onBrowseEvents })
           <Icon name="ChevronLeft" size={16} strokeWidth={2.4} color={theme.primary} /> Find clubs
         </button>
         <div style={{ flex: 1, textAlign: "center", fontFamily: theme.display, fontWeight: 700, fontSize: 14, letterSpacing: -0.2 }}>{club.name}</div>
-        <button aria-label="Share" style={{ background: "transparent", border: 0, padding: 8, marginRight: -8, cursor: "pointer", display: "none", alignItems: "center", color: "#858F8F" }}>
-          <Icon name="Share2" size={16} strokeWidth={2} color="#858F8F" />
+        <button aria-label="Share" style={{ background: "transparent", border: 0, padding: 8, marginRight: -8, cursor: "pointer", display: "none", alignItems: "center", color: "var(--pp-fg-subtle)" }}>
+          <Icon name="Share2" size={16} strokeWidth={2} color="var(--pp-fg-subtle)" />
         </button>
       </div>
       <div style={{ maxWidth: 880, margin: "0 auto", padding: "24px 24px 120px" }}>
@@ -1159,7 +1159,7 @@ function ClubDetailDesktop({ club, theme, onBack, onBookCourt, onBrowseEvents })
         <div style={{
           pointerEvents: "auto",
           display: "flex", alignItems: "center", gap: 16,
-          background: "#0F1214", color: "#fff",
+          background: "var(--pp-fg-default)", color: "var(--pp-bg-default)",
           padding: "10px 10px 10px 24px", borderRadius: 999,
           boxShadow: "0 14px 40px rgba(15,18,20,.28), 0 2px 8px rgba(15,18,20,.18)",
           maxWidth: 720, width: "100%", justifyContent: "space-between"
@@ -1187,7 +1187,7 @@ function ClubDetailDesktop({ club, theme, onBack, onBookCourt, onBrowseEvents })
             <button onClick={onBrowseEvents} style={{
               height: 44, padding: "0 18px", borderRadius: 999,
               border: "1px solid rgba(255,255,255,.30)",
-              background: "transparent", color: "#fff",
+              background: "transparent", color: "var(--pp-bg-default)",
               fontFamily: "inherit", fontWeight: 600, fontSize: 13, cursor: "pointer"
             }}>
               See events
@@ -1196,10 +1196,10 @@ function ClubDetailDesktop({ club, theme, onBack, onBookCourt, onBrowseEvents })
             <button onClick={onBookCourt} style={{
               display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0,
               height: 44, padding: "0 22px", borderRadius: 999, border: 0,
-              background: "#fff", color: "#0F1214",
+              background: "var(--pp-bg-default)", color: "var(--pp-fg-default)",
               fontFamily: "inherit", fontWeight: 700, fontSize: 13, cursor: "pointer"
             }}>
-              Book a court <Icon name="ArrowRight" size={13} color="#0F1214" strokeWidth={2.5} />
+              Book a court <Icon name="ArrowRight" size={13} color="var(--pp-fg-default)" strokeWidth={2.5} />
             </button>
           </div>
         </div>
@@ -1210,18 +1210,18 @@ function ClubDetailDesktop({ club, theme, onBack, onBookCourt, onBrowseEvents })
 
 function ClubDetailMobile({ club, theme, onBack, onBookCourt, onBrowseEvents }) {
   return (
-    <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif", position: "relative" }}>
+    <div style={{ background: "var(--pp-bg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif", position: "relative" }}>
       <div style={{
         position: "sticky", top: 0, zIndex: 20,
-        background: "#fff", borderBottom: "1px solid #E9EBEC",
+        background: "var(--pp-bg-default)", borderBottom: "1px solid var(--pp-border-subtle)",
         height: 52, display: "flex", alignItems: "center", padding: "0 16px", gap: 12
       }}>
         <button onClick={onBack} style={{ background: "transparent", border: 0, padding: 8, marginLeft: -8, cursor: "pointer", display: "inline-flex", alignItems: "center", color: theme.primary, fontSize: 13, fontWeight: 700, fontFamily: "inherit", gap: 4 }}>
           <Icon name="ChevronLeft" size={16} strokeWidth={2.4} color={theme.primary} /> Find clubs
         </button>
         <div style={{ flex: 1, textAlign: "center", fontFamily: theme.display, fontWeight: 700, fontSize: 13, letterSpacing: -0.1 }}>{club.name}</div>
-        <button aria-label="Share" style={{ background: "transparent", border: 0, padding: 8, marginRight: -8, cursor: "pointer", display: "none", color: "#858F8F" }}>
-          <Icon name="Share2" size={16} strokeWidth={2} color="#858F8F" />
+        <button aria-label="Share" style={{ background: "transparent", border: 0, padding: 8, marginRight: -8, cursor: "pointer", display: "none", color: "var(--pp-fg-subtle)" }}>
+          <Icon name="Share2" size={16} strokeWidth={2} color="var(--pp-fg-subtle)" />
         </button>
       </div>
       <div style={{ padding: "16px 16px 100px" }}>
@@ -1230,23 +1230,23 @@ function ClubDetailMobile({ club, theme, onBack, onBookCourt, onBrowseEvents }) 
       {/* Sticky mobile CTA bar — full-width buttons, anchored to bottom */}
       <div style={{
         position: "sticky", bottom: 0, zIndex: 30,
-        background: "#fff", borderTop: "1px solid #E9EBEC",
+        background: "var(--pp-bg-default)", borderTop: "1px solid var(--pp-border-subtle)",
         padding: "12px 16px 18px",
         display: "flex", gap: 8
       }}>
         <button onClick={onBrowseEvents} style={{
           flex: 1, height: 48, padding: "0 14px", borderRadius: 8,
-          border: "1px solid #E9EBEC", background: "transparent", color: "#0F1214",
+          border: "1px solid var(--pp-border-subtle)", background: "transparent", color: "var(--pp-fg-default)",
           fontFamily: "inherit", fontWeight: 600, fontSize: 13, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center"
         }}>See events</button>
         <button onClick={onBookCourt} style={{
           flex: 1.4, height: 48, padding: "0 18px", borderRadius: 8,
-          border: 0, background: theme.primary, color: "#fff",
+          border: 0, background: theme.primary, color: "var(--pp-bg-default)",
           fontFamily: "inherit", fontWeight: 700, fontSize: 13, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8
         }}>
-          Book a court <Icon name="ArrowRight" size={13} color="#fff" strokeWidth={2.5} />
+          Book a court <Icon name="ArrowRight" size={13} color="var(--pp-bg-default)" strokeWidth={2.5} />
         </button>
       </div>
     </div>);
