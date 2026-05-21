@@ -2963,8 +2963,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             letterSpacing: isMobile ? -0.6 : -0.8,
             color: theme.t.text,
           }}>
-            <span style={{ display: "block" }}>Welcome to Court Reserve</span>
-            <span style={{ display: "block", color: "#6F7476" }}>Let's Play.</span>
+            Welcome to Court Reserve
           </h1>
         </div> :
         <div style={{ marginBottom: isMobile ? 8 : 32, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: isMobile ? 16 : 32, flexWrap: "wrap" }}>

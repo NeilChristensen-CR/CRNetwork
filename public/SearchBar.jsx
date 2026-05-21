@@ -853,19 +853,19 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
       };
       return (
         <SBPopover anchorRef={anchorRef} minWidth={260}>
-          <div style={{ padding: "10px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
-            Players
-          </div>
-          {/* The +/- buttons disable at 1 and 8 (`whoCount <= 1` /
-              `whoCount >= 8`), so the range is enforced by interaction
-              alone — no separate "1–8 players" label needed. */}
+          {/* WHO popover — the "Players" eyebrow above the stepper was
+              dropped (the segment label already says WHO + "N Player(s)",
+              and the only control is the stepper, so a second label is
+              redundant). The stepper pill now fills the popover width
+              instead of hugging right, so the +/- targets sit at the
+              edges where players' thumbs naturally land. */}
           <div style={{
-            padding: "8px 12px 12px 12px",
-            display: "flex", alignItems: "center", justifyContent: "flex-end",
-            gap: 12,
+            padding: 12,
+            display: "flex",
           }}>
             <div style={{
-              display: "inline-flex", alignItems: "center",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              flex: 1, minWidth: 0,
               background: "#F4F5F6",
               borderRadius: 999,
               padding: 4,
@@ -884,12 +884,13 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   opacity: whoCount <= 1 ? 0.35 : 1,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   padding: 0,
+                  flexShrink: 0,
                 }}
               >
                 {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="#0F1214" />}
               </button>
               <span style={{
-                minWidth: 80, textAlign: "center",
+                flex: 1, textAlign: "center",
                 fontFamily: "Axiforma, Inter, system-ui, sans-serif",
                 fontWeight: 700, fontSize: 14, color: "#0F1214",
                 fontVariantNumeric: "tabular-nums",
@@ -909,6 +910,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   opacity: whoCount >= 8 ? 0.35 : 1,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   padding: 0,
+                  flexShrink: 0,
                 }}
               >
                 {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#0F1214" />}

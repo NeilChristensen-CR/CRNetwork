@@ -539,7 +539,11 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
       </div>
 
       {/* See Events & Info — Figma footer: bg #F4F5F6, 12px uniform
-          padding, 13/regular text + ChevronRight 16px on the right. */}
+          padding, 13/regular text + ChevronRight 16px on the right.
+          No hover state on the footer itself — the card-level hover
+          elevation (box-shadow + transform on the outer card div)
+          already signals interactivity; a second tinted bg on the
+          footer would be a redundant cue. */}
       <button onClick={(e) => { e.stopPropagation(); onOpenClub && onOpenClub(v.id); }} style={{
         marginTop: "auto",
         padding: 12,
@@ -550,10 +554,7 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
         fontFamily: "inherit", fontSize: 13, fontWeight: 400, color: "#0F1214",
         lineHeight: "16px", letterSpacing: 0.2,
         cursor: "pointer",
-        transition: "background 120ms",
-      }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = "#E9EBEC"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}>
+      }}>
         See Events & Info
         <Icon name="ChevronRight" size={16} strokeWidth={2} color="#0F1214" />
       </button>
