@@ -554,7 +554,7 @@ function VerifiedClubsCarousel({ theme, desktop, venues, totalSlots, onOpenClub 
   if (typeof window !== "undefined" && typeof window.useDragScroll === "function") window.useDragScroll(scrollRef);
   return (
     <div style={{ marginBottom: 24 }}>
-      <ListSectionHeader theme={theme} title="Play today at verified clubs" count={`${totalSlots} open bookings`} />
+      <ListSectionHeader theme={theme} title="Play today" count={`${totalSlots} open bookings`} />
       <div ref={scrollRef} style={{
         display: "flex", gap: 12, overflowX: "auto",
         scrollSnapType: "x mandatory",
@@ -575,7 +575,7 @@ function VerifiedClubsCarousel({ theme, desktop, venues, totalSlots, onOpenClub 
 
 }
 
-function FindClubs({ theme, viewport, onBack, onOpenClub }) {
+function FindClubs({ theme, viewport, app, setApp, onBack, onOpenClub }) {
   const desktop = viewport === "desktop";
   // Subscribe to the favorites store so changes from any card on the
   // page repartition the Your-Favorites carousel and Verified-locations
@@ -629,7 +629,7 @@ function FindClubs({ theme, viewport, onBack, onOpenClub }) {
   return (
     <div style={{ background: "#fff", minHeight: "100%", height: desktop ? "auto" : "100%", fontFamily: "Inter, system-ui, sans-serif", position: "relative", display: desktop ? "block" : "flex", flexDirection: "column" }}>
       {desktop && window.ChromeBar &&
-      <window.ChromeBar theme={theme} viewport="desktop" app={null} setApp={() => {}}
+      <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp || (() => {})}
       onOpenQR={() => {}} onFindClubs={() => {}}
       active="Reserve"
       onNav={(l) => {if (window.__navigate) window.__navigate(l);}} />
@@ -760,7 +760,7 @@ function FindClubs({ theme, viewport, onBack, onOpenClub }) {
           }
             <ListSectionHeader
             theme={theme}
-            title={desktop ? filtering ? "Verified locations" : myClubs.length ? "Verified locations" : "Verified locations" : "Clubs near you"}
+            title={desktop ? "Locations" : "Clubs near you"}
             count={`${(desktop ? otherClubs : [...myClubs, ...otherClubs]).length} clubs`} />
           
             <div>{(desktop ? otherClubs : [...myClubs, ...otherClubs]).map((c) => <ClubResultRow key={c.id} club={c} theme={theme} desktop={desktop} onOpen={() => onOpenClub && onOpenClub(c.id)} />)}</div>
@@ -1053,8 +1053,7 @@ function ClubFilterBar({
         position: "sticky", top: 0, zIndex: 25,
         background: "#fff",
         marginBottom: 14,
-        paddingTop: 12, paddingBottom: 12,
-        borderBottom: "1px solid #E9EBEC"
+        paddingTop: 12, paddingBottom: 12
       }}>
         {renderBar(false)}
       </div>

@@ -462,7 +462,7 @@
                   : (screen === "reserve-court"
                       ? <ReserveCourtPage theme={theme} viewport="desktop" onBack={() => setScreen("home")} app={app} setApp={setApp} />
                       : (screen === "clubs"
-                      ? <FindClubs viewport="desktop" theme={theme} onBack={() => setScreen("home")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} />
+                      ? <FindClubs viewport="desktop" theme={theme} app={app} setApp={setApp} onBack={() => setScreen("home")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} />
                       : (screen === "messages"
                           ? (
                               <div style={{ background: "#fff", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
@@ -562,7 +562,7 @@
                     : (screen === "reserve-court"
                         ? <ReserveCourtPage theme={theme} viewport="mobile" onBack={() => setScreen("home")} app={app} setApp={setApp} />
                         : (screen === "clubs"
-                        ? <FindClubs viewport="mobile" theme={theme} onBack={() => setScreen("home")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} />
+                        ? <FindClubs viewport="mobile" theme={theme} app={app} setApp={setApp} onBack={() => setScreen("home")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} />
                         : (screen === "club"
                             ? <ClubDetail viewport="mobile" theme={theme} clubId={selectedClubId || app} loggedIn={loggedIn} onBack={() => setScreen("clubs")} onBookCourt={() => setScreen("events")} onBrowseEvents={() => setScreen("events")} />
                             : (screen === "profile"
