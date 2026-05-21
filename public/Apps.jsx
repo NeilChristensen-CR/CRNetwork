@@ -2736,11 +2736,16 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         }}>{r.time}</div>
         {(() => {
           const s = supplyState(r);
+          // Spots pill uses the spec's muted error tone (tagschips/
+          // status/error/bg/default = #F7ECEB / fg = #860606) rather
+          // than the vibrant red — the "more events" list is a long
+          // scan surface and a soft chip reads less alarming than the
+          // saturated variant used on the trending carousel cards.
           return (
             <span data-tag={s.urgent ? "warning" : "default"} style={{
               padding: "2px 6px", borderRadius: 9999,
-              background: s.urgent ? "#DA0B0B" : "#F4F5F6",
-              color: s.urgent ? "#FFFFFF" : "#2F3436",
+              background: s.urgent ? "#F7ECEB" : "#F4F5F6",
+              color: s.urgent ? "#860606" : "#2F3436",
               fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
               fontWeight: 400,
               display: "inline-flex", alignItems: "center",
@@ -2749,10 +2754,9 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
           );
         })()}
       </div>
-      {/* Vertical divider between the time column and the info column —
-          1px hairline matching the segment dividers in the hero
-          SearchBar. */}
-      <div style={{ alignSelf: "stretch", width: 1, background: "#E9EBEC", flexShrink: 0 }} />
+      {/* No vertical divider between the time column and the info
+          column — per direction, the row reads cleaner without the
+          1px hairline. The 24px column gap carries the separation. */}
       {/* Info column — title + avatar group on row one, location row,
           meta row. */}
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 8 }}>
@@ -2779,9 +2783,12 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
             }}>+{r.attending}</span>
           </div>
         </div>
+        {/* Location row — pin icon + "Club, City • N mi away". The
+            distance suffix turns the row into a two-fact line: where
+            it is + how far. */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
           <Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />
-          <span>{r.club}, {r.city}</span>
+          <span>{r.club}, {r.city}{r.distance ? ` • ${r.distance} away` : ""}</span>
         </div>
         <div style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
           {r.meta}
@@ -2792,27 +2799,29 @@ function EventRow({ r, first, onOpenEvent, theme, Avatars, viewport = "desktop" 
         fontSize: 20, lineHeight: "28px", letterSpacing: 0,
         color: "#0F1214", whiteSpace: "nowrap", flexShrink: 0,
       }}>{r.price}</div>
-      {/* Reserve button — per spec the default state is the full pill
-          (icon + "Reserve" label + ArrowRight icon), 16/12 padding,
-          minWidth 72, fontSize 16 medium. No hover-reveal — the
-          affordance is always discoverable. */}
+      {/* Reserve button — icon-only square at rest (40×40 with a
+          single ArrowRight glyph), expands on hover to the full pill
+          with the "Reserve" label so the affordance is discoverable
+          without competing for label space in the resting list state. */}
       <button
         onClick={(e) => { e.stopPropagation(); onOpenEvent && onOpenEvent(); }}
         aria-label="Reserve event"
         style={{
-          minWidth: 72,
-          padding: "12px 16px",
+          minWidth: hover ? 112 : 48,
+          height: 48,
+          padding: hover ? "0 16px" : 0,
           borderRadius: 8,
           background: "#222424", color: "#fff", border: 0, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
-          gap: 8,
+          gap: hover ? 8 : 0,
           fontFamily: "inherit", fontWeight: 500, fontSize: 16, lineHeight: "24px",
-          whiteSpace: "nowrap", flexShrink: 0,
+          whiteSpace: "nowrap", flexShrink: 0, overflow: "hidden",
           boxShadow: "0 2px 4px rgba(0,0,0,.08)",
+          transition: "min-width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
         }}
       >
-        Reserve
-        <Icon name="ArrowRight" size={20} strokeWidth={1.75} color="#fff" />
+        {hover && <span>Reserve</span>}
+        <Icon name="ArrowRight" size={24} strokeWidth={1.75} color="#fff" />
       </button>
     </div>
   );
