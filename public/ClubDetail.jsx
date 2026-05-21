@@ -10,21 +10,19 @@ const { useState: useStateCD, useMemo: useMemoCD } = React;
 
 // ── shared building blocks ────────────────────────────────────────────────
 function CDSectionHead({ children, sub, action, theme }) {
-  // Matches the logged-out homepage section-title pattern: display/d5
-  // 24/32/700 type lockup with the title flex-1 left and any
-  // sub-caption / action affordance on the right. No hairline rule —
-  // the homepage relies on whitespace + the title weight to delineate
-  // sections, and we want the same readable rhythm here.
+  // Aligned with the homepage's ListSectionHeader pattern: uppercase
+  // title eyebrow + extending hairline rule + optional count/action on
+  // the right. Replaces the heavier 20px-bold display heading so the
+  // page reads as a sibling of the dashboard.
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 24 }}>
-      <h2 style={{
-        margin: 0,
-        flex: 1, minWidth: 0,
-        fontFamily: theme.display, fontWeight: 700,
-        fontSize: 24, lineHeight: "32px", letterSpacing: 0,
-        color: "#0F1214",
-      }}>{children}</h2>
-      {sub && <span style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052", fontWeight: 500, whiteSpace: "nowrap" }}>{sub}</span>}
+    <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 8, paddingBottom: 14, marginBottom: 8 }}>
+      <span style={{
+        fontFamily: theme.display, fontWeight: 800,
+        fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase",
+        color: "#0F1214", whiteSpace: "nowrap"
+      }}>{children}</span>
+      <span style={{ flex: 1, height: 1, background: "#E9EBEC" }} aria-hidden="true" />
+      {sub && <span style={{ fontSize: 12, color: "#858F8F", fontWeight: 500, whiteSpace: "nowrap" }}>{sub}</span>}
       {action}
     </div>);
 
@@ -32,99 +30,6 @@ function CDSectionHead({ children, sub, action, theme }) {
 
 function CDDivider({ mt = 40, mb = 28 }) {
   return <div style={{ height: 1, background: "#E9EBEC", marginTop: mt, marginBottom: mb }} />;
-}
-
-// ── CDListRow — shared list-row primitive mirroring the homepage's
-// MoreEventsNearYou EventRow pattern. Used across the Club Detail
-// page's converted-from-carousel sections (Coaches, Courts, Players,
-// Programs) so every section reads with the same line-item rhythm:
-//
-//   24px padding · gap 24 · zebra hover (white rest, soft tint hover)
-//   border-bottom 1px #E9EBEC
-//   left column     stacked primary (avatar/time/name) + optional chip
-//   info column     title row + 1-2 caption rows (location, meta)
-//   right column    optional price + icon-only Reserve square that
-//                   expands on hover to show its label.
-function CDListRow({
-  left,           // { primary: ReactNode, secondary?: ReactNode }
-  title,          // ReactNode (large headline for the row)
-  trailing,       // optional ReactNode aligned right of the title
-  lines = [],     // array of ReactNode (location / meta caption rows)
-  price,          // optional ReactNode (right-aligned price string)
-  ctaLabel = "Reserve",
-  ctaIcon = "ArrowRight",
-  onClick,
-}) {
-  const [hover, setHover] = useStateCD(false);
-  return (
-    <div
-      data-card-hover
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={onClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 24,
-        padding: 24,
-        borderBottom: "1px solid #E9EBEC",
-        background: hover ? "rgba(0,0,0,.04)" : "#FFFFFF",
-        cursor: onClick ? "pointer" : "default",
-        transition: "background 140ms ease",
-      }}
-    >
-      {left && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-start", flexShrink: 0, minWidth: 96 }}>
-          {left.primary}
-          {left.secondary}
-        </div>
-      )}
-      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <span style={{
-            fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700,
-            fontSize: 20, lineHeight: "28px", letterSpacing: 0,
-            color: "#0F1214",
-          }}>{title}</span>
-          {trailing}
-        </div>
-        {lines.map((line, i) => (
-          <div key={i} style={{ fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
-            {line}
-          </div>
-        ))}
-      </div>
-      {price && (
-        <div style={{
-          fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700,
-          fontSize: 20, lineHeight: "28px", letterSpacing: 0,
-          color: "#0F1214", whiteSpace: "nowrap", flexShrink: 0,
-        }}>{price}</div>
-      )}
-      {onClick && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          aria-label={ctaLabel}
-          style={{
-            minWidth: hover ? 132 : 48,
-            height: 48,
-            padding: hover ? "0 16px" : 0,
-            borderRadius: 8,
-            background: "#222424", color: "#fff", border: 0, cursor: "pointer",
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            gap: hover ? 8 : 0,
-            fontFamily: "inherit", fontWeight: 500, fontSize: 16, lineHeight: "24px",
-            whiteSpace: "nowrap", flexShrink: 0, overflow: "hidden",
-            boxShadow: "0 2px 4px rgba(0,0,0,.08)",
-            transition: "min-width 220ms cubic-bezier(.2,.8,.2,1), padding 220ms ease",
-          }}
-        >
-          {hover && <span>{ctaLabel}</span>}
-          <Icon name={ctaIcon} size={24} strokeWidth={1.75} color="#fff" />
-        </button>
-      )}
-    </div>
-  );
 }
 
 // ── Photo carousel — main image + thumbnail strip below for navigation.
@@ -664,46 +569,37 @@ function CDCourtAvailability({ club, theme }) {
         })}
       </div>
 
-      {/* Court list — converted from a 3-column grid of cards into a
-          vertical list using CDListRow. Each row: time + status chip
-          on the left, court name + sport/format in the info column,
-          price on the right with a Reserve CTA. Taken courts dim the
-          row and drop the CTA. */}
-      <div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
         {filtered.map((c) => {
           const taken = c.status === "taken";
-          const sportLabel = c.sport === "tennis" ? "Tennis" : "Pickleball";
           return (
-            <div key={c.id} style={{ opacity: taken ? 0.55 : 1 }}>
-              <CDListRow
-                left={{
-                  primary: (
-                    <span style={{
-                      fontFamily: theme.display, fontWeight: 700,
-                      fontSize: 20, lineHeight: "28px", letterSpacing: 0,
-                      color: "#0F1214", width: 96,
-                    }}>{c.time}</span>
-                  ),
-                  secondary: (
-                    <span style={{
-                      padding: "2px 6px", borderRadius: 9999,
-                      background: taken ? "#F4F5F6" : "#E6F4ED",
-                      color: taken ? "#4B5052" : "#1F5C3A",
-                      fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
-                      fontWeight: 400,
-                      display: "inline-flex", alignItems: "center",
-                      whiteSpace: "nowrap",
-                    }}>{taken ? "Taken" : "Open"}</span>
-                  ),
-                }}
-                title={c.name}
-                lines={[`${sportLabel} • ${c.format}`, `${c.duration}`]}
-                price={`$${c.price}/hr`}
-                ctaLabel="Reserve"
-                onClick={taken ? null : () => {}}
-              />
-            </div>
-          );
+            <div key={c.id} style={{
+              padding: "14px 16px 12px", borderRadius: 8,
+              background: "#fff", border: "1px solid #E9EBEC",
+              opacity: taken ? 0.55 : 1,
+              display: "flex", flexDirection: "column", gap: 8
+            }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 11, letterSpacing: 0.4, textTransform: "uppercase", color: theme.primary }}>{c.sport === "tennis" ? "Tennis" : "Pickleball"}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: taken ? "#858F8F" : "#1F8A5B" }}>{taken ? "Taken" : "Open"}</span>
+              </div>
+              <div>
+                <div style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 16, color: "#0F1214", letterSpacing: -0.3 }}>{c.name}</div>
+                <div style={{ fontSize: 11, color: "#4B5052", fontWeight: 500, marginTop: 2 }}>{c.time} · {c.duration}</div>
+                <div style={{ fontSize: 11, color: "#858F8F", fontWeight: 500 }}>{c.format}</div>
+              </div>
+              <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 13, color: "#0F1214" }}>${c.price}/hr</span>
+                {!taken &&
+                <button style={{
+                  height: 28, padding: "0 14px", borderRadius: 8, border: 0,
+                  background: theme.primary, color: "#fff",
+                  fontFamily: "inherit", fontWeight: 700, fontSize: 11, cursor: "pointer"
+                }}>Reserve</button>
+                }
+              </div>
+            </div>);
+
         })}
       </div>
     </div>);
@@ -726,47 +622,48 @@ function CDPlayersYouMightKnow({ club, theme, desktop }) {
   return (
     <div>
       <CDSectionHead theme={theme} sub={`Members at ${club.shortName || club.name}`}>Players you might know</CDSectionHead>
-      {/* Players list — converted from a 2/4-col grid into a vertical
-          list using CDListRow. Avatar tile on the left, name + level
-          + "why suggested" caption in the info column, "Connect" CTA
-          on the right that expands on hover. */}
-      <div>
-        {shown.map((p) => (
-          <CDListRow
-            key={p.name}
-            left={{
-              primary: (
-                <span style={{
-                  width: 48, height: 48, borderRadius: 999,
-                  background: theme.primary, color: "#fff",
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: theme.display, fontWeight: 800, fontSize: 14,
-                  flexShrink: 0,
-                }}>{p.avatar}</span>
-              ),
-              secondary: (
-                <span style={{
-                  padding: "2px 6px", borderRadius: 9999,
-                  background: "#F4F5F6",
-                  fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
-                  fontWeight: 400, color: "#2F3436",
-                  display: "inline-flex", alignItems: "center",
-                  whiteSpace: "nowrap",
-                }}>{p.level}</span>
-              ),
-            }}
-            title={p.name}
-            lines={[
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }} key="why">
-                <Icon name={p.reasonIcon} size={14} color={theme.primary} strokeWidth={2.2} />
-                <span>{p.reason}</span>
-              </span>
-            ]}
-            ctaLabel="Connect"
-            ctaIcon="UserPlus"
-            onClick={() => {}}
-          />
-        ))}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: desktop ? "repeat(4, 1fr)" : "repeat(2, 1fr)",
+        gap: 10
+      }}>
+        {shown.map((p) =>
+        <button key={p.name} style={{
+          padding: "14px 16px", borderRadius: 8,
+          background: "#fff", border: "1px solid #E9EBEC", cursor: "pointer",
+          display: "flex", flexDirection: "column", gap: 8, alignItems: "stretch",
+          fontFamily: "inherit", textAlign: "left",
+          transition: "border-color 120ms, box-shadow 120ms"
+        }}
+        onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#DEE1E5";e.currentTarget.style.boxShadow = "0 2px 8px rgba(15,18,20,.06)";}}
+        onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";e.currentTarget.style.boxShadow = "none";}}>
+            {/* Identity: avatar + name + level */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+              <span style={{
+              width: 36, height: 36, borderRadius: 999, background: theme.primary, color: "#fff",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontFamily: theme.display, fontWeight: 800, fontSize: 12, flexShrink: 0
+            }}>{p.avatar}</span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 14, color: "#0F1214", letterSpacing: -0.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</div>
+                <div style={{ marginTop: 1, fontSize: 11, fontWeight: 700, color: theme.primary }}>{p.level}</div>
+              </div>
+            </div>
+
+            {/* Why suggested — soft tinted callout so the reason reads as
+            the system's recommendation logic, not a label. */}
+            <div style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "6px 10px", borderRadius: 8,
+            background: theme.softTint || "#F4F5F6",
+            fontSize: 11, color: theme.primary, fontWeight: 600,
+            lineHeight: 1.3
+          }}>
+              <Icon name={p.reasonIcon} size={11} color={theme.primary} strokeWidth={2.4} />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{p.reason}</span>
+            </div>
+          </button>
+        )}
       </div>
     </div>);
 
@@ -821,75 +718,137 @@ function CDProsPrograms({ club, theme }) {
     <div>
       <CDSectionHead theme={theme}>Pros &amp; programs</CDSectionHead>
 
-      {/* Coaches — converted from a horizontal-scroll carousel of
-          300px cards into a vertical list using the shared CDListRow
-          primitive. Each coach reads as one EventRow-style line:
-          avatar + rating in the left column, name + credential + blurb
-          in the info column, dark hover-reveal "Book lesson" CTA on
-          the right. Aligns with the homepage's MoreEventsNearYou
-          rhythm. */}
-      <div>
-        {coaches.map((c) => (
-          <CDListRow
-            key={c.name}
-            left={{
-              primary: (
-                <span style={{
-                  width: 48, height: 48, borderRadius: 999,
-                  background: theme.primary, color: "#fff",
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: theme.display, fontWeight: 800, fontSize: 14,
-                  flexShrink: 0,
-                }}>{c.avatar}</span>
-              ),
-              secondary: (
-                <span style={{
-                  display: "inline-flex", alignItems: "center", gap: 4,
-                  padding: "2px 6px", borderRadius: 9999,
-                  background: "#F4F5F6",
-                  fontSize: 12, lineHeight: "16px", letterSpacing: 0.3,
-                  fontWeight: 400, color: "#2F3436",
-                }}>
-                  <Icon name="Star" size={12} color="#F2A93B" strokeWidth={2.2} />
-                  <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>{c.rating}</span>
-                </span>
-              ),
+      {/* Coaches — horizontal scrolling carousel of fixed-width cards,
+                  matching the homepage's PeopleSegment/MatchesSegment pattern.
+                  Negative side margins let the carousel bleed to the content
+                  edges; cards inside snap-align to start. */}
+      <div style={{
+        display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory",
+        scrollbarWidth: "none",
+        paddingBottom: 4,
+        margin: "0 -4px",
+        paddingLeft: 4,
+        paddingRight: 4
+      }}>
+        {coaches.map((c) =>
+        <div key={c.name} style={{
+          flex: "0 0 300px",
+          scrollSnapAlign: "start",
+          padding: "16px 18px", borderRadius: 8,
+          background: "#fff", border: "1px solid #E9EBEC",
+          display: "flex", flexDirection: "column", gap: 8
+        }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+              <span style={{ width: 36, height: 36, borderRadius: 999, background: theme.primary, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: theme.display, fontWeight: 800, fontSize: 11, flexShrink: 0 }}>{c.avatar}</span>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <Icon name="Star" size={12} color="#F2A93B" strokeWidth={2.2} />
+                <span style={{ fontFamily: theme.display, fontWeight: 800, fontSize: 13, color: "#0F1214", fontVariantNumeric: "tabular-nums" }}>{c.rating}</span>
+              </div>
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontFamily: theme.display, fontWeight: 700, fontSize: 15, color: "#0F1214", letterSpacing: -0.2 }}>{c.name}</div>
+              <div style={{ marginTop: 2, fontSize: 11, fontWeight: 600, color: theme.primary }}>{c.credential}</div>
+              <div style={{ marginTop: 8, fontSize: 12, color: "#4B5052", fontWeight: 500, lineHeight: 1.45 }}>{c.blurb}</div>
+            </div>
+            {/* Action row — More info (ghost) + Book a lesson (primary).
+            Two-button grid so the secondary "view profile" action
+            sits left of the primary book CTA on each coach card. */}
+            <div style={{ marginTop: 4, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+              <button style={{
+              height: 36, padding: "0 12px", borderRadius: 8,
+              border: "1px solid #E9EBEC", background: "#fff", color: "#0F1214",
+              fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              transition: "border-color 120ms"
             }}
-            title={c.name}
-            lines={[c.credential, c.blurb]}
-            ctaLabel="Book lesson"
-            onClick={() => {}}
-          />
-        ))}
+            onMouseEnter={(e) => {e.currentTarget.style.borderColor = "#0F1214";}}
+            onMouseLeave={(e) => {e.currentTarget.style.borderColor = "#E9EBEC";}}>
+                More info
+              </button>
+              <button style={{
+              height: 36, padding: "0 12px", borderRadius: 8, border: 0,
+              background: "#0F1214", color: "#fff",
+              fontFamily: "inherit", fontWeight: 600, fontSize: 12, cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center"
+            }}>
+                Book a lesson
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Programs — same CDListRow pattern. Calendar icon in the
-          left column, name + schedule caption in the info column,
-          price on the right with the dark Reserve CTA. */}
-      <div style={{ marginTop: 48 }}>
-        <CDSectionHead theme={theme}>Recurring programs</CDSectionHead>
-        {programs.map((p) => (
-          <CDListRow
-            key={p.name}
-            left={{
-              primary: (
-                <span style={{
-                  width: 48, height: 48, borderRadius: 8,
-                  background: "#F4F5F6",
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0,
-                }}>
-                  <Icon name={p.icon || "Calendar"} size={20} color={theme.primary} strokeWidth={1.75} />
-                </span>
-              ),
-            }}
-            title={p.name}
-            lines={[p.schedule]}
-            price={p.price}
-            ctaLabel="Join"
-            onClick={() => {}}
-          />
-        ))}
+      {/* Programs — patterned after EventCard rows from the event list:
+                  left time column with day-of-week + time, middle name + meta,
+                  right price + black hover-reveal Reserve button. Reads as a
+                  sibling of the event list rather than a custom card layout. */}
+      <div style={{ marginTop: 24 }}>
+        {programs.map((p, i) =>
+        <CDProgramRow key={p.name} p={p} theme={theme} last={i === programs.length - 1} />
+        )}
+      </div>
+    </div>);
+
+}
+
+// ── Program row — leads with a calendar icon, then a name + schedule
+// caption (single column so day/time strings of any shape — "Wed 7–9pm",
+// "Tue & Thu 4–6pm", "Mon/Wed/Fri 8–10am" — render cleanly without trying
+// to split them into separate day/time columns). Right rail carries the
+// price and a hover-reveal Join CTA, matching EventCard. */
+function CDProgramRow({ p, theme, last }) {
+  const [hover, setHover] = useStateCD(false);
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        padding: "20px 4px 20px 0",
+        borderBottom: last ? 0 : "1px solid #E9EBEC",
+        display: "grid",
+        gridTemplateColumns: "44px 1fr auto",
+        gap: 16,
+        alignItems: "center",
+        background: hover ? "#F4F5F6" : "transparent",
+        transition: "background 120ms",
+        cursor: "pointer"
+      }}>
+      {/* Calendar icon tile — soft-tinted, mirrors the icon column on the
+                  old event row but at a slightly larger size for parity with
+                  EventCard's left time column. */}
+      <span style={{
+        width: 44, height: 44, borderRadius: 8,
+        background: theme.softTint || "#F4F5F6",
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        flexShrink: 0
+      }}>
+        <Icon name="Calendar" size={18} color={theme.primary} strokeWidth={2} />
+      </span>
+
+      {/* Name + full schedule string. The schedule is rendered as one
+                  quiet caption line; flex-wrap is allowed by leaving overflow
+                  unclamped so "Mon/Wed/Fri 8–10am · Recreational" stays readable. */}
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 17, lineHeight: "22px", color: "#0F1214", letterSpacing: -0.3 }}>{p.name}</div>
+        {p.schedule &&
+        <div style={{ marginTop: 4, fontSize: 13, color: "#4B5052", fontWeight: 500, lineHeight: 1.4 }}>{p.schedule}</div>
+        }
+      </div>
+
+      {/* Right rail — price + hover-reveal Join button. */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16, position: "relative" }}>
+        <div style={{ fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700, fontSize: 17, color: "#0F1214", textAlign: "right", letterSpacing: -0.2, whiteSpace: "nowrap" }}>{p.price}</div>
+        <div style={{
+          display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+          height: 36, padding: hover ? "0 16px" : 0,
+          width: hover ? "auto" : 36,
+          background: "#0F1214", color: "#fff", borderRadius: 8,
+          overflow: "hidden", whiteSpace: "nowrap",
+          transition: "padding 180ms cubic-bezier(.2,.8,.2,1), width 180ms cubic-bezier(.2,.8,.2,1)"
+        }}>
+          {hover && <span style={{ fontFamily: "inherit", fontWeight: 600, fontSize: 12 }}>Join</span>}
+          <Icon name="ArrowRight" size={13} color="#fff" strokeWidth={2.5} />
+        </div>
       </div>
     </div>);
 
