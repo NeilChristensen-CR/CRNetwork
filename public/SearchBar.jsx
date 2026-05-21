@@ -419,18 +419,24 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // trackBg uses the design system's surfaceSoft tone (#F4F5F6) so the
   // selected-state recede is subtle — segments still stand out as lifted
   // white pills, but the surrounding track no longer looks heavy.
+  // Tokens here are aligned to the Figma px.club SearchBar spec
+  // (node 8059-57624). The focused track uses #EDF3F3 (system/bg/default/
+  // primary), label takes the secondary text token #4B5052, value uses
+  // #0F1214 (inputs/neutral/fg/default), and the submit pill takes the
+  // buttons/primary/bg/default token #222424 — slightly lighter than
+  // pure black so it reads as a soft dark capsule.
   const COLORS = {
     pillBg:        "#FFFFFF",
-    trackBg:       "#F4F5F6",
+    trackBg:       "#EDF3F3",
     focusBg:       "#FFFFFF",
     hoverBg:       "rgba(15,18,20,.04)",  // unfocused-segment hover fill
-    label:         "#858F8F",
+    label:         "#4B5052",
     value:         "#0F1214",
-    divider:       "rgba(15,18,20,.06)",
+    divider:       "#E9EBEC",              // visible 1px segment dividers
     arrowAccent:   "#5B7CFA",
-    submitBg:      "#0F1214",
+    submitBg:      "#222424",
     submitFg:      "#FFFFFF",
-    border:        "rgba(15,18,20,.06)",
+    border:        "#E9EBEC",
   };
 
   // ---- Geometry ----------------------------------------------------------
@@ -444,15 +450,19 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // Container padding stays 8px (the user-spec outer gutter) so the bar's
   // overall height = segH (64) + pad*2 (16) = 80. Each segment ends up at
   // a clean 64 internal height.
+  // Per Figma spec — label is `overline` (10/0.8 ls, lh 12), value is `p1
+  // medium` (16/0 ls, lh 24). Mobile drops one notch on each (9/0.7 ls,
+  // 14/0 ls) so the bar still fits within a 360px column without crushing
+  // the value text.
   const SIZES = desktop
-    ? { pillH: 80, pad: 8, gap: 8,
-        segPadX: 22, segPadY: 12, whoPadRight: 8,
-        segGapY: 4, labelFs: 10.5, labelLs: 1.3,
-        valueFs: 14, btn: 40, btnExpW: 112, radius: 999 }
-    : { pillH: 76, pad: 8, gap: 8,
+    ? { pillH: 80, pad: 8, gap: 0,
+        segPadX: 24, segPadY: 12, whoPadRight: 8,
+        segGapY: 4, labelFs: 10, labelLs: 0.8,
+        valueFs: 16, btn: 40, btnExpW: 112, radius: 999 }
+    : { pillH: 76, pad: 8, gap: 0,
         segPadX: 16, segPadY: 10, whoPadRight: 8,
-        segGapY: 3, labelFs: 9.5, labelLs: 1.2,
-        valueFs: 13, btn: 36, btnExpW: 100, radius: 999 };
+        segGapY: 3, labelFs: 9, labelLs: 0.7,
+        valueFs: 14, btn: 36, btnExpW: 100, radius: 999 };
   const pillH = SIZES.pillH;
 
   // ---- Segments ----------------------------------------------------------
@@ -465,11 +475,14 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     { key: "who",      label: "WHO",      value: v.who,      display: touched.who      ? v.who      : PLACEHOLDERS.who,      icon: null,         anchorRef: whoRef },
   ];
 
-  // Track background flips to gray once any segment is focused.
+  // Track background flips to the mint surfaceSoft tone (#EDF3F3) once any
+  // segment is focused — matches the Figma spec's `bg/default/primary`
+  // token. The unfocused track is plain white with a 4/4 soft drop shadow
+  // and a 1px border (Figma elevation/200).
   const trackBg = active ? COLORS.trackBg : COLORS.pillBg;
   const trackShadow = active
     ? "inset 0 0 0 1px " + COLORS.border
-    : "0 1px 2px rgba(15,18,20,.04), 0 4px 14px rgba(15,18,20,.06), inset 0 0 0 1px " + COLORS.border;
+    : "0 4px 4px rgba(0,0,0,.16), inset 0 0 0 1px " + COLORS.border;
 
   // ---- Search submit button (lives inside the WHO segment) ---------------
   // Default state: 40px dark capsule with a search icon. When WHO is the
@@ -544,7 +557,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // the WHO container). That extension is drawn as an absolute child that
   // overhangs the segment's right edge into the bar's reserved submit area
   // — it doesn't change WHO's own flex width.
-  const Segment = ({ seg, focused, isWho }) => {
+  const Segment = ({ seg, focused, isWho, isLast }) => {
     const onClick = (e) => { e.stopPropagation(); setActive(focused ? null : seg.key); };
     // WHO has asymmetric padding (12px right vs 24px elsewhere) because
     // the right side is occupied by the submit circle button; matching its
@@ -560,6 +573,15 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
           flex: "1 1 0",
           minWidth: 0,
           display: "flex",
+          // Segment dividers — 1px vertical line between segments, matching
+          // Figma spec. The last segment (WHO) skips the border so the bar
+          // doesn't render a trailing line into the submit area.
+          borderRight: isLast ? "none" : `1px solid ${COLORS.divider}`,
+          // Each segment owns 8px of inner padding (Figma "1/interactive"
+          // wrapper) so its lifted-white-pill state has breathing room
+          // before the divider.
+          padding: SIZES.pad,
+          boxSizing: "border-box",
         }}
       >
         {(hover) => (
@@ -574,7 +596,6 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
               position: "relative",
               flex: "1 1 0",
               minWidth: 0,
-              height: pillH - SIZES.pad * 2,
               borderRadius: SIZES.radius,
               padding,
               display: "flex",
@@ -587,8 +608,12 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                 : hover
                   ? COLORS.hoverBg
                   : "transparent",
+              // Focused-segment elevation: soft 4/4 drop shadow per Figma
+              // spec (color/alpha/black/200 at offset 0,4 radius 4). Lighter
+              // than the previous two-layer treatment so it floats above
+              // the EDF3F3 track without dominating.
               boxShadow: focused
-                ? "0 2px 8px rgba(15,18,20,.08), 0 8px 24px rgba(15,18,20,.10)"
+                ? "0 4px 4px rgba(0,0,0,.16)"
                 : "none",
               transition: "background 160ms ease, box-shadow 200ms ease",
             }}
@@ -896,19 +921,24 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
           borderRadius: SIZES.radius,
           background: trackBg,
           boxShadow: trackShadow,
-          padding: SIZES.pad,
+          // Track itself has no inner padding — each segment owns its 8px
+          // gutter so the divider lines can sit cleanly between adjacent
+          // segments (per Figma spec node 8059-57624).
+          padding: 0,
           display: "flex",
           alignItems: "stretch",
           gap: SIZES.gap,
+          overflow: "hidden",
           transition: "background 200ms ease, box-shadow 200ms ease",
         }}
       >
-        {segments.map((seg) => (
+        {segments.map((seg, i) => (
           <Segment
             key={seg.key}
             seg={seg}
             focused={active === seg.key}
             isWho={seg.key === "who"}
+            isLast={i === segments.length - 1}
           />
         ))}
       </div>
