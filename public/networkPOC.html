@@ -381,7 +381,12 @@
           onClick={() => setControlsOpen(o => !o)}
           style={{
             position: "fixed", right: 20, top: "50%", transform: "translateY(-50%)",
-            zIndex: 60,
+            // 9999 keeps the gear above every other surface in the
+            // prototype — sticky chrome (50), bottom action bar (30),
+            // SearchResultsModal (200/201), MobileSearchSheet portals,
+            // etc. The panel is a dev affordance; it should never get
+            // hidden by app content.
+            zIndex: 9999,
             width: 44, height: 44, borderRadius: 999,
             background: controlsOpen ? "#0F1214" : "#fff",
             color: controlsOpen ? "#fff" : "#0F1214",
@@ -398,7 +403,10 @@
         {controlsOpen && (
           <div style={{
             position: "fixed", right: 72, top: "50%", transform: "translateY(-50%)",
-            zIndex: 55,
+            // 9998 sits one below the gear (9999) but above every
+            // app surface so the flyout floats on top of modals + the
+            // mobile bottom sheet portal target.
+            zIndex: 9998,
             width: 240, maxHeight: "calc(100vh - 40px)",
             display: "flex", flexDirection: "column", gap: 18,
             background: "#fff",
@@ -470,7 +478,13 @@
                 <React.Fragment>
                   <NestedRow on={screen === "clubs"} onClick={() => { setScreen("clubs"); setForceType(null); }} label="List" />
                   <NestedRow on={screen === "club"}  onClick={() => { setScreen("club");  setForceType(null); }} label="Detail" />
-                  <NestedRow on={screen === "reserve-court"} onClick={() => { setScreen("reserve-court"); setForceType(null); }} label="Book" />
+                  {/* On the CourtReserve (brand-agnostic) surface,
+                      booking is a *public* booking experience — any
+                      visitor can land here and book without a club
+                      membership. Other branded clubs (Old Coast, Dill
+                      Dinkers) just say "Book" because the booking flow
+                      lives inside that club's context. */}
+                  <NestedRow on={screen === "reserve-court"} onClick={() => { setScreen("reserve-court"); setForceType(null); }} label={app === "cr" ? "Public booking" : "Book"} />
                 </React.Fragment>
               )}
               <RadioRow
