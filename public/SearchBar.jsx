@@ -182,7 +182,7 @@ function SBPopover({ anchorRef, width = "match", minWidth = 220, maxWidth = 360,
         top: pos.top,
         left: pos.left,
         width: resolvedWidth,
-        background: "#FFFFFF",
+        background: "var(--pp-bg-default)",
         borderRadius: 16,
         boxShadow: "0 12px 40px rgba(15,18,20,.14), 0 2px 8px rgba(15,18,20,.06)",
         border: "1px solid rgba(15,18,20,.06)",
@@ -218,7 +218,7 @@ function SBRow({ icon, label, sub, selected, onClick }) {
         padding: "10px 12px",
         borderRadius: 10,
         border: 0,
-        background: hover || selected ? "#F4F5F6" : "transparent",
+        background: hover || selected ? "var(--pp-bg-subtle)" : "transparent",
         cursor: "pointer",
         fontFamily: "inherit",
         textAlign: "left",
@@ -227,19 +227,19 @@ function SBRow({ icon, label, sub, selected, onClick }) {
     >
       {icon && window.Icon && (
         <span style={{ display: "inline-flex", flexShrink: 0 }}>
-          <window.Icon name={icon} size={16} strokeWidth={2} color="#0F1214" />
+          <window.Icon name={icon} size={16} strokeWidth={2} color="var(--pp-fg-default)" />
         </span>
       )}
       <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
-        <span style={{ fontSize: 13, fontWeight: selected ? 700 : 500, color: "#0F1214", lineHeight: 1.2 }}>
+        <span style={{ fontSize: 13, fontWeight: selected ? 700 : 500, color: "var(--pp-fg-default)", lineHeight: 1.2 }}>
           {label}
         </span>
         {sub && (
-          <span style={{ fontSize: 11, color: "#4B5052", lineHeight: 1.2 }}>{sub}</span>
+          <span style={{ fontSize: 11, color: "var(--pp-fg-muted)", lineHeight: 1.2 }}>{sub}</span>
         )}
       </span>
       {selected && (
-        <span style={{ width: 6, height: 6, borderRadius: 999, background: "#0F1214", flexShrink: 0 }} />
+        <span style={{ width: 6, height: 6, borderRadius: 999, background: "var(--pp-fg-default)", flexShrink: 0 }} />
       )}
     </button>
   );
@@ -257,8 +257,8 @@ function SBStepper({ value, min = 1, max = 8, onChange, label }) {
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: "#0F1214" }}>{label}</span>
-        <span style={{ fontSize: 11, color: "#4B5052" }}>Including you</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--pp-fg-default)" }}>{label}</span>
+        <span style={{ fontSize: 11, color: "var(--pp-fg-muted)" }}>Including you</span>
       </div>
       <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
         <button
@@ -268,14 +268,14 @@ function SBStepper({ value, min = 1, max = 8, onChange, label }) {
           aria-label="Decrement"
           style={{
             width: 30, height: 30, borderRadius: 999,
-            border: "1px solid #DEE1E5", background: "#fff",
-            color: value <= min ? "#BBBFC1" : "#0F1214",
+            border: "1px solid var(--pp-border-default)", background: "var(--pp-bg-default)",
+            color: value <= min ? "var(--pp-fg-subtle)" : "var(--pp-fg-default)",
             cursor: value <= min ? "not-allowed" : "pointer",
             fontSize: 16, lineHeight: 1, fontFamily: "inherit",
             display: "inline-flex", alignItems: "center", justifyContent: "center",
           }}
         >−</button>
-        <span style={{ minWidth: 18, textAlign: "center", fontWeight: 700, fontSize: 14, color: "#0F1214", fontVariantNumeric: "tabular-nums" }}>{value}</span>
+        <span style={{ minWidth: 18, textAlign: "center", fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)", fontVariantNumeric: "tabular-nums" }}>{value}</span>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onChange(Math.min(max, value + 1)); }}
@@ -283,8 +283,8 @@ function SBStepper({ value, min = 1, max = 8, onChange, label }) {
           aria-label="Increment"
           style={{
             width: 30, height: 30, borderRadius: 999,
-            border: "1px solid #DEE1E5", background: "#fff",
-            color: value >= max ? "#BBBFC1" : "#0F1214",
+            border: "1px solid var(--pp-border-default)", background: "var(--pp-bg-default)",
+            color: value >= max ? "var(--pp-fg-subtle)" : "var(--pp-fg-default)",
             cursor: value >= max ? "not-allowed" : "pointer",
             fontSize: 16, lineHeight: 1, fontFamily: "inherit",
             display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -426,17 +426,17 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // buttons/primary/bg/default token #222424 — slightly lighter than
   // pure black so it reads as a soft dark capsule.
   const COLORS = {
-    pillBg:        "#FFFFFF",
-    trackBg:       "#EDF3F3",
-    focusBg:       "#FFFFFF",
+    pillBg:        "var(--pp-bg-default)",
+    trackBg:       "var(--pp-bg-muted)",
+    focusBg:       "var(--pp-bg-default)",
     hoverBg:       "rgba(15,18,20,.04)",  // unfocused-segment hover fill
-    label:         "#4B5052",
-    value:         "#0F1214",
-    divider:       "#E9EBEC",              // visible 1px segment dividers
+    label:         "var(--pp-fg-muted)",
+    value:         "var(--pp-fg-default)",
+    divider:       "var(--pp-border-subtle)",              // visible 1px segment dividers
     arrowAccent:   "#5B7CFA",
-    submitBg:      "#222424",
-    submitFg:      "#FFFFFF",
-    border:        "#E9EBEC",
+    submitBg:      "var(--pp-bg-inverse)",
+    submitFg:      "var(--pp-bg-default)",
+    border:        "var(--pp-border-subtle)",
   };
 
   // ---- Geometry ----------------------------------------------------------
@@ -525,7 +525,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
           onSubmit && onSubmit(v);
         }
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = "#212425"; }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-inverse)"; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.submitBg; }}
       style={{
         // Submit button matches the Figma spec's p-8 + min-w-72
@@ -716,10 +716,10 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
               display: "flex", alignItems: "center", gap: 8,
               padding: "0 12px",
               height: 40, borderRadius: 10,
-              border: "1px solid #E9EBEC",
-              background: "#FFFFFF",
+              border: "1px solid var(--pp-border-subtle)",
+              background: "var(--pp-bg-default)",
             }}>
-              <window.Icon name="Search" size={14} strokeWidth={2} color="#4B5052" />
+              <window.Icon name="Search" size={14} strokeWidth={2} color="var(--pp-fg-muted)" />
               <input
                 ref={whereInputRef}
                 type="text"
@@ -738,7 +738,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                 style={{
                   flex: 1, minWidth: 0,
                   border: 0, outline: "none", background: "transparent",
-                  fontFamily: "inherit", fontSize: 14, color: "#0F1214",
+                  fontFamily: "inherit", fontSize: 14, color: "var(--pp-fg-default)",
                 }}
               />
               {whereQuery && (
@@ -748,11 +748,11 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   aria-label="Clear"
                   style={{
                     width: 20, height: 20, borderRadius: 999, border: 0,
-                    background: "#F4F5F6", cursor: "pointer",
+                    background: "var(--pp-bg-subtle)", cursor: "pointer",
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
                   }}
                 >
-                  <window.Icon name="X" size={12} strokeWidth={2.4} color="#4B5052" />
+                  <window.Icon name="X" size={12} strokeWidth={2.4} color="var(--pp-fg-muted)" />
                 </button>
               )}
             </div>
@@ -767,10 +767,10 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
           />
 
           {/* Section divider */}
-          <div style={{ height: 1, background: "#F4F5F6", margin: "4px 12px" }} />
+          <div style={{ height: 1, background: "var(--pp-bg-subtle)", margin: "4px 12px" }} />
 
           {matches.length === 0 ? (
-            <div style={{ padding: "12px 14px", fontSize: 12.5, color: "#858F8F" }}>
+            <div style={{ padding: "12px 14px", fontSize: 12.5, color: "var(--pp-fg-subtle)" }}>
               No matches for "{whereQuery}"
             </div>
           ) : (
@@ -813,7 +813,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
       const recombine = (d, t) => `${d} · ${t}`;
       return (
         <SBPopover anchorRef={anchorRef}>
-          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
+          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--pp-fg-muted)" }}>
             Day range
           </div>
           {SB_WHEN_OPTIONS.map((opt) => (
@@ -825,8 +825,8 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
               onClick={() => setValues({ whenDay: opt.id, when: recombine(opt.id, time) })}
             />
           ))}
-          <div style={{ height: 1, background: "#F0F0F0", margin: "6px 4px" }} />
-          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#4B5052" }}>
+          <div style={{ height: 1, background: "var(--pp-border-subtle)", margin: "6px 4px" }} />
+          <div style={{ padding: "8px 12px 4px", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--pp-fg-muted)" }}>
             Time of day
           </div>
           {SB_WHEN_TIME_BUCKETS.map((b) => (
@@ -873,7 +873,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               flex: 1, minWidth: 0,
-              background: "#F4F5F6",
+              background: "var(--pp-bg-subtle)",
               borderRadius: 999,
               padding: 4,
               height: 44,
@@ -886,7 +886,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                 style={{
                   width: 36, height: 36, borderRadius: 999,
                   border: 0, background: "transparent",
-                  color: "#0F1214",
+                  color: "var(--pp-fg-default)",
                   cursor: whoCount <= 1 ? "not-allowed" : "pointer",
                   opacity: whoCount <= 1 ? 0.35 : 1,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -894,12 +894,12 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   flexShrink: 0,
                 }}
               >
-                {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="#0F1214" />}
+                {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="var(--pp-fg-default)" />}
               </button>
               <span style={{
                 flex: 1, textAlign: "center",
                 fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-                fontWeight: 700, fontSize: 14, color: "#0F1214",
+                fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)",
                 fontVariantNumeric: "tabular-nums",
                 padding: "0 6px",
                 whiteSpace: "nowrap",
@@ -912,7 +912,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                 style={{
                   width: 36, height: 36, borderRadius: 999,
                   border: 0, background: "transparent",
-                  color: "#0F1214",
+                  color: "var(--pp-fg-default)",
                   cursor: whoCount >= 8 ? "not-allowed" : "pointer",
                   opacity: whoCount >= 8 ? 0.35 : 1,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -920,7 +920,7 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
                   flexShrink: 0,
                 }}
               >
-                {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#0F1214" />}
+                {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="var(--pp-fg-default)" />}
               </button>
             </div>
           </div>
@@ -1122,7 +1122,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             fontFamily: "Axiforma, Inter, system-ui, sans-serif",
             fontWeight: 800,
             fontSize: 16, lineHeight: 1.25, letterSpacing: -0.2,
-            color: "#0F1214",
+            color: "var(--pp-fg-default)",
             // Long section labels — keep on one line, ellipsize if the
             // chip + label combine wider than the row.
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -1131,7 +1131,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           {chip && !isOpen && (
             <span style={{
               height: 22, padding: "0 10px", borderRadius: 6,
-              background: "#F4F5F6", color: "#0F1214",
+              background: "var(--pp-bg-subtle)", color: "var(--pp-fg-default)",
               fontSize: 11.5, fontWeight: 600,
               display: "inline-flex", alignItems: "center",
               maxWidth: 160,
@@ -1161,7 +1161,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   // min-height: 56 keeps 1-line and 2-line rows visually balanced.
   // Picked rows get a subtle #F4F5F6 fill so the selection reads even
   // without looking at the dot.
-  const Row = ({ active, icon, label, sub, onClick, accent = "#0F1214" }) => (
+  const Row = ({ active, icon, label, sub, onClick, accent = "var(--pp-fg-default)" }) => (
     <button
       type="button"
       onClick={onClick}
@@ -1176,29 +1176,29 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         // - 12 = body content right - 12 from the row's right edge).
         padding: "10px 12px",
         border: 0,
-        background: active ? "#F4F5F6" : "transparent",
+        background: active ? "var(--pp-bg-subtle)" : "transparent",
         borderRadius: 10,
-        color: "#0F1214",
+        color: "var(--pp-fg-default)",
         fontFamily: "inherit", textAlign: "left", cursor: "pointer",
         transition: "background 120ms ease",
       }}
     >
       {icon && window.Icon && (
         <span style={{ display: "inline-flex", flexShrink: 0 }}>
-          <window.Icon name={icon} size={18} strokeWidth={2} color={accent === "#1F4ED8" ? accent : "#4B5052"} />
+          <window.Icon name={icon} size={18} strokeWidth={2} color={accent === "var(--pp-blue-600)" ? accent : "var(--pp-fg-muted)"} />
         </span>
       )}
       <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
         <span style={{
           fontSize: 15,
           fontWeight: active ? 600 : 500,
-          color: accent === "#1F4ED8" ? accent : "#0F1214",
+          color: accent === "var(--pp-blue-600)" ? accent : "var(--pp-fg-default)",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           lineHeight: 1.3,
         }}>{label}</span>
         {sub && (
           <span style={{
-            fontSize: 13, color: "#4B5052", lineHeight: 1.3,
+            fontSize: 13, color: "var(--pp-fg-muted)", lineHeight: 1.3,
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           }}>{sub}</span>
         )}
@@ -1207,7 +1207,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
           active. `accent` lets specialty rows (e.g. blue actions) swap in. */}
       <span style={{
         width: 20, height: 20, borderRadius: 999,
-        border: `2px solid ${active ? accent : "#C8CDCD"}`,
+        border: `2px solid ${active ? accent : "var(--pp-border-default)"}`,
         display: "inline-flex", alignItems: "center", justifyContent: "center",
         flexShrink: 0,
         transition: "border-color 120ms ease",
@@ -1278,7 +1278,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
         style={{
           position: "absolute", left: 0, right: 0, bottom: 0,
           height: "92%",
-          background: "#FFFFFF",
+          background: "var(--pp-bg-default)",
           borderTopLeftRadius: 20, borderTopRightRadius: 20,
           boxShadow: "0 -8px 32px rgba(15,18,20,.22)",
           transform: open ? "translateY(0)" : "translateY(100%)",
@@ -1294,7 +1294,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
       >
         {/* Drag handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px 0" }}>
-          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#E9EBEC" }} />
+          <div style={{ width: 40, height: 4, borderRadius: 999, background: "var(--pp-border-subtle)" }} />
         </div>
         {/* Header row — sheet title (largest in the hierarchy) + ghost X.
             Hierarchy now reads:
@@ -1311,7 +1311,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             margin: 0,
             fontFamily: "Axiforma, Inter, system-ui, sans-serif",
             fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
-            color: "#0F1214",
+            color: "var(--pp-fg-default)",
           }}>Search for anything</h2>
           <button
             type="button"
@@ -1329,7 +1329,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               cursor: "pointer",
             }}
           >
-            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="#0F1214" />}
+            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="var(--pp-fg-default)" />}
           </button>
         </div>
 
@@ -1348,11 +1348,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               display: "flex", alignItems: "center", gap: 8,
               padding: "0 14px",
               height: 48, borderRadius: 10,
-              border: "1px solid #E9EBEC",
-              background: "#FFFFFF",
+              border: "1px solid var(--pp-border-subtle)",
+              background: "var(--pp-bg-default)",
               marginBottom: 4,
             }}>
-              {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2} color="#4B5052" />}
+              {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2} color="var(--pp-fg-muted)" />}
               <input
                 type="text"
                 value={whereQuery}
@@ -1370,7 +1370,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                 style={{
                   flex: 1, minWidth: 0,
                   border: 0, outline: "none", background: "transparent",
-                  fontFamily: "inherit", fontSize: 14, color: "#0F1214",
+                  fontFamily: "inherit", fontSize: 14, color: "var(--pp-fg-default)",
                 }}
               />
               {whereQuery && (
@@ -1380,11 +1380,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                   aria-label="Clear"
                   style={{
                     width: 24, height: 24, borderRadius: 999, border: 0,
-                    background: "#F4F5F6", cursor: "pointer",
+                    background: "var(--pp-bg-subtle)", cursor: "pointer",
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
                   }}
                 >
-                  {window.Icon && <window.Icon name="X" size={14} strokeWidth={2.4} color="#4B5052" />}
+                  {window.Icon && <window.Icon name="X" size={14} strokeWidth={2.4} color="var(--pp-fg-muted)" />}
                 </button>
               )}
             </div>
@@ -1403,7 +1403,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                 onClick={() => { set("where", "Current location"); setOpenSection("what"); }}
               />
               {whereVisible.length === 0 ? (
-                <div style={{ padding: "16px 0", fontSize: 13, color: "#858F8F" }}>
+                <div style={{ padding: "16px 0", fontSize: 13, color: "var(--pp-fg-subtle)" }}>
                   No matches for "{whereQuery}"
                 </div>
               ) : (
@@ -1458,11 +1458,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               // padding so it lines up vertically with row content.
               margin: "0 -16px",
               padding: "12px 16px 6px 16px",
-              borderBottom: "1px solid #E9EBEC",
+              borderBottom: "1px solid var(--pp-border-subtle)",
               fontFamily: "Axiforma, Inter, system-ui, sans-serif",
               fontSize: 10.5, fontWeight: 800,
               letterSpacing: 1.2, textTransform: "uppercase",
-              color: "#858F8F", lineHeight: 1,
+              color: "var(--pp-fg-subtle)", lineHeight: 1,
             }}>Day range</div>
             <div style={{ paddingTop: 4, paddingBottom: 8 }}>
               {SB_WHEN_OPTIONS.map((w) => (
@@ -1489,11 +1489,11 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               // padding so it lines up vertically with row content.
               margin: "0 -16px",
               padding: "12px 16px 6px 16px",
-              borderBottom: "1px solid #E9EBEC",
+              borderBottom: "1px solid var(--pp-border-subtle)",
               fontFamily: "Axiforma, Inter, system-ui, sans-serif",
               fontSize: 10.5, fontWeight: 800,
               letterSpacing: 1.2, textTransform: "uppercase",
-              color: "#858F8F", lineHeight: 1,
+              color: "var(--pp-fg-subtle)", lineHeight: 1,
             }}>Time of day</div>
             <div style={{ paddingTop: 4 }}>
               {SB_WHEN_TIME_BUCKETS.map((tb) => (
@@ -1529,12 +1529,12 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               fontFamily: "Axiforma, Inter, system-ui, sans-serif",
               fontWeight: 800,
               fontSize: 16, lineHeight: 1.25, letterSpacing: -0.2,
-              color: "#0F1214",
+              color: "var(--pp-fg-default)",
             }}>Who</span>
             {/* Single contained pill: [−] [N players] [+]. Cap at 8. */}
             <div style={{
               display: "inline-flex", alignItems: "center",
-              background: "#F4F5F6",
+              background: "var(--pp-bg-subtle)",
               borderRadius: 999,
               padding: 4,
               gap: 0,
@@ -1548,19 +1548,19 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                 style={{
                   width: 36, height: 36, borderRadius: 999,
                   border: 0, background: "transparent",
-                  color: "#0F1214",
+                  color: "var(--pp-fg-default)",
                   cursor: playerCount <= 1 ? "not-allowed" : "pointer",
                   opacity: playerCount <= 1 ? 0.35 : 1,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   padding: 0,
                 }}
               >
-                {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="#0F1214" />}
+                {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="var(--pp-fg-default)" />}
               </button>
               <span style={{
                 minWidth: 76, textAlign: "center",
                 fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-                fontWeight: 700, fontSize: 14, color: "#0F1214",
+                fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)",
                 fontVariantNumeric: "tabular-nums",
                 padding: "0 6px",
                 whiteSpace: "nowrap",
@@ -1573,14 +1573,14 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                 style={{
                   width: 36, height: 36, borderRadius: 999,
                   border: 0, background: "transparent",
-                  color: "#0F1214",
+                  color: "var(--pp-fg-default)",
                   cursor: playerCount >= 8 ? "not-allowed" : "pointer",
                   opacity: playerCount >= 8 ? 0.35 : 1,
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   padding: 0,
                 }}
               >
-                {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="#0F1214" />}
+                {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="var(--pp-fg-default)" />}
               </button>
             </div>
           </section>
@@ -1591,7 +1591,10 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             against a hard hairline. No top border. */}
         <div style={{
           padding: "20px 16px calc(12px + env(safe-area-inset-bottom)) 16px",
-          background: "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 35%, #FFFFFF 100%)",
+          // Gradient fades into the sheet's bg-default surface. Using
+          // the canvas token directly so the fade lands on the right
+          // tone in both themes.
+          background: "linear-gradient(to bottom, transparent 0%, var(--pp-bg-default) 60%, var(--pp-bg-default) 100%)",
         }}>
           <button
             type="button"
@@ -1614,13 +1617,13 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             }}
             style={{
               width: "100%", height: 52, borderRadius: 12,
-              border: 0, background: "#0F1214", color: "#FFFFFF",
+              border: 0, background: "var(--pp-fg-default)", color: "var(--pp-bg-default)",
               fontFamily: "inherit", fontSize: 15, fontWeight: 700,
               display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
               cursor: "pointer",
             }}
           >
-            {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2.2} color="#fff" />}
+            {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2.2} color="var(--pp-bg-default)" />}
             Search
           </button>
         </div>
@@ -1687,7 +1690,7 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
         style={{
           position: "absolute", left: 0, right: 0, bottom: 0,
           height: "92%",
-          background: "#FFFFFF",
+          background: "var(--pp-bg-default)",
           borderTopLeftRadius: 20, borderTopRightRadius: 20,
           boxShadow: "0 -8px 32px rgba(15,18,20,.22)",
           transform: open ? "translateY(0)" : "translateY(100%)",
@@ -1700,7 +1703,7 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
       >
         {/* Drag handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px 0" }}>
-          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#E9EBEC" }} />
+          <div style={{ width: 40, height: 4, borderRadius: 999, background: "var(--pp-border-subtle)" }} />
         </div>
         {/* Header — same scale as MobileSearchSheet's title */}
         <div style={{
@@ -1711,7 +1714,7 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
             margin: 0,
             fontFamily: "Axiforma, Inter, system-ui, sans-serif",
             fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
-            color: "#0F1214",
+            color: "var(--pp-fg-default)",
           }}>Available clubs</h2>
           <button
             type="button"
@@ -1724,7 +1727,7 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
               cursor: "pointer",
             }}
           >
-            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="#0F1214" />}
+            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="var(--pp-fg-default)" />}
           </button>
         </div>
 
@@ -1738,7 +1741,7 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
             {filterChips.map((c, i) => (
               <span key={i} style={{
                 height: 22, padding: "0 10px", borderRadius: 6,
-                background: "#F4F5F6", color: "#0F1214",
+                background: "var(--pp-bg-subtle)", color: "var(--pp-fg-default)",
                 fontSize: 11.5, fontWeight: 600,
                 display: "inline-flex", alignItems: "center",
                 whiteSpace: "nowrap",
@@ -1761,29 +1764,29 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
                 padding: "12px 12px",
                 border: 0, background: "transparent",
                 borderRadius: 10,
-                color: "#0F1214",
+                color: "var(--pp-fg-default)",
                 fontFamily: "inherit", textAlign: "left", cursor: "pointer",
                 transition: "background 120ms ease",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
-              {window.Icon && <window.Icon name="Building2" size={18} strokeWidth={2} color="#4B5052" />}
+              {window.Icon && <window.Icon name="Building2" size={18} strokeWidth={2} color="var(--pp-fg-muted)" />}
               <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
                 <span style={{
-                  fontSize: 15, fontWeight: 600, color: "#0F1214",
+                  fontSize: 15, fontWeight: 600, color: "var(--pp-fg-default)",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                   lineHeight: 1.3,
                 }}>{c.name}</span>
                 <span style={{
-                  fontSize: 13, color: "#4B5052", lineHeight: 1.3,
+                  fontSize: 13, color: "var(--pp-fg-muted)", lineHeight: 1.3,
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                 }}>
                   {c.city}{c.state ? `, ${c.state}` : ""}
                   {c.distance ? ` · ${c.distance} mi` : ""}
                 </span>
               </span>
-              {window.Icon && <window.Icon name="ChevronRight" size={18} strokeWidth={2} color="#4B5052" />}
+              {window.Icon && <window.Icon name="ChevronRight" size={18} strokeWidth={2} color="var(--pp-fg-muted)" />}
             </button>
           ))}
         </div>
@@ -1814,31 +1817,31 @@ function SBClubMapThumb({ club }) {
       width: 96, height: 96,
       borderRadius: 8,
       overflow: "hidden",
-      background: "#EDF3F3",
+      background: "var(--pp-bg-muted)",
       flexShrink: 0,
     }}>
       <svg viewBox="0 0 96 96" width="96" height="96" style={{ display: "block" }} aria-hidden="true">
         {/* base tone */}
-        <rect width="96" height="96" fill="#EDF3F3" />
+        <rect width="96" height="96" fill="var(--pp-bg-muted)" />
         {/* park / blocks */}
-        <rect x="0" y="0" width="50" height="36" fill="#E0EBE7" />
-        <rect x="56" y="58" width="40" height="38" fill="#E0EBE7" />
+        <rect x="0" y="0" width="50" height="36" fill="var(--pp-map-block)" />
+        <rect x="56" y="58" width="40" height="38" fill="var(--pp-map-block)" />
         {/* streets */}
-        <line x1="0" y1={yRoad1} x2="96" y2={yRoad1} stroke="#FFFFFF" strokeWidth="3" />
-        <line x1={xRoad1} y1="0" x2={xRoad1} y2="96" stroke="#FFFFFF" strokeWidth="3" />
-        <line x1="0" y1="72" x2="96" y2="72" stroke="#FFFFFF" strokeWidth="2.4" />
+        <line x1="0" y1={yRoad1} x2="96" y2={yRoad1} stroke="var(--pp-bg-default)" strokeWidth="3" />
+        <line x1={xRoad1} y1="0" x2={xRoad1} y2="96" stroke="var(--pp-bg-default)" strokeWidth="3" />
+        <line x1="0" y1="72" x2="96" y2="72" stroke="var(--pp-bg-default)" strokeWidth="2.4" />
         {/* pin */}
         <g transform={`translate(${xPin} ${yPin})`}>
           <ellipse cx="0" cy="11" rx="6" ry="2" fill="rgba(15,18,20,.18)" />
-          <path d="M 0 -10 C -6 -10 -10 -6 -10 0 C -10 6 0 14 0 14 C 0 14 10 6 10 0 C 10 -6 6 -10 0 -10 Z" fill="#2E7D32" stroke="#fff" strokeWidth="1.4" />
-          <circle cx="0" cy="-1" r="3" fill="#fff" />
+          <path d="M 0 -10 C -6 -10 -10 -6 -10 0 C -10 6 0 14 0 14 C 0 14 10 6 10 0 C 10 -6 6 -10 0 -10 Z" fill="var(--pp-green-700)" stroke="var(--pp-bg-default)" strokeWidth="1.4" />
+          <circle cx="0" cy="-1" r="3" fill="var(--pp-bg-default)" />
         </g>
       </svg>
       {/* Distance pill — neutral chip in the top-left of the map. */}
       <span style={{
         position: "absolute", top: 6, left: 6,
         padding: "2px 6px", borderRadius: 9999,
-        background: "#F4F5F6", color: "#2F3436",
+        background: "var(--pp-bg-subtle)", color: "var(--pp-fg-muted)",
         fontSize: 11, lineHeight: "14px", letterSpacing: 0.3,
         fontWeight: 500,
         whiteSpace: "nowrap",
@@ -1866,8 +1869,8 @@ function SBClubListRow({ club, onSelect }) {
         alignItems: "center",
         gap: 24,
         padding: 24,
-        borderBottom: "1px solid #E9EBEC",
-        background: hover ? "rgba(0,0,0,.04)" : "#FFFFFF",
+        borderBottom: "1px solid var(--pp-border-subtle)",
+        background: hover ? "rgba(0,0,0,.04)" : "var(--pp-bg-default)",
         cursor: "pointer",
         transition: "background 140ms ease",
       }}
@@ -1877,20 +1880,20 @@ function SBClubListRow({ club, onSelect }) {
         <div style={{
           fontFamily: "Axiforma, Inter, system-ui, sans-serif", fontWeight: 700,
           fontSize: 20, lineHeight: "28px", letterSpacing: 0,
-          color: "#0F1214",
+          color: "var(--pp-fg-default)",
         }}>{club.name}</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "#4B5052" }}>
-          {window.Icon && <window.Icon name="MapPin" size={16} strokeWidth={1.75} color="#4B5052" />}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, lineHeight: "16px", letterSpacing: 0.2, color: "var(--pp-fg-muted)" }}>
+          {window.Icon && <window.Icon name="MapPin" size={16} strokeWidth={1.75} color="var(--pp-fg-muted)" />}
           <span>{club.city}, {club.state}</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <span style={{
             padding: "2px 6px", borderRadius: 9999,
-            background: "#F4F5F6", color: "#2F3436",
+            background: "var(--pp-bg-subtle)", color: "var(--pp-fg-muted)",
             fontSize: 12, lineHeight: "16px", letterSpacing: 0.3, fontWeight: 400,
             whiteSpace: "nowrap",
           }}>{club.sport}</span>
-          <span style={{ fontSize: 12, lineHeight: "16px", letterSpacing: 0.3, color: "#2F3436" }}>
+          <span style={{ fontSize: 12, lineHeight: "16px", letterSpacing: 0.3, color: "var(--pp-fg-muted)" }}>
             · Booked {club.booked} x Today
           </span>
         </div>
@@ -1903,7 +1906,7 @@ function SBClubListRow({ club, onSelect }) {
           height: 48,
           padding: hover ? "0 16px" : 0,
           borderRadius: 8,
-          background: "#222424", color: "#fff", border: 0, cursor: "pointer",
+          background: "var(--pp-bg-inverse)", color: "var(--pp-bg-default)", border: 0, cursor: "pointer",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           gap: hover ? 8 : 0,
           fontFamily: "inherit", fontWeight: 500, fontSize: 16, lineHeight: "24px",
@@ -1913,7 +1916,7 @@ function SBClubListRow({ club, onSelect }) {
         }}
       >
         {hover && <span>Reserve</span>}
-        {window.Icon && <window.Icon name="ArrowRight" size={24} strokeWidth={1.75} color="#fff" />}
+        {window.Icon && <window.Icon name="ArrowRight" size={24} strokeWidth={1.75} color="var(--pp-bg-default)" />}
       </button>
     </div>
   );
@@ -2006,7 +2009,7 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           opacity: open ? 1 : 0,
           width: "min(640px, calc(100vw - 48px))",
           maxHeight: "min(75vh, 720px)",
-          background: "#FFFFFF",
+          background: "var(--pp-bg-default)",
           borderRadius: 16,
           boxShadow: "0 24px 64px rgba(15,18,20,.32), 0 4px 16px rgba(15,18,20,.16)",
           transition: "opacity 220ms ease, transform 220ms cubic-bezier(.2,.8,.2,1)",
@@ -2030,7 +2033,7 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
           <div role="tablist" aria-label="Filter clubs" style={{
             display: "inline-flex", alignItems: "center",
             padding: 4, gap: 4,
-            background: "#F4F5F6", borderRadius: 999,
+            background: "var(--pp-bg-subtle)", borderRadius: 999,
             flexShrink: 1, minWidth: 0,
             overflowX: "auto", scrollbarWidth: "none",
           }}>
@@ -2045,9 +2048,9 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
                   style={{
                     padding: "8px 14px",
                     borderRadius: 999, border: 0,
-                    background: isActive ? "#FFFFFF" : "transparent",
+                    background: isActive ? "var(--pp-bg-default)" : "transparent",
                     boxShadow: isActive ? "0 2px 4px rgba(0,0,0,.08)" : "none",
-                    color: isActive ? "#0F1214" : "#4B5052",
+                    color: isActive ? "var(--pp-fg-default)" : "var(--pp-fg-muted)",
                     fontFamily: "inherit",
                     fontWeight: isActive ? 600 : 500, fontSize: 13, lineHeight: "20px",
                     letterSpacing: 0,
@@ -2070,10 +2073,10 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
               display: "inline-flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", borderRadius: 999, flexShrink: 0,
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F6"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
           >
-            {window.Icon && <window.Icon name="X" size={20} strokeWidth={2} color="#0F1214" />}
+            {window.Icon && <window.Icon name="X" size={20} strokeWidth={2} color="var(--pp-fg-default)" />}
           </button>
         </div>
 
@@ -2088,7 +2091,7 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
             {filterChips.map((c, i) => (
               <span key={i} data-tag="default" style={{
                 padding: "2px 6px", borderRadius: 9999,
-                background: "#F4F5F6", color: "#2F3436",
+                background: "var(--pp-bg-subtle)", color: "var(--pp-fg-muted)",
                 fontSize: 12, lineHeight: "16px", letterSpacing: 0.3, fontWeight: 400,
                 display: "inline-flex", alignItems: "center",
                 whiteSpace: "nowrap",
@@ -2156,7 +2159,7 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
         // generous shape — content (label + value) is two stacked lines
         // ≈ 36px tall, so total pill ≈ 60px tall.
         borderRadius: 999,
-        background: "#fff",
+        background: "var(--pp-bg-default)",
         border: 0,
         boxShadow: "0 1px 2px rgba(15,18,20,.06), 0 4px 14px rgba(15,18,20,.08), inset 0 0 0 1px rgba(15,18,20,.06)",
         padding: "12px 8px 12px 18px",
@@ -2182,7 +2185,7 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
         <div style={{
           fontFamily: "Axiforma, Inter, system-ui, sans-serif",
           fontWeight: 800,
-          fontSize: 10.5, color: "#858F8F",
+          fontSize: 10.5, color: "var(--pp-fg-subtle)",
           letterSpacing: 1.3, textTransform: "uppercase",
           lineHeight: 1,
           maxWidth: "100%",
@@ -2195,19 +2198,19 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
             row reaches the search button so it never visually overlaps. */}
         <div style={{
           fontFamily: "Inter, system-ui, sans-serif",
-          fontSize: 14, fontWeight: 500, color: "#0F1214",
+          fontSize: 14, fontWeight: 500, color: "var(--pp-fg-default)",
           lineHeight: 1.2,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           maxWidth: "100%", width: "100%",
         }}>
-          {v.where}<span style={{ color: "#C8CDCD", margin: "0 6px" }}>•</span>{v.activity}<span style={{ color: "#C8CDCD", margin: "0 6px" }}>•</span>{v.when}<span style={{ color: "#C8CDCD", margin: "0 6px" }}>•</span>{v.who}
+          {v.where}<span style={{ color: "var(--pp-fg-subtle)", margin: "0 6px" }}>•</span>{v.activity}<span style={{ color: "var(--pp-fg-subtle)", margin: "0 6px" }}>•</span>{v.when}<span style={{ color: "var(--pp-fg-subtle)", margin: "0 6px" }}>•</span>{v.who}
         </div>
       </div>
       <span style={{
-        width: 36, height: 36, borderRadius: 999, background: "#0F1214",
+        width: 36, height: 36, borderRadius: 999, background: "var(--pp-fg-default)",
         display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
       }}>
-        {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2.2} color="#fff" />}
+        {window.Icon && <window.Icon name="Search" size={16} strokeWidth={2.2} color="var(--pp-bg-default)" />}
       </span>
     </button>
     <MobileSearchSheet
