@@ -375,7 +375,7 @@ function ClubSwitcher({ theme, app, setApp, onFindClubs }) {
 
 }
 
-function ChromeBar({ theme, viewport, app, setApp, onOpenQR, onFindClubs, onOpenProfile, active = "Home", onNav }) {
+function ChromeBar({ theme, viewport, app, setApp, onOpenQR, onFindClubs, onOpenProfile, active = "Home", onNav, searchValues }) {
   const t = theme.t || { bg: "var(--pp-bg-default)", surface: "var(--pp-bg-default)", surfaceSoft: "var(--pp-bg-subtle)", text: "var(--pp-fg-default)", textMuted: "var(--pp-fg-muted)", textSubtle: "var(--pp-fg-subtle)", textInverted: "var(--pp-bg-default)", line: "var(--pp-border-subtle)", rule: "var(--pp-fg-default)", chip: "var(--pp-bg-subtle)" };
   const desktop = viewport === "desktop";
   const [profileOpen, setProfileOpen] = useStateAP(false);
@@ -387,7 +387,7 @@ function ChromeBar({ theme, viewport, app, setApp, onOpenQR, onFindClubs, onOpen
   // the north-star design.
   const loggedOut = app === "cr";
   if (loggedOut && window.ChromeBarLoggedOut) {
-    return <window.ChromeBarLoggedOut theme={theme} viewport={viewport} active={active} onNav={onNav} />;
+    return <window.ChromeBarLoggedOut theme={theme} viewport={viewport} active={active} onNav={onNav} searchValues={searchValues} />;
   }
   return (
     <div style={{
@@ -2337,33 +2337,9 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
     const el = trackRef.current; if (!el) return;
     el.scrollBy({ left: dx, behavior: "smooth" });
   };
-  // Mobile carousel focus elevation — observe each card and elevate
-  // the one(s) that are ≥70% visible inside the track viewport. Touch
-  // devices have no :hover, so this gives the visible card the same
-  // "in-focus" cue desktop gets from a mouse hover.
-  React.useEffect(() => {
-    if (!isMobile || typeof IntersectionObserver === "undefined") return;
-    const track = trackRef.current;
-    if (!track) return;
-    const cards = Array.from(track.querySelectorAll("[data-card-hover]"));
-    if (cards.length === 0) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.intersectionRatio >= 0.7) {
-            e.target.style.boxShadow = "0 12px 32px rgba(15,18,20,0.18)";
-            e.target.style.transform = "translateY(-4px)";
-          } else if (e.intersectionRatio < 0.4) {
-            e.target.style.boxShadow = "none";
-            e.target.style.transform = "translateY(0)";
-          }
-        });
-      },
-      { root: track, threshold: [0, 0.4, 0.7, 1] }
-    );
-    cards.forEach((c) => obs.observe(c));
-    return () => obs.disconnect();
-  }, [isMobile]);
+  // Carousel auto-focus elevation removed — cards stay flat at
+  // rest on mobile. Desktop hover still elevates via the
+  // onMouseEnter handlers wired further down on each card.
   return (
     <div style={{ marginTop: isMobile ? 48 : 56 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
@@ -3046,7 +3022,7 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
       "--text": theme.t.text, "--text-muted": theme.t.textMuted, "--text-subtle": theme.t.textSubtle,
       "--text-inverted": theme.t.textInverted, "--line": theme.t.line, "--rule": theme.t.rule, "--chip": theme.t.chip
     }}>
-      <ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => setQrOpen(true)} onFindClubs={onFindClubs} onOpenProfile={() => {if (window.__navigateProfile) window.__navigateProfile();}} active="Home" onNav={(l) => {if (window.__navigate) window.__navigate(l);}} />
+      <ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => setQrOpen(true)} onFindClubs={onFindClubs} onOpenProfile={() => {if (window.__navigateProfile) window.__navigateProfile();}} active="Home" onNav={(l) => {if (window.__navigate) window.__navigate(l);}} searchValues={searchValues} />
       <div style={{
         // Fluid page container. Width caps at 1200 on the largest
         // viewports but the padding scales with viewport width via
@@ -3144,23 +3120,19 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             against a hard edge. */}
         {isCR && window.SearchBar &&
         <div style={{
-          position: "sticky",
-          // 64 desktop matches the logged-out ChromeBar; 56 on mobile.
-          top: isMobile ? 56 : 64,
-          zIndex: 40,
-          // Negative margins escape the maxWidth parent so the sticky shelf
-          // spans full device-frame width. Desktop has 120px gutter; mobile
-          // has 16px container padding so we only need -16 there.
+          // Hero SearchBar — sits in the page flow, NOT sticky. On
+          // desktop, the floating chrome (ChromeBarLoggedOut) swaps
+          // its center tabs for a compact search pill once the user
+          // scrolls past 200px, so the SearchBar doesn't need to
+          // self-stick. On mobile it remains a top-of-page element.
+          // Negative margins extend the gradient surface to the
+          // device-frame edges.
           marginLeft: isMobile ? -16 : -120,
           marginRight: isMobile ? -16 : -120,
           paddingLeft: isMobile ? 16 : 120,
           paddingRight: isMobile ? 16 : 120,
-          background: "linear-gradient(to bottom, var(--pp-bg-default) 0%, var(--pp-bg-default) 80%, rgba(255,255,255,0) 100%)",
           marginBottom: isMobile ? 0 : 8,
-          // Mobile: 24px shelf top padding + 8px H1 marginBottom = 32px
-          // total gap from title to search bar (per spec). Desktop unchanged.
           paddingTop: isMobile ? 24 : 16,
-          // Mobile: 16px between bar and the location blurb below.
           paddingBottom: isMobile ? 16 : 4,
         }}>
             {isMobile && window.SearchBarCompact
@@ -3276,7 +3248,8 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
         }
         {!isCR && <ClubLeaderboardSegment theme={theme} isCR={isCR} />}
       </div>
-      <DesktopActionFloater theme={theme} viewport={viewport} visible={pastActions} onOpenEventList={onOpenEventList} onFindClubs={onFindClubs} isCR={isCR} />
+      {/* DesktopActionFloater removed — actions live in the chrome
+          and search bar instead of a persistent bottom bar. */}
       {qrOpen && <MemberQRSheet theme={theme} onClose={() => setQrOpen(false)} />}
     </div>);
 

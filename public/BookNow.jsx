@@ -442,25 +442,12 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
   const activePlayers = v.activePlayers != null ? v.activePlayers : (30 + hash % 35);
   const venueForMap = { ...v, distance, activePlayers };
 
-  // Mobile carousel focus state — touch devices don't get :hover, so the
-  // "elevated" look (shadow + lift) is driven by an IntersectionObserver
-  // that flags the card as focused when it's ≥70% visible in the carousel
-  // viewport. Desktop keeps its onMouseEnter/Leave handlers.
+  // Mobile cards no longer auto-elevate the in-viewport card —
+  // the IntersectionObserver-driven focus state added too much
+  // visual noise. Desktop keeps its onMouseEnter/Leave handlers
+  // for the explicit lift; mobile is flat at rest.
   const cardRef = React.useRef(null);
-  const [inFocus, setInFocus] = React.useState(false);
-  React.useEffect(() => {
-    if (!isMobile) return;
-    const el = cardRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setInFocus(entry.intersectionRatio >= 0.7),
-      { threshold: [0, 0.4, 0.7, 1] }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [isMobile]);
-
-  const elevated = isMobile ? inFocus : false; // desktop uses :hover handlers
+  const elevated = false;
   return (
     <div
       ref={cardRef}

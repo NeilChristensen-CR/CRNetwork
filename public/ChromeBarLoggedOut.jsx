@@ -8,10 +8,38 @@
 // ChromeBar (in Apps.jsx) delegates to this when app === "cr".
 // ----------------------------------------------------------------------------
 
-const { useState: useStateCBLO } = React;
+const { useState: useStateCBLO, useEffect: useEffectCBLO } = React;
 
-function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now", onNav }) {
+function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now", onNav, searchValues }) {
   const desktop = viewport === "desktop";
+
+  // Scroll-driven chrome swap: once the user scrolls past the hero
+  // SearchBar, the center tabs hide and a compact search pill
+  // appears in their place — keeping the primary filter affordance
+  // always reachable as the page scrolls. Threshold of 200px clears
+  // the hero title + the search bar above the fold so the swap
+  // happens after the user is genuinely past the hero. Disabled on
+  // mobile (mobile uses its own sticky chrome strategy).
+  const [scrolled, setScrolled] = useStateCBLO(false);
+  useEffectCBLO(() => {
+    if (!desktop || typeof window === "undefined") return;
+    const onScroll = () => setScrolled(window.scrollY > 200);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [desktop]);
+
+  // Compact filter summary, derived from the live SearchBar values
+  // passed from the parent (DashboardDesktop). Falls back to the
+  // defaults when no values are provided so the pill always shows
+  // something readable.
+  const v = searchValues || {};
+  const summary = [
+    v.where || "Anywhere",
+    v.activity || "Any Sport",
+    v.when || "Any Day",
+    v.who || "1 Player",
+  ].join(" · ");
   // Color tokens read from the Pickle Pixels alias layer so the chrome
   // re-themes automatically when <html data-theme="dark"> flips. brandGreen
   // is intentionally a primitive — the brand mark color shouldn't shift
@@ -114,15 +142,13 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
           </span>
         </button>
 
-        {/* Center tabs — desktop only. Absolutely positioned so the
-            left brandmark and right CTA stay anchored to the edges via
-            the parent's space-between flex while the tabs sit dead-
-            centered regardless of side-content widths. Each tab is
-            full chrome height (64px) so its active underline lands
-            flush against the chrome's own border-bottom, reading as
-            one continuous bottom rule with a colored segment under
-            the active label. */}
-        {desktop && (
+        {/* Center slot — desktop only. Renders the Clubs / Players
+            tabs at rest, swaps to a compact search pill once the
+            user scrolls past the hero SearchBar (window.scrollY >
+            200). Clicking the pill scrolls back to the hero so the
+            full filter UI can be edited. Same absolutely-positioned
+            center anchor in both states. */}
+        {desktop && !scrolled && (
           <div
             role="tablist"
             aria-label="Browse"
@@ -171,6 +197,58 @@ function ChromeBarLoggedOut({ theme, viewport = "desktop", active = "Reserve Now
               );
             })}
           </div>
+        )}
+
+        {desktop && scrolled && (
+          <button
+            type="button"
+            onClick={() => {
+              // Scroll back to the top so the hero search bar is
+              // visible and ready to edit. The user can also click
+              // the search pill icon to open the desktop results
+              // modal directly if window.__openResultsModal is wired.
+              if (typeof window !== "undefined") {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
+            aria-label="Edit search filters"
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              maxWidth: 520,
+              width: "min(520px, calc(100vw - 360px))",
+              height: 44,
+              padding: "0 6px 0 18px",
+              borderRadius: 999,
+              background: "var(--pp-bg-default)",
+              border: 0,
+              boxShadow: "0 1px 2px rgba(15,18,20,.06), 0 4px 14px rgba(15,18,20,.08), inset 0 0 0 1px rgba(15,18,20,.08)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              cursor: "pointer",
+              fontFamily: "Inter, system-ui, sans-serif",
+            }}
+          >
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              minWidth: 0, flex: 1,
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              fontSize: 13, fontWeight: 500, color: C.text,
+            }}>{summary}</span>
+            <span style={{
+              width: 32, height: 32, borderRadius: 999,
+              background: "var(--pp-bg-inverse)",
+              color: "var(--pp-fg-onVibrant)",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
+            }}>
+              {window.Icon && <window.Icon name="Search" size={14} strokeWidth={2.2} color="currentColor" />}
+            </span>
+          </button>
         )}
 
         {/* Right — primary CTA pill. Copy switched from "Sign In" to
