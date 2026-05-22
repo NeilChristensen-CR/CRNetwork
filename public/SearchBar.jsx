@@ -114,14 +114,14 @@ const SB_WHEN_TIME_BUCKETS = [
 // "club card" UI from the logged-out home (MiniMap header, sport tag,
 // booked count, 2x2 time slots, "See Events & Info" footer).
 const SB_RESULTS_CLUBS = [
-  { id: "old-coast",      name: "Old Coast Pickleball",      city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 23, distance: "2.1", times: ["9:00 AM", "9:30 AM", "10:00 AM", "11:30 AM"] },
-  { id: "anastasia",      name: "Anastasia Tennis Club",     city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 14, distance: "2.4", times: ["8:00 AM", "8:30 AM", "12:00 PM",  "2:00 PM"] },
-  { id: "vilano-beach",   name: "Vilano Beach Racquet",      city: "Vilano Beach",       state: "FL", sport: "Tennis",     booked: 41, distance: "2.6", times: ["10:00 AM", "10:30 AM", "11:00 AM", "12:30 PM"] },
-  { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", city: "Jacksonville",       state: "FL", sport: "Pickleball", booked: 18, distance: "8.4", times: ["8:00 AM", "12:00 PM", "2:30 PM", "4:00 PM"] },
-  { id: "treaty-park",    name: "Treaty Park Tennis",        city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 9,  distance: "3.2", times: ["7:00 AM", "9:00 AM", "3:00 PM", "5:30 PM"] },
-  { id: "south-st-aug",   name: "South St. Augustine",       city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 27, distance: "3.6", times: ["8:30 AM", "11:00 AM", "1:30 PM", "4:30 PM"] },
-  { id: "the-hub-padel",  name: "The Hub Padel",             city: "Jacksonville Beach", state: "FL", sport: "Padel",      booked: 12, distance: "5.1", times: ["9:00 AM", "10:30 AM", "1:00 PM", "6:00 PM"] },
-  { id: "world-golf",     name: "World Golf Village Tennis", city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 31, distance: "6.8", times: ["7:30 AM", "9:00 AM", "2:00 PM", "6:30 PM"] },
+  { id: "old-coast",      name: "Old Coast Pickleball",      city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 23, distance: "2.1", logoMark: "OC", logoBg: "#2E5D52", times: ["9:00 AM", "9:30 AM", "10:00 AM", "11:30 AM"] },
+  { id: "anastasia",      name: "Anastasia Tennis Club",     city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 14, distance: "2.4", logoMark: "AT", logoBg: "#5B7CFA", times: ["8:00 AM", "8:30 AM", "12:00 PM",  "2:00 PM"] },
+  { id: "vilano-beach",   name: "Vilano Beach Racquet",      city: "Vilano Beach",       state: "FL", sport: "Tennis",     booked: 41, distance: "2.6", logoMark: "VB", logoBg: "#7C3AED", times: ["10:00 AM", "10:30 AM", "11:00 AM", "12:30 PM"] },
+  { id: "dill-dinkers",   name: "Dill Dinkers Jacksonville", city: "Jacksonville",       state: "FL", sport: "Pickleball", booked: 18, distance: "8.4", logoMark: "DD", logoBg: "#8E5BE8", times: ["8:00 AM", "12:00 PM", "2:30 PM", "4:00 PM"] },
+  { id: "treaty-park",    name: "Treaty Park Tennis",        city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 9,  distance: "3.2", logoMark: "TP", logoBg: "#0F1214", times: ["7:00 AM", "9:00 AM", "3:00 PM", "5:30 PM"] },
+  { id: "south-st-aug",   name: "South St. Augustine",       city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 27, distance: "3.6", logoMark: "SA", logoBg: "#C77700", times: ["8:30 AM", "11:00 AM", "1:30 PM", "4:30 PM"] },
+  { id: "the-hub-padel",  name: "The Hub Padel",             city: "Jacksonville Beach", state: "FL", sport: "Padel",      booked: 12, distance: "5.1", logoMark: "HP", logoBg: "#D6573B", times: ["9:00 AM", "10:30 AM", "1:00 PM", "6:00 PM"] },
+  { id: "world-golf",     name: "World Golf Village Tennis", city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 31, distance: "6.8", logoMark: "WG", logoBg: "#1F8A5B", times: ["7:30 AM", "9:00 AM", "2:00 PM", "6:30 PM"] },
 ];
 
 // ---- Stars helper ---------------------------------------------------------
@@ -1926,7 +1926,7 @@ function SearchResultsSheet({ open, onClose, onEdit, values, onSelectClub, theme
                 cursor: "pointer",
               }}
             >
-              {window.Icon && <window.Icon name="SlidersHorizontal" size={20} strokeWidth={2} color="var(--pp-fg-default)" />}
+              {window.Icon && <window.Icon name="Pencil" size={18} strokeWidth={2} color="var(--pp-fg-default)" />}
             </button>
             <button
               type="button"
@@ -1984,7 +1984,19 @@ function SearchResultsSheet({ open, onClose, onEdit, values, onSelectClub, theme
               onMouseEnter={(e) => { e.currentTarget.style.background = "var(--pp-bg-subtle)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
-              {window.Icon && <window.Icon name="Building2" size={18} strokeWidth={2} color="var(--pp-fg-muted)" />}
+              {/* Club avatar — colored disc with the logoMark initials,
+                  matching the brand-color treatment used on the home
+                  carousel cards. Replaces the generic Building2 glyph
+                  so each club gets a recognizable identity at-a-glance. */}
+              <span style={{
+                width: 40, height: 40, borderRadius: 10,
+                background: c.logoBg || "var(--pp-fg-default)",
+                color: "var(--pp-neutral-0)",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+                fontWeight: 800, fontSize: 13, letterSpacing: -0.2,
+                flexShrink: 0,
+              }}>{c.logoMark || c.name.split(" ").map((w) => w[0]).join("").slice(0, 2)}</span>
               <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
                 <span style={{
                   fontSize: 15, fontWeight: 600, color: "var(--pp-fg-default)",
@@ -1996,7 +2008,7 @@ function SearchResultsSheet({ open, onClose, onEdit, values, onSelectClub, theme
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                 }}>
                   {c.city}{c.state ? `, ${c.state}` : ""}
-                  {c.distance ? ` · ${c.distance} mi` : ""}
+                  {c.distance ? ` · ${c.distance} mi away` : ""}
                 </span>
               </span>
               {window.Icon && <window.Icon name="ChevronRight" size={18} strokeWidth={2} color="var(--pp-fg-muted)" />}
