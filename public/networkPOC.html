@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CourtReserve · Events Discovery</title>
-<link rel="stylesheet" href="colors_and_type.css?v=20260521ax">
+<link rel="stylesheet" href="colors_and_type.css?v=20260521ay">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -99,27 +99,27 @@
 <!-- Cache-buster — bump ?v= when iterating on a .jsx file so the browser
      refetches it instead of serving the previously-compiled version.
      Babel-standalone has no module hashing of its own. -->
-<script type="text/babel" src="Components.jsx?v=20260521ax"></script>
-<script type="text/babel" src="SearchBar.jsx?v=20260521ax"></script>
-<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521ax"></script>
-<script type="text/babel" src="data.jsx?v=20260521ax"></script>
-<script type="text/babel" src="EventCard.jsx?v=20260521ax"></script>
-<script type="text/babel" src="BrowseDesktop.jsx?v=20260521ax"></script>
-<script type="text/babel" src="FilterDesktop.jsx?v=20260521ax"></script>
-<script type="text/babel" src="Mobile.jsx?v=20260521ax"></script>
-<script type="text/babel" src="FilterBarD.jsx?v=20260521ax"></script>
-<script type="text/babel" src="RecurringCarousel.jsx?v=20260521ax"></script>
-<script type="text/babel" src="EventDetails.jsx?v=20260521ax"></script>
-<script type="text/babel" src="EventRegistration.jsx?v=20260521ax"></script>
-<script type="text/babel" src="BookNow.jsx?v=20260521ax"></script>
-<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521ax"></script>
-<script type="text/babel" src="BookCourtWidget.jsx?v=20260521ax"></script>
-<script type="text/babel" src="Apps.jsx?v=20260521ax"></script>
-<script type="text/babel" src="ClubDetail.jsx?v=20260521ax"></script>
-<script type="text/babel" src="FindClubs.jsx?v=20260521ax"></script>
-<script type="text/babel" src="Profile.jsx?v=20260521ax"></script>
-<script type="text/babel" src="ReserveCourt.jsx?v=20260521ax"></script>
-<script type="text/babel" src="design-canvas.jsx?v=20260521ax"></script>
+<script type="text/babel" src="Components.jsx?v=20260521ay"></script>
+<script type="text/babel" src="SearchBar.jsx?v=20260521ay"></script>
+<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521ay"></script>
+<script type="text/babel" src="data.jsx?v=20260521ay"></script>
+<script type="text/babel" src="EventCard.jsx?v=20260521ay"></script>
+<script type="text/babel" src="BrowseDesktop.jsx?v=20260521ay"></script>
+<script type="text/babel" src="FilterDesktop.jsx?v=20260521ay"></script>
+<script type="text/babel" src="Mobile.jsx?v=20260521ay"></script>
+<script type="text/babel" src="FilterBarD.jsx?v=20260521ay"></script>
+<script type="text/babel" src="RecurringCarousel.jsx?v=20260521ay"></script>
+<script type="text/babel" src="EventDetails.jsx?v=20260521ay"></script>
+<script type="text/babel" src="EventRegistration.jsx?v=20260521ay"></script>
+<script type="text/babel" src="BookNow.jsx?v=20260521ay"></script>
+<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521ay"></script>
+<script type="text/babel" src="BookCourtWidget.jsx?v=20260521ay"></script>
+<script type="text/babel" src="Apps.jsx?v=20260521ay"></script>
+<script type="text/babel" src="ClubDetail.jsx?v=20260521ay"></script>
+<script type="text/babel" src="FindClubs.jsx?v=20260521ay"></script>
+<script type="text/babel" src="Profile.jsx?v=20260521ay"></script>
+<script type="text/babel" src="ReserveCourt.jsx?v=20260521ay"></script>
+<script type="text/babel" src="design-canvas.jsx?v=20260521ay"></script>
 <script type="text/babel">
   const { useState } = React;
 
@@ -153,8 +153,8 @@
     // QA across breakpoints without resizing the window.
     //
     // Breakpoints (matches common tablet/web ranges):
-    //   mobile          <  768px  → viewport="mobile"
-    //   tablet / web    ≥ 768px   → viewport="desktop"
+    //   mobile          <  768px  → viewport={viewport}
+    //   tablet / web    ≥ 768px   → viewport={viewport}
     //
     // The DashboardDesktop internals constrain content to maxWidth
     // 1200 already, so tablet (768-1024), desktop web (1024-1440), and
@@ -162,30 +162,41 @@
     // proportionally centered — page padding bumps with viewport.
     const getInitialDevice = () => {
       if (typeof window === "undefined") return "desktop";
-      return window.matchMedia && window.matchMedia("(max-width: 767px)").matches
-        ? "mobile" : "desktop";
+      const w = window.innerWidth || 1024;
+      if (w < 768) return "mobile";
+      if (w < 1024) return "tablet";
+      if (w < 1440) return "desktop";
+      return "wide";
     };
     const [device, setDevice] = useState(getInitialDevice());
     const [userOverrode, setUserOverrode] = useState(false);
     React.useEffect(() => {
-      if (typeof window === "undefined" || !window.matchMedia) return;
-      const mq = window.matchMedia("(max-width: 767px)");
-      const onChange = () => {
+      if (typeof window === "undefined") return;
+      const onResize = () => {
         // Only auto-flip when the user hasn't manually picked a device
         // via the ControlPanel. Manual override sticks until the page
         // reloads — keeps QA mode from getting disrupted by a stray
         // resize while toggling.
-        if (!userOverrode) setDevice(mq.matches ? "mobile" : "desktop");
+        if (userOverrode) return;
+        const w = window.innerWidth || 1024;
+        setDevice(
+          w < 768 ? "mobile"
+            : w < 1024 ? "tablet"
+            : w < 1440 ? "desktop"
+            : "wide"
+        );
       };
-      if (mq.addEventListener) mq.addEventListener("change", onChange);
-      else mq.addListener(onChange);
-      return () => {
-        if (mq.removeEventListener) mq.removeEventListener("change", onChange);
-        else mq.removeListener(onChange);
-      };
+      window.addEventListener("resize", onResize);
+      return () => window.removeEventListener("resize", onResize);
     }, [userOverrode]);
     // Wrap setDevice so any ControlPanel toggle marks the override flag.
     const setDeviceManual = (next) => { setUserOverrode(true); setDevice(next); };
+    // Derived viewport prop — drives all the component-level
+    // `isMobile` checks. Mobile + Tablet share the mobile-style
+    // layout (single column, compact pill, accordion sheet) since
+    // touch + narrow widths warrant the same treatment. Desktop +
+    // Wide share the multi-column desktop layout.
+    const viewport = (device === "mobile" || device === "tablet") ? "mobile" : "desktop";
     // Auth state — logged-out defaults to the universal CourtReserve view
     // (multi-club discovery), logged-in defaults to the player's home
     // club (Old Coast). Toggling forces the matching brand app.
@@ -450,8 +461,8 @@
             <Group label="Device">
               {/* Tablet + Wide desktop are visual labels for now — the
                   prototype renders all desktop-class widths through the
-                  same viewport="desktop" code path. Mobile uniquely
-                  triggers viewport="mobile" + 410-cap layout. */}
+                  same viewport={viewport} code path. Mobile uniquely
+                  triggers viewport={viewport} + 410-cap layout. */}
               <RadioRow on={device === "mobile"}  onClick={() => setDeviceManual("mobile")}   icon="Smartphone" label="Mobile" />
               <RadioRow on={device === "tablet"}  onClick={() => setDeviceManual("tablet")}   icon="Tablet"     label="Tablet" />
               <RadioRow on={device === "desktop"} onClick={() => setDeviceManual("desktop")}  icon="Monitor"    label="Desktop" />
@@ -557,14 +568,14 @@
       // how it should behave on a real tablet.
       <div style={{ background: "#F4F5F6", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
         <div style={{ display: "flex", justifyContent: "center" }}>
-          {device !== "mobile" ? (
+          {viewport !== "mobile" ? (
             <div id="device-frame-inner" ref={deviceFrameRef} style={{
               // Width caps simulate each desktop-class breakpoint;
               // height: 100vh keeps the nested flex:1 overflowY:auto
               // scroll container bounded. Sticky headers + the
               // floating action bar anchor to that inner scroller.
               width: "100%",
-              maxWidth: device === "tablet" ? 820 : device === "desktop" ? 1280 : undefined,
+              maxWidth: device === "desktop" ? 1280 : undefined,
               height: "100vh",
               background: "var(--pp-bg-default)",
               color: "var(--pp-fg-default)",
@@ -579,95 +590,99 @@
               <div style={{ flex: 1, overflowY: "auto" }}>
                 {forceType
                   ? (forceType === "register"
-                      ? <EventRegistration viewport="desktop" type={lastDetailType} onBack={() => setForceType(lastDetailType)} />
-                      : <EventDetails type={forceType} viewport="desktop" onBack={() => setForceType(null)} onRegister={() => { setLastDetailType(forceType); setForceType("register"); }} />)
+                      ? <EventRegistration viewport={viewport} type={lastDetailType} onBack={() => setForceType(lastDetailType)} />
+                      : <EventDetails type={forceType} viewport={viewport} onBack={() => setForceType(null)} onRegister={() => { setLastDetailType(forceType); setForceType("register"); }} />)
                   : (screen === "reserve-court"
-                      ? <ReserveCourtPage theme={theme} viewport="desktop" onBack={() => setScreen("home")} app={app} setApp={setApp} />
+                      ? <ReserveCourtPage theme={theme} viewport={viewport} onBack={() => setScreen("home")} app={app} setApp={setApp} />
                       : (screen === "clubs"
-                      ? <FindClubs viewport="desktop" theme={theme} app={app} setApp={setApp} onBack={() => setScreen("home")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} />
+                      ? <FindClubs viewport={viewport} theme={theme} app={app} setApp={setApp} onBack={() => setScreen("home")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} />
                       : (screen === "messages"
                           ? (
                               <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
-                                {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} active="Messages" onNav={(l) => window.__navigate && window.__navigate(l)} />}
+                                {window.ChromeBar && <window.ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} active="Messages" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                 <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 24px 64px" }}>
                                   {window.MessagesScreen && <window.MessagesScreen theme={theme} />}
                                 </div>
                               </div>
                           )
                       : (screen === "club"
-                          ? <ClubDetail viewport="desktop" theme={theme} clubId={selectedClubId || app} loggedIn={loggedIn} onBack={() => setScreen("clubs")} onBookCourt={() => setScreen("events")} onBrowseEvents={() => setScreen("events")} />
+                          ? <ClubDetail viewport={viewport} theme={theme} clubId={selectedClubId || app} loggedIn={loggedIn} onBack={() => setScreen("clubs")} onBookCourt={() => setScreen("events")} onBrowseEvents={() => setScreen("events")} />
                           : (screen === "profile"
                               ? (
                                   <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
-                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
+                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
                                     <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 24px 80px" }}>
-                                      {window.ProfilePage && <window.ProfilePage theme={theme} viewport="desktop" onBack={() => setScreen("home")} />}
+                                      {window.ProfilePage && <window.ProfilePage theme={theme} viewport={viewport} onBack={() => setScreen("home")} />}
                                     </div>
                                   </div>
                               )
                           : (screen === "equipment-locker"
                               ? (
                                   <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
-                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
-                                    {window.EquipmentLockerPage && <window.EquipmentLockerPage theme={theme} viewport="desktop" onBack={() => setScreen("profile")} />}
+                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
+                                    {window.EquipmentLockerPage && <window.EquipmentLockerPage theme={theme} viewport={viewport} onBack={() => setScreen("profile")} />}
                                   </div>
                               )
                           : (screen === "equipment-add"
                               ? (
                                   <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
-                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
-                                    {window.EquipmentAddPage && <window.EquipmentAddPage theme={theme} viewport="desktop" onBack={() => setScreen("equipment-locker")} />}
+                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
+                                    {window.EquipmentAddPage && <window.EquipmentAddPage theme={theme} viewport={viewport} onBack={() => setScreen("equipment-locker")} />}
                                   </div>
                               )
                           : (screen === "privacy-security"
                               ? (
                                   <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
-                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
-                                    {window.PrivacySecurityPage && <window.PrivacySecurityPage theme={theme} viewport="desktop" onBack={() => setScreen("profile")} />}
+                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
+                                    {window.PrivacySecurityPage && <window.PrivacySecurityPage theme={theme} viewport={viewport} onBack={() => setScreen("profile")} />}
                                   </div>
                               )
                           : (screen === "profile-privacy"
                               ? (
                                   <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
-                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
-                                    {window.ProfilePrivacyPage && <window.ProfilePrivacyPage theme={theme} viewport="desktop" onBack={() => setScreen("privacy-security")} />}
+                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
+                                    {window.ProfilePrivacyPage && <window.ProfilePrivacyPage theme={theme} viewport={viewport} onBack={() => setScreen("privacy-security")} />}
                                   </div>
                               )
                           : (screen === "password"
                               ? (
                                   <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
-                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
-                                    {window.PasswordPage && <window.PasswordPage theme={theme} viewport="desktop" onBack={() => setScreen("privacy-security")} />}
+                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
+                                    {window.PasswordPage && <window.PasswordPage theme={theme} viewport={viewport} onBack={() => setScreen("privacy-security")} />}
                                   </div>
                               )
                           : (screen === "two-factor"
                               ? (
                                   <div style={{ background: "var(--pp-bg-default)", color: "var(--pp-fg-default)", minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
-                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport="desktop" app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
-                                    {window.TwoFactorPage && <window.TwoFactorPage theme={theme} viewport="desktop" onBack={() => setScreen("privacy-security")} />}
+                                    {window.ChromeBar && <window.ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => {}} onFindClubs={() => setScreen("clubs")} onOpenProfile={() => setScreen("profile")} active="" onNav={(l) => window.__navigate && window.__navigate(l)} />}
+                                    {window.TwoFactorPage && <window.TwoFactorPage theme={theme} viewport={viewport} onBack={() => setScreen("privacy-security")} />}
                                   </div>
                               )
                           : (screen === "home"
                               ? (app === "cr"
-                                  ? <HomeCR viewport="desktop" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />
-                                  : <HomeOC viewport="desktop" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />)
+                                  ? <HomeCR viewport={viewport} theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />
+                                  : <HomeOC viewport={viewport} theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />)
                               : <BrowseDesktop theme={theme} app={app} setApp={setApp} onFindClubs={() => setScreen("clubs")} onBack={() => setScreen("home")} />))))))))))))}
               </div>
             </div>
           ) : (
-            // Mobile — 410-wide column centered in the viewport. The
-            // phone bezel + simulated iOS status bar are gone (the user
-            // can use their browser DevTools to mock a real device);
-            // we just want a constrained column that mobile components
-            // can use to demonstrate their breakpoint behavior. The
-            // `device-frame-inner` ID stays on this wrapper so the
-            // MobileSearchSheet portal target still resolves.
-            // `height: 100vh` on the inner keeps the existing
-            // `flex: 1 overflow: hidden` body container bounded so
-            // sticky shelves + action bars anchor correctly.
+            // Mobile-style structure — used for both Mobile (410 cap)
+            // and Tablet (820 cap). Same flex-column + sticky-bottom-nav
+            // anchoring; just a wider frame at tablet so the touch
+            // layout has more breathing room. The `device-frame-inner`
+            // ID stays on the inner wrapper so the MobileSearchSheet
+            // portal target still resolves. `height: 100vh` on the
+            // inner keeps the existing `flex: 1 overflow: hidden`
+            // body container bounded so sticky shelves + action bars
+            // anchor correctly.
             <div ref={deviceFrameRef} style={{
-              width: "100%", maxWidth: 410, height: "100vh",
+              width: "100%",
+              maxWidth: device === "tablet" ? 820 : 410,
+              height: "100vh",
               display: "flex", justifyContent: "center",
+              // Frame shadow on mobile/tablet so the constrained width
+              // reads as a "viewport" against the gray page bg behind.
+              boxShadow: "0 0 0 1px rgba(15,18,20,.06), 0 12px 32px rgba(15,18,20,.06)",
             }}>
               <div id="device-frame-inner" style={{
                 width: "100%", height: "100%",
@@ -680,32 +695,32 @@
                 <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
                   {forceType
                     ? (forceType === "register"
-                        ? <EventRegistration viewport="mobile" type={lastDetailType} onBack={() => setForceType(lastDetailType)} />
-                        : <EventDetails type={forceType} viewport="mobile" onBack={() => setForceType(null)} onRegister={() => { setLastDetailType(forceType); setForceType("register"); }} />)
+                        ? <EventRegistration viewport={viewport} type={lastDetailType} onBack={() => setForceType(lastDetailType)} />
+                        : <EventDetails type={forceType} viewport={viewport} onBack={() => setForceType(null)} onRegister={() => { setLastDetailType(forceType); setForceType("register"); }} />)
                     : (screen === "reserve-court"
-                        ? <ReserveCourtPage theme={theme} viewport="mobile" onBack={() => setScreen("home")} app={app} setApp={setApp} />
+                        ? <ReserveCourtPage theme={theme} viewport={viewport} onBack={() => setScreen("home")} app={app} setApp={setApp} />
                         : (screen === "clubs"
-                        ? <FindClubs viewport="mobile" theme={theme} app={app} setApp={setApp} onBack={() => setScreen("home")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} />
+                        ? <FindClubs viewport={viewport} theme={theme} app={app} setApp={setApp} onBack={() => setScreen("home")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} />
                         : (screen === "club"
-                            ? <ClubDetail viewport="mobile" theme={theme} clubId={selectedClubId || app} loggedIn={loggedIn} onBack={() => setScreen("clubs")} onBookCourt={() => setScreen("events")} onBrowseEvents={() => setScreen("events")} />
+                            ? <ClubDetail viewport={viewport} theme={theme} clubId={selectedClubId || app} loggedIn={loggedIn} onBack={() => setScreen("clubs")} onBookCourt={() => setScreen("events")} onBrowseEvents={() => setScreen("events")} />
                             : (screen === "profile"
-                                ? (window.ProfilePage && <window.ProfilePage theme={theme} viewport="mobile" onBack={() => setScreen("home")} />)
+                                ? (window.ProfilePage && <window.ProfilePage theme={theme} viewport={viewport} onBack={() => setScreen("home")} />)
                             : (screen === "equipment-locker"
-                                ? (window.EquipmentLockerPage && <window.EquipmentLockerPage theme={theme} viewport="mobile" onBack={() => setScreen("profile")} />)
+                                ? (window.EquipmentLockerPage && <window.EquipmentLockerPage theme={theme} viewport={viewport} onBack={() => setScreen("profile")} />)
                             : (screen === "equipment-add"
-                                ? (window.EquipmentAddPage && <window.EquipmentAddPage theme={theme} viewport="mobile" onBack={() => setScreen("equipment-locker")} />)
+                                ? (window.EquipmentAddPage && <window.EquipmentAddPage theme={theme} viewport={viewport} onBack={() => setScreen("equipment-locker")} />)
                             : (screen === "privacy-security"
-                                ? (window.PrivacySecurityPage && <window.PrivacySecurityPage theme={theme} viewport="mobile" onBack={() => setScreen("profile")} />)
+                                ? (window.PrivacySecurityPage && <window.PrivacySecurityPage theme={theme} viewport={viewport} onBack={() => setScreen("profile")} />)
                             : (screen === "profile-privacy"
-                                ? (window.ProfilePrivacyPage && <window.ProfilePrivacyPage theme={theme} viewport="mobile" onBack={() => setScreen("privacy-security")} />)
+                                ? (window.ProfilePrivacyPage && <window.ProfilePrivacyPage theme={theme} viewport={viewport} onBack={() => setScreen("privacy-security")} />)
                             : (screen === "password"
-                                ? (window.PasswordPage && <window.PasswordPage theme={theme} viewport="mobile" onBack={() => setScreen("privacy-security")} />)
+                                ? (window.PasswordPage && <window.PasswordPage theme={theme} viewport={viewport} onBack={() => setScreen("privacy-security")} />)
                             : (screen === "two-factor"
-                                ? (window.TwoFactorPage && <window.TwoFactorPage theme={theme} viewport="mobile" onBack={() => setScreen("privacy-security")} />)
+                                ? (window.TwoFactorPage && <window.TwoFactorPage theme={theme} viewport={viewport} onBack={() => setScreen("privacy-security")} />)
                             : (screen === "home"
                                 ? (app === "cr"
-                                    ? <HomeCR viewport="mobile" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />
-                                    : <HomeOC viewport="mobile" theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />)
+                                    ? <HomeCR viewport={viewport} theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />
+                                    : <HomeOC viewport={viewport} theme={theme} app={app} setApp={setApp} onOpenEventList={() => setScreen("events")} onOpenClub={(id) => { setSelectedClubId(id || null); setScreen("club"); }} onFindClubs={() => setScreen("clubs")} onBookCourt={(prefill) => { if (prefill && prefill.clubId) setSelectedClubId(prefill.clubId); setScreen("reserve-court"); }} />)
                                 : <BrowseMobileInline />)))))))))))}
                 </div>
               </div>
