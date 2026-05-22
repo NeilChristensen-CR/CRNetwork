@@ -280,6 +280,20 @@
 }
 
 /* ============================================================
+   Touch-device hover guard. On devices without a hover-capable
+   pointer (touch screens), suppress the `:hover` styles applied
+   to data-card-hover cards so a tap doesn't leave a sticky lift.
+   The IntersectionObserver-driven "currently focused card"
+   elevation in JS does the right thing on mobile carousels.
+   ============================================================ */
+@media (hover: none) and (pointer: coarse) {
+  [data-card-hover]:hover {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+}
+
+/* ============================================================
    Semantic CSS (use directly in HTML).
    ============================================================ */
 

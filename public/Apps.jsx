@@ -2226,11 +2226,13 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop", filters
       {/* Carousel wrapper — `position: relative` so the right-edge gradient
           fade can sit absolutely on top, and y-padding gives card hover
           shadows room to render without getting clipped by the scroll
-          container's overflow box. */}
-      <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px 0" : "-16px -4px -16px" }}>
+          container's overflow box. overflowY: visible is required because
+          overflowX: auto otherwise implicitly clips the vertical axis,
+          which cuts off the card's lift shadow. */}
+      <div style={{ position: "relative", margin: isMobile ? "-24px -16px -32px 0" : "-24px -4px -32px" }}>
       <div ref={trackRef} style={{
-        display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
-        paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
+        display: "flex", gap: 16, overflowX: "auto", overflowY: "visible", scrollSnapType: "x mandatory",
+        paddingTop: isMobile ? 24 : 28, paddingBottom: isMobile ? 32 : 32, scrollbarWidth: "none",
         paddingLeft: 4, paddingRight: 4
       }}>
         {clubs.map((c) => (
@@ -2397,12 +2399,13 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
           </button>
         </div>
       </div>
-      {/* Carousel wrapper — relative for the right-edge fade overlay, y
-          padding so card hover shadows aren't clipped. */}
-      <div style={{ position: "relative", margin: isMobile ? "-8px -16px -8px 0" : "-16px -4px -16px" }}>
+      {/* Carousel wrapper — relative for the right-edge fade overlay,
+          y-padding + overflowY: visible so card hover/focus shadows
+          render fully without being clipped by the horizontal scroller. */}
+      <div style={{ position: "relative", margin: isMobile ? "-24px -16px -32px 0" : "-24px -4px -32px" }}>
       <div ref={trackRef} style={{
-        display: "flex", gap: 16, overflowX: "auto", scrollSnapType: "x mandatory",
-        paddingTop: isMobile ? 12 : 28, paddingBottom: isMobile ? 16 : 32, scrollbarWidth: "none",
+        display: "flex", gap: 16, overflowX: "auto", overflowY: "visible", scrollSnapType: "x mandatory",
+        paddingTop: isMobile ? 24 : 28, paddingBottom: isMobile ? 32 : 32, scrollbarWidth: "none",
         paddingLeft: 4, paddingRight: 4,
         alignItems: "stretch"
       }}>
