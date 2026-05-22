@@ -1554,24 +1554,12 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             </div>
           </SectionAccordion>
 
-          {/* ---- WHO — inline header, no accordion expand ----------------- */}
-          {/* The stepper pill lives directly across from the "Who" title;
-              no expanded body. Counter renders as "N players" and caps
-              at 8. Matches the section-header height + typography of the
-              accordion sections above so the row reads as part of the
-              same list. */}
-          <section style={{
-            minHeight: 56,
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            gap: 12,
-            padding: "12px 0",
-          }}>
-            <span style={{
-              fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-              fontWeight: 800,
-              fontSize: 16, lineHeight: 1.25, letterSpacing: -0.2,
-              color: "var(--pp-fg-default)",
-            }}>Who</span>
+          {/* ---- WHO — accordion (matches Where / What / When) ------------ */}
+          {/* Collapsed state: section title + a "1 player" chip on the
+              right, identical anatomy to the other three sections so the
+              four rows read as one consistent list. Tapping the row
+              expands it to reveal the stepper paddle. */}
+          <SectionAccordion id="who" label="Who" chip={v.who || "1 Player"}>
             {/* Single contained pill: [−] [N players] [+]. Cap at 8. */}
             <div style={{
               display: "inline-flex", alignItems: "center",
@@ -1624,19 +1612,66 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
                 {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="var(--pp-fg-default)" />}
               </button>
             </div>
-          </section>
+          </SectionAccordion>
         </div>
 
-        {/* Sticky footer — Search button sits on a gradient fade so the
-            scrolling content above dissolves into white instead of clipping
-            against a hard hairline. No top border. */}
+        {/* Sticky footer — Revert + Search buttons anchored to the
+            viewport bottom. The button row sits 48px from the sheet's
+            bottom edge; a white gradient covers the area below (white
+            at the bottom, fading to transparent above the buttons)
+            so any scrolling content dissolves into the bottom edge
+            instead of clipping against a hard hairline. */}
         <div style={{
-          padding: "20px 16px calc(12px + env(safe-area-inset-bottom)) 16px",
-          // Gradient fades into the sheet's bg-default surface. Using
-          // the canvas token directly so the fade lands on the right
-          // tone in both themes.
-          background: "linear-gradient(to bottom, transparent 0%, var(--pp-bg-default) 60%, var(--pp-bg-default) 100%)",
+          position: "sticky",
+          bottom: 0,
+          // Top padding leaves room for the gradient fade above the
+          // buttons; bottom padding lifts the buttons 48px off the
+          // viewport bottom per the mobile spec.
+          padding: `24px 16px calc(48px + env(safe-area-inset-bottom)) 16px`,
+          background: "linear-gradient(to bottom, transparent 0%, var(--pp-bg-default) 30%, var(--pp-bg-default) 100%)",
+          display: "flex", alignItems: "center", gap: 12,
         }}>
+          {/* Revert — secondary action, text-only ghost button.
+              Clears every facet back to its default ("all").
+              Sized smaller than Search so it reads as the
+              less-emphasized choice. */}
+          <button
+            type="button"
+            onClick={() => {
+              // Reset every committed facet + the local sub-facet state
+              // back to the sheet's initial open state. The accordion
+              // jumps back to WHERE so the user can start over cleanly.
+              setActivity("Any Sport");
+              setWhenDay("Any day");
+              setWhenTime("Any time");
+              setOpenWhenSub("day");
+              setWhereQuery("");
+              setOpenSection("where");
+              onChange({
+                ...v,
+                where: "Current location",
+                activities: [],
+                activity: "Any Sport",
+                whenDay: "Any day",
+                whenTime: "Any time",
+                when: "Any day · Any time",
+                who: "1 Player",
+                whoCount: 1,
+              });
+            }}
+            style={{
+              flexShrink: 0,
+              height: 52, padding: "0 18px", borderRadius: 12,
+              border: 0, background: "transparent",
+              color: "var(--pp-fg-muted)",
+              fontFamily: "inherit", fontSize: 14, fontWeight: 600,
+              textDecoration: "underline",
+              textUnderlineOffset: 4,
+              cursor: "pointer",
+            }}
+          >
+            Revert
+          </button>
           <button
             type="button"
             onClick={() => {
@@ -1657,7 +1692,8 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
               onClose && onClose();
             }}
             style={{
-              width: "100%", height: 52, borderRadius: 12,
+              flex: 1,
+              height: 52, borderRadius: 12,
               border: 0, background: "var(--pp-fg-default)", color: "var(--pp-bg-default)",
               fontFamily: "inherit", fontSize: 15, fontWeight: 700,
               display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,

@@ -1972,13 +1972,14 @@ function DesktopActionFloater({ theme, visible, onOpenEventList, onFindClubs, is
       bottom: isMobile ? 0 : 24,
       zIndex: 30,
       display: "flex", justifyContent: "center", pointerEvents: "none",
-      // Mobile: 16 top, 12 sides, 24 bottom — bottom cushion bumped from
-      // 8 → 24 so the pill doesn't disappear into the bottom of the device
-      // frame as the page scrolls. Desktop: floats inset.
-      padding: isMobile ? "16px 12px 24px 12px" : "0 24px",
+      // Mobile: 24 top, 12 sides, 48 bottom — bottom cushion bumped to
+      // 48 so the pill sits 48px from the viewport bottom (per the
+      // mobile bottom-action-button spec). Desktop: floats inset.
+      padding: isMobile ? "24px 12px 48px 12px" : "0 24px",
       marginTop: isMobile ? -88 : -88,
       // Gradient on mobile so the page content visibly fades into the
-      // sticky action shelf instead of cutting at a hard edge.
+      // sticky action shelf instead of cutting at a hard edge. White
+      // at the very bottom, fading to transparent above the pill.
       background: isMobile
         ? "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 35%, var(--pp-bg-default) 100%)"
         : "transparent",
