@@ -12,7 +12,11 @@
 //      a tight row of: venue, rating, sport/price/city, then 4 bookable time
 //      pills. Clicking a time opens the Customize modal, pre-filled with
 //      that slot as a template the player can tweak before confirming.
-function BookNowSegment({ theme, viewport = "desktop" }) {
+function BookNowSegment({ theme, viewport = "desktop", filters }) {
+  // External multi-sport filter from the parent SearchBar. Empty array
+  // (or missing) means "any sport"; populated array intersects with the
+  // internal `sport` chip filter so both sources can narrow the list.
+  const externalSports = (filters && Array.isArray(filters.activities)) ? filters.activities : [];
   // Fallback theme tokens read from the Pickle Pixels alias layer so
   // any caller that omits theme.t still re-themes with data-theme="dark".
   const t = theme.t || {
@@ -176,7 +180,10 @@ function BookNowSegment({ theme, viewport = "desktop" }) {
   filter(playersFits).
   map((v) => ({ ...v, times: (v.times || []).filter(timeFits) })).
   filter((v) => v.times.length > 0);
-  const filtered = sport === "all" ? projected : projected.filter((v) => v.sport === sport);
+  const internalSportFiltered = sport === "all" ? projected : projected.filter((v) => v.sport === sport);
+  const filtered = externalSports.length === 0
+    ? internalSportFiltered
+    : internalSportFiltered.filter((v) => externalSports.includes(v.sport));
   // My clubs lead the carousel; nearby clubs follow. Same-group order
   // preserved from the source array so we keep an editorially curated
   // sequence inside each bucket rather than re-sorting alphabetically.

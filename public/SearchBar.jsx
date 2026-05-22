@@ -304,6 +304,10 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
   // the mock copy.
   const [internal, setInternal] = useStateSB({
     where: "Oakland, CA",
+    // WHAT is now a multiselect — `activities` is the source of truth
+    // (array of sport ids) and `activity` is the derived display
+    // string the rest of the page reads. Empty array == "Any Sport".
+    activities: [],
     activity: "Any Sport",
     // WHEN is two-dimensional — `whenDay` and `whenTime` track each
     // sub-facet independently so the user can pick both; `when` is the
@@ -340,6 +344,32 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
     });
     if (values && onChange) onChange({ ...values, ...updates });
     else setInternal((prev) => ({ ...prev, ...updates }));
+  };
+
+  // WHAT multiselect — derive the user-visible display string from
+  // the activities array. Three rules:
+  //   0 selected → "Any Sport" (everything matches)
+  //   1 selected → the sport name ("Pickleball")
+  //   2 selected → comma-joined ("Pickleball, Tennis")
+  //   3+ selected → count summary ("3 sports")
+  const activityDisplay = (arr) => {
+    if (!arr || arr.length === 0) return "Any Sport";
+    if (arr.length === 1) return arr[0];
+    if (arr.length === 2) return arr.join(", ");
+    return `${arr.length} sports`;
+  };
+  // Toggle a sport in/out of v.activities. "Any Sport" is a sentinel
+  // that clears the multiselect back to the empty (all) state.
+  const toggleActivity = (sportId) => {
+    if (sportId === "Any Sport") {
+      setValues({ activities: [], activity: "Any Sport" });
+      return;
+    }
+    const current = Array.isArray(v.activities) ? v.activities : [];
+    const next = current.includes(sportId)
+      ? current.filter((s) => s !== sportId)
+      : [...current, sportId];
+    setValues({ activities: next, activity: activityDisplay(next) });
   };
 
   // Placeholder copy per segment — shown until the user selects something.
@@ -789,17 +819,26 @@ function SearchBar({ theme, viewport = "desktop", values, onChange, onSubmit }) 
       );
     }
     if (active === "activity") {
+      // Multiselect — each row toggles its sport in/out of v.activities.
+      // Popover stays OPEN so the user can pick multiple before closing.
+      // "Any Sport" acts as a clear-all sentinel: selecting it empties
+      // the array (and is shown as selected when the array is empty).
+      const selectedSet = new Set(Array.isArray(v.activities) ? v.activities : []);
       return (
         <SBPopover anchorRef={anchorRef}>
-          {SB_SPORTS.map((s) => (
-            <SBRow
-              key={s.id}
-              icon={s.icon}
-              label={s.id}
-              selected={v.activity === s.id}
-              onClick={() => { setValue("activity", s.id); setActive(null); }}
-            />
-          ))}
+          {SB_SPORTS.map((s) => {
+            const isAny = s.id === "Any Sport";
+            const isSelected = isAny ? selectedSet.size === 0 : selectedSet.has(s.id);
+            return (
+              <SBRow
+                key={s.id}
+                icon={s.icon}
+                label={s.id}
+                selected={isSelected}
+                onClick={() => toggleActivity(s.id)}
+              />
+            );
+          })}
         </SBPopover>
       );
     }

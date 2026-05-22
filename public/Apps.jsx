@@ -2143,9 +2143,10 @@ const TRENDING_PILL = {
 // ---- Verified popular clubs near you — horizontal carousel of map-image
 // venue cards. Each card: map preview with distance badge, club name,
 // rating + price, sport tag, and a See Events & Info link.
-function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
+function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop", filters }) {
   const isMobile = viewport === "mobile";
   const trackRef = React.useRef(null);
+  const activitiesFilter = (filters && Array.isArray(filters.activities)) ? filters.activities : [];
   // Varied club data per card so the carousel reads as a real list rather
   // than a repeated placeholder. Each club carries multiple sport tags so
   // the multi-sport venues read accurately.
@@ -2165,11 +2166,27 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop" }) {
     { id: "south-st-aug",   name: "South St. Augustine",       city: "St. Augustine",      state: "FL", sport: "Pickleball", booked: 27, distance: "3.6", times: ["8:30 AM", "11:00 AM", "1:30 PM", "4:30 PM"] },
     { id: "the-hub-padel",  name: "The Hub Padel",             city: "Jacksonville Beach", state: "FL", sport: "Padel",      booked: 12, distance: "5.1", times: ["9:00 AM", "10:30 AM", "1:00 PM", "6:00 PM"] },
     { id: "world-golf",     name: "World Golf Village Tennis", city: "St. Augustine",      state: "FL", sport: "Tennis",     booked: 31, distance: "6.8", times: ["7:30 AM", "9:00 AM", "2:00 PM", "6:30 PM"] },
-  ];
+  ].filter((c) => activitiesFilter.length === 0 || activitiesFilter.includes(c.sport));
   const scrollBy = (dx) => {
     const el = trackRef.current; if (!el) return;
     el.scrollBy({ left: dx, behavior: "smooth" });
   };
+  // No matches — render an empty state so the section doesn't silently
+  // disappear when the user's filter has no overlap with the data.
+  if (clubs.length === 0) {
+    return (
+      <div style={{ marginTop: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
+            Clubs near me
+          </h2>
+        </div>
+        <div style={{ padding: "32px 16px", color: "var(--pp-fg-muted)", fontSize: 14, fontFamily: "Inter, system-ui, sans-serif" }}>
+          No clubs match the selected sport{activitiesFilter.length > 1 ? "s" : ""}.
+        </div>
+      </div>
+    );
+  }
   return (
     <div style={{ marginTop: 8 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
@@ -2278,9 +2295,31 @@ const BEGINNER_EVENTS_DEFAULT = [
   { id: "b6", logoMark: "AT", logoBg: "var(--pp-blue-600)", logoFg: "#8AB6FF", logoLine1: "ANASTASIA",  logoLine2: "TENNIS",     title: "First Serve — New Player Social",          club: "Anastasia Tennis Club",     city: "St. Augustine, FL",  distance: "2.4 mi", date: "Fri, May 15", duration: "5:00 PM – 6:30 PM",  spotsLeft: 8,  totalSpots: 10, taken: 2,  price: "Free", tags: ["2.0 - 2.5 DUPR", "Social", "All Ages"] },
 ];
 
-function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false, viewport = "desktop", events = POPULAR_EVENTS_DEFAULT }) {
+// Map of club name → primary sport. Events store `club` as a name string
+// rather than an id, and don't carry a sport field of their own, so we
+// derive sport from the club name. Falls back to "Pickleball" for any
+// unmapped club so the filter doesn't silently drop unknown events.
+const CLUB_SPORT_BY_NAME = {
+  "Old Coast Pickleball":      "Pickleball",
+  "Anastasia Tennis Club":     "Tennis",
+  "Vilano Beach Racquet":      "Tennis",
+  "Dill Dinkers Jacksonville": "Pickleball",
+  "Treaty Park Tennis":        "Tennis",
+  "South St. Augustine":       "Pickleball",
+  "The Hub Padel":             "Padel",
+  "World Golf Village Tennis": "Tennis",
+};
+const sportForClub = (clubName) => CLUB_SPORT_BY_NAME[clubName] || "Pickleball";
+
+function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near you", showLocationFilter = false, viewport = "desktop", events = POPULAR_EVENTS_DEFAULT, filters }) {
   const isMobile = viewport === "mobile";
   const trackRef = React.useRef(null);
+  // Sport filter — events lookup their sport via sportForClub() since
+  // they don't store it directly. Empty array == no filter.
+  const activitiesFilter = (filters && Array.isArray(filters.activities)) ? filters.activities : [];
+  const filteredEvents = activitiesFilter.length === 0
+    ? events
+    : events.filter((ev) => activitiesFilter.includes(sportForClub(ev.club)));
   const scrollBy = (dx) => {
     const el = trackRef.current; if (!el) return;
     el.scrollBy({ left: dx, behavior: "smooth" });
@@ -2366,7 +2405,12 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
         paddingLeft: 4, paddingRight: 4,
         alignItems: "stretch"
       }}>
-        {events.map((ev) => (
+        {filteredEvents.length === 0 && (
+          <div style={{ padding: "32px 16px", color: "var(--pp-fg-muted)", fontSize: 14, fontFamily: "Inter, system-ui, sans-serif" }}>
+            No events match the selected sport{activitiesFilter.length > 1 ? "s" : ""}.
+          </div>
+        )}
+        {filteredEvents.map((ev) => (
           <div
             key={ev.id}
             data-card-hover
@@ -2542,8 +2586,9 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
 // Each row: time + status on the left, title + spots-left pill + meta + avatars
 // in the middle, price + arrow CTA on the right. Date headers carry a count
 // chip showing how many sessions fall under that day.
-function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
+function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop", filters }) {
   const isMobile = viewport === "mobile";
+  const activitiesFilter = (filters && Array.isArray(filters.activities)) ? filters.activities : [];
   // Avatar stack — three overlapping player avatars. The "+X attending"
   // count is rendered separately by the caller so the number can vary per
   // row without re-rendering the avatar stack.
@@ -2581,10 +2626,19 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
     { time: "10:00 AM", spotsLeft: 8,  totalSpots: 16, title: "Beginner Bootcamp",               attending: 2,  club: "Treaty Park Tennis",        city: "St. Augustine, FL", distance: "3.2 mi", meta: "Singles & Doubles • 2.5 - 3.0 DUPR • Coach Jana Ellis", price: "$45" },
     { time: "6:00 PM",  spotsLeft: 2,  totalSpots: 16, title: "Open Play: All Levels Welcome",   attending: 12, club: "Dill Dinkers Jacksonville", city: "Jacksonville, FL",  distance: "8.4 mi", meta: "Doubles • 2.5 - 4.5 DUPR • League Director Sam B.", price: "$15 - $35" },
   ];
+  const filteredRows = activitiesFilter.length === 0
+    ? allRows
+    : allRows.filter((r) => activitiesFilter.includes(sportForClub(r.club)));
+  // Re-split into Today / Tomorrow based on the original positions so the
+  // grouping survives filtering. Empty groups drop out so the section
+  // doesn't show stale date headers with no rows under them.
+  const todayClubs = new Set(allRows.slice(0, 4).map((r) => r.club + r.time));
+  const todayRows = filteredRows.filter((r) => todayClubs.has(r.club + r.time));
+  const tomorrowRows = filteredRows.filter((r) => !todayClubs.has(r.club + r.time));
   const groups = [
-    { id: "today",    label: "Today, Monday, May 11, 2026",     rows: allRows.slice(0, 4) },
-    { id: "tomorrow", label: "Tomorrow, Tuesday, May 12, 2026", rows: allRows.slice(4) },
-  ];
+    { id: "today",    label: "Today, Monday, May 11, 2026",     rows: todayRows },
+    { id: "tomorrow", label: "Tomorrow, Tuesday, May 12, 2026", rows: tomorrowRows },
+  ].filter((g) => g.rows.length > 0);
   return (
     <div style={{ marginTop: isMobile ? 48 : 56 }}>
       {/* Header — just the title now. Per Figma spec (node 8057-51747)
@@ -2596,6 +2650,11 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop" }) {
           {isMobile ? "Advanced players" : "Events for advanced players"}
         </h2>
       </div>
+      {groups.length === 0 && (
+        <div style={{ padding: "24px 24px", color: "var(--pp-fg-muted)", fontSize: 14, fontFamily: "Inter, system-ui, sans-serif", borderTop: "1px solid var(--pp-border-subtle)", borderBottom: "1px solid var(--pp-border-subtle)" }}>
+          No advanced events match the selected sport{activitiesFilter.length > 1 ? "s" : ""}.
+        </div>
+      )}
       {groups.map((g, gi) => (
         <div key={g.id} style={{ marginBottom: gi === groups.length - 1 ? 0 : 32 }}>
           {/* Date subsection header, per Figma spec (node 8057-51747):
@@ -2900,6 +2959,22 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
   const [racquetAlertOpen, setRacquetAlertOpen] = React.useState(false);
   const [qrOpen, setQrOpen] = React.useState(false);
   const [pastActions, setPastActions] = React.useState(false);
+  // SearchBar values are lifted to this parent so the page sections
+  // (VerifiedPopularClubs, BookNowSegment, PopularEventsNearYou,
+  // MoreEventsNearYou) can re-filter their data as the user picks
+  // WHAT (multi-select sports). WHERE/WHEN/WHO are tracked too so the
+  // SearchBar stays controlled in one place, but the prototype's mock
+  // data only filters on sport — location/time/players are display-only.
+  const [searchValues, setSearchValues] = React.useState({
+    where: "Oakland, CA",
+    activities: [],
+    activity: "Any Sport",
+    whenDay: "Any day",
+    whenTime: "Any time",
+    when: "Any day · Any time",
+    who: "1 Player",
+    whoCount: 1,
+  });
   React.useEffect(() => {
     const el = actionGridRef.current;if (!el) return;
     const findScroll = (n) => {
@@ -3044,8 +3119,8 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           paddingBottom: isMobile ? 16 : 4,
         }}>
             {isMobile && window.SearchBarCompact
-              ? <window.SearchBarCompact theme={theme} viewport={viewport} onSubmit={(prefill) => onBookCourt && onBookCourt(prefill)} />
-              : <window.SearchBar theme={theme} viewport={viewport} onSubmit={(prefill) => onBookCourt && onBookCourt(prefill)} />}
+              ? <window.SearchBarCompact theme={theme} viewport={viewport} values={searchValues} onChange={setSearchValues} onSubmit={(prefill) => onBookCourt && onBookCourt(prefill)} />
+              : <window.SearchBar theme={theme} viewport={viewport} values={searchValues} onChange={setSearchValues} onSubmit={(prefill) => onBookCourt && onBookCourt(prefill)} />}
           </div>
         }
         {/* Location blurb — sits BELOW the sticky SearchBar shelf (not
@@ -3108,15 +3183,15 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
         }
         <div ref={actionGridRef} aria-hidden="true" style={{ marginTop: 8 }} />
         {isCR &&
-        <VerifiedPopularClubs theme={theme} viewport={viewport} onOpenClub={onOpenClub} />
+        <VerifiedPopularClubs theme={theme} viewport={viewport} filters={searchValues} onOpenClub={onOpenClub} />
         }
         {isCR &&
         <div style={{ marginTop: isMobile ? 48 : 56 }}>
-            <BookNowSegment theme={theme} viewport={viewport} />
+            <BookNowSegment theme={theme} viewport={viewport} filters={searchValues} />
           </div>
         }
         {isCR &&
-        <PopularEventsNearYou theme={theme} viewport={viewport} title="Trending events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <PopularEventsNearYou theme={theme} viewport={viewport} filters={searchValues} title="Trending events near you" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {/* Events for Beginners — second carousel using the same
             PopularEventsNearYou component with a beginner-tuned dataset.
@@ -3125,13 +3200,10 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             you" to "everything else." Beginner cards are intentionally
             ≤50% filled so the trending pill never reads as urgent. */}
         {isCR &&
-        <PopularEventsNearYou theme={theme} viewport={viewport} title="Events for beginners" events={BEGINNER_EVENTS_DEFAULT} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <PopularEventsNearYou theme={theme} viewport={viewport} filters={searchValues} title="Events for beginners" events={BEGINNER_EVENTS_DEFAULT} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {isCR &&
-        <MoreEventsNearYou theme={theme} viewport={viewport} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
-        }
-        {isCR &&
-        <PopularEventsNearYou theme={theme} viewport={viewport} title="Recurring Events" onOpenEvent={() => onOpenEventList && onOpenEventList()} />
+        <MoreEventsNearYou theme={theme} viewport={viewport} filters={searchValues} onOpenEvent={() => onOpenEventList && onOpenEventList()} />
         }
         {!isCR && window.MyClubBookingPanel &&
         <window.MyClubBookingPanel
