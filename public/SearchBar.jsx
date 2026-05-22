@@ -1106,6 +1106,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
       onChange({
         ...v,
         where: "Current location",
+        activities: [],
         activity: "Any Sport",
         who: "1 Player",
         whoCount: 1,
@@ -1114,9 +1115,16 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   }, [open]);
 
   // Mirror single-select state back to the committed values so the pill
-  // subtitle reflects what the user picked.
+  // subtitle reflects what the user picked. WHAT is now multiselect —
+  // the row's onClick writes both v.activities and v.activity in one
+  // onChange call, so we skip this mirror when the display matches a
+  // multiselect aggregate ("N sports" or a comma-joined string) to
+  // avoid clobbering the array.
   useEffectSB(() => {
-    if (activity) set("activity", activity);
+    if (!activity) return;
+    const isAggregate = /^\d+ sports$/.test(activity) || activity.includes(", ");
+    if (isAggregate) return;
+    set("activity", activity);
   }, [activity]);
   useEffectSB(() => {
     if (!whenDay && !whenTime) return;
@@ -1141,13 +1149,53 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   // 15. No chevron — chip on the right shows the current pick when
   // collapsed, and tapping the header (with min-height: 56 hit area)
   // toggles. No inter-section borders.
-  const SectionAccordion = ({ id, label, chip, children }) => {
+  // Renders a single accordion row. Two modes:
+  //   1) Default — chip on the right when collapsed; children below
+  //      when open (Where / What / When use this).
+  //   2) renderRight provided — the right slot is fully delegated to
+  //      the caller (it receives `isOpen` + a toggle fn). The body
+  //      below is suppressed because the active control lives inline
+  //      in the header (WHO's stepper paddle uses this so the paddle
+  //      visually replaces the "1 Player" chip rather than dropping
+  //      below the title).
+  const SectionAccordion = ({ id, label, chip, children, renderRight }) => {
     const isOpen = openSection === id;
+    const toggle = () => setOpenSection(isOpen ? null : id);
+
+    if (renderRight) {
+      return (
+        <section style={{
+          minHeight: 56,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          gap: 12,
+          padding: "12px 0",
+        }}>
+          <button
+            type="button"
+            onClick={toggle}
+            aria-expanded={isOpen}
+            style={{
+              flex: 1, minWidth: 0,
+              border: 0, background: "transparent",
+              padding: 0,
+              cursor: "pointer", textAlign: "left",
+              fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+              fontWeight: 800,
+              fontSize: 16, lineHeight: 1.25, letterSpacing: -0.2,
+              color: "var(--pp-fg-default)",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}
+          >{label}</button>
+          {renderRight(isOpen, toggle)}
+        </section>
+      );
+    }
+
     return (
       <section>
         <button
           type="button"
-          onClick={() => setOpenSection(isOpen ? null : id)}
+          onClick={toggle}
           aria-expanded={isOpen}
           style={{
             width: "100%", minHeight: 56,
@@ -1268,7 +1316,17 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
   // Any Sport, Any day · Any time, 1 Player). Reads as "here's what
   // you'd be searching for; tap to refine."
   const whereChip = v.where || null;
-  const whatChip = activity || null;
+  // WHAT multiselect chip — derived from v.activities array (the
+  // multiselect source of truth) with three rules:
+  //   0 selected → "Any Sport"
+  //   1 selected → the sport name
+  //   2 selected → "Pickleball, Tennis"
+  //   3+ selected → "3 sports"
+  const sheetActivities = Array.isArray(v.activities) ? v.activities : [];
+  const whatChip = sheetActivities.length === 0 ? "Any Sport"
+    : sheetActivities.length === 1 ? sheetActivities[0]
+    : sheetActivities.length === 2 ? sheetActivities.join(", ")
+    : `${sheetActivities.length} sports`;
   const whenChip = whenDay && whenTime ? `${whenDay} · ${whenTime}`
     : (whenDay || whenTime || null);
   const whoChip = v.who || null;
@@ -1466,22 +1524,46 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             </div>
           </SectionAccordion>
 
-          {/* ---- WHAT — radio single-select, auto-advance to WHEN -------- */}
+          {/* ---- WHAT — multiselect (matches desktop SearchBar) ---------- */}
+          {/* Tapping a sport toggles it in/out of v.activities. The
+              section stays OPEN so the user can pick multiple before
+              moving on. "Any Sport" is a sentinel that clears the
+              array; the chip + display string follow the desktop
+              rules (0 → Any Sport / 1 → name / 2 → comma joined /
+              3+ → "N sports"). */}
           <SectionAccordion id="what" label="What" chip={whatChip}>
             <div>
-              {SB_SPORTS.map((s) => (
-                <Row
-                  key={s.id}
-
-                  active={activity === s.id}
-                  label={s.id}
-                  onClick={() => {
-                    setActivity(s.id);
-                    setOpenSection("when");
-                    setOpenWhenSub("day");
-                  }}
-                />
-              ))}
+              {SB_SPORTS.map((s) => {
+                const isAny = s.id === "Any Sport";
+                const isSelected = isAny ? sheetActivities.length === 0 : sheetActivities.includes(s.id);
+                return (
+                  <Row
+                    key={s.id}
+                    active={isSelected}
+                    label={s.id}
+                    onClick={() => {
+                      let nextActivities;
+                      if (isAny) {
+                        nextActivities = [];
+                      } else if (sheetActivities.includes(s.id)) {
+                        nextActivities = sheetActivities.filter((id) => id !== s.id);
+                      } else {
+                        nextActivities = [...sheetActivities, s.id];
+                      }
+                      const nextDisplay = nextActivities.length === 0 ? "Any Sport"
+                        : nextActivities.length === 1 ? nextActivities[0]
+                        : nextActivities.length === 2 ? nextActivities.join(", ")
+                        : `${nextActivities.length} sports`;
+                      onChange({ ...v, activities: nextActivities, activity: nextDisplay });
+                      // Mirror to local single-select state so the
+                      // existing useEffect doesn't fight the multi
+                      // update by writing v.activity back to a single
+                      // sport value.
+                      setActivity(nextDisplay);
+                    }}
+                  />
+                );
+              })}
             </div>
           </SectionAccordion>
 
@@ -1554,65 +1636,86 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
             </div>
           </SectionAccordion>
 
-          {/* ---- WHO — accordion (matches Where / What / When) ------------ */}
-          {/* Collapsed state: section title + a "1 player" chip on the
-              right, identical anatomy to the other three sections so the
-              four rows read as one consistent list. Tapping the row
-              expands it to reveal the stepper paddle. */}
-          <SectionAccordion id="who" label="Who" chip={v.who || "1 Player"}>
-            {/* Single contained pill: [−] [N players] [+]. Cap at 8. */}
-            <div style={{
-              display: "inline-flex", alignItems: "center",
-              background: "var(--pp-bg-subtle)",
-              borderRadius: 999,
-              padding: 4,
-              gap: 0,
-              height: 44,
-            }}>
+          {/* ---- WHO — chip when collapsed, stepper inline when open ------ */}
+          {/* Tapping the title toggles the row. The right slot swaps in
+              place: "1 Player" chip → stepper paddle. No body below;
+              the active control lives in the chip slot itself so the
+              row height stays consistent with the other accordions. */}
+          <SectionAccordion
+            id="who"
+            label="Who"
+            renderRight={(isOpen, toggle) => isOpen ? (
+              <div style={{
+                display: "inline-flex", alignItems: "center",
+                background: "var(--pp-bg-subtle)",
+                borderRadius: 999,
+                padding: 4,
+                gap: 0,
+                height: 40,
+                flexShrink: 0,
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setPlayers(playerCount - 1)}
+                  disabled={playerCount <= 1}
+                  aria-label="Fewer players"
+                  style={{
+                    width: 32, height: 32, borderRadius: 999,
+                    border: 0, background: "transparent",
+                    color: "var(--pp-fg-default)",
+                    cursor: playerCount <= 1 ? "not-allowed" : "pointer",
+                    opacity: playerCount <= 1 ? 0.35 : 1,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    padding: 0,
+                  }}
+                >
+                  {window.Icon && <window.Icon name="Minus" size={14} strokeWidth={2.4} color="var(--pp-fg-default)" />}
+                </button>
+                <span style={{
+                  minWidth: 60, textAlign: "center",
+                  fontFamily: "Axiforma, Inter, system-ui, sans-serif",
+                  fontWeight: 700, fontSize: 13, color: "var(--pp-fg-default)",
+                  fontVariantNumeric: "tabular-nums",
+                  padding: "0 4px",
+                  whiteSpace: "nowrap",
+                }}>{playerCount} {playerCount === 1 ? "player" : "players"}</span>
+                <button
+                  type="button"
+                  onClick={() => setPlayers(playerCount + 1)}
+                  disabled={playerCount >= 8}
+                  aria-label="More players"
+                  style={{
+                    width: 32, height: 32, borderRadius: 999,
+                    border: 0, background: "transparent",
+                    color: "var(--pp-fg-default)",
+                    cursor: playerCount >= 8 ? "not-allowed" : "pointer",
+                    opacity: playerCount >= 8 ? 0.35 : 1,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    padding: 0,
+                  }}
+                >
+                  {window.Icon && <window.Icon name="Plus" size={14} strokeWidth={2.4} color="var(--pp-fg-default)" />}
+                </button>
+              </div>
+            ) : (
               <button
                 type="button"
-                onClick={() => setPlayers(playerCount - 1)}
-                disabled={playerCount <= 1}
-                aria-label="Fewer players"
+                onClick={toggle}
                 style={{
-                  width: 36, height: 36, borderRadius: 999,
-                  border: 0, background: "transparent",
-                  color: "var(--pp-fg-default)",
-                  cursor: playerCount <= 1 ? "not-allowed" : "pointer",
-                  opacity: playerCount <= 1 ? 0.35 : 1,
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  padding: 0,
+                  height: 22, padding: "0 10px", borderRadius: 6,
+                  background: "var(--pp-bg-subtle)", color: "var(--pp-fg-default)",
+                  fontSize: 11.5, fontWeight: 600,
+                  display: "inline-flex", alignItems: "center",
+                  maxWidth: 160,
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  border: 0,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
                 }}
-              >
-                {window.Icon && <window.Icon name="Minus" size={16} strokeWidth={2.4} color="var(--pp-fg-default)" />}
-              </button>
-              <span style={{
-                minWidth: 76, textAlign: "center",
-                fontFamily: "Axiforma, Inter, system-ui, sans-serif",
-                fontWeight: 700, fontSize: 14, color: "var(--pp-fg-default)",
-                fontVariantNumeric: "tabular-nums",
-                padding: "0 6px",
-                whiteSpace: "nowrap",
-              }}>{playerCount} players</span>
-              <button
-                type="button"
-                onClick={() => setPlayers(playerCount + 1)}
-                disabled={playerCount >= 8}
-                aria-label="More players"
-                style={{
-                  width: 36, height: 36, borderRadius: 999,
-                  border: 0, background: "transparent",
-                  color: "var(--pp-fg-default)",
-                  cursor: playerCount >= 8 ? "not-allowed" : "pointer",
-                  opacity: playerCount >= 8 ? 0.35 : 1,
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  padding: 0,
-                }}
-              >
-                {window.Icon && <window.Icon name="Plus" size={16} strokeWidth={2.4} color="var(--pp-fg-default)" />}
-              </button>
-            </div>
-          </SectionAccordion>
+              >{v.who || "1 Player"}</button>
+            )}
+          />
         </div>
 
         {/* Sticky footer — Revert + Search buttons anchored to the
@@ -2203,17 +2306,22 @@ function SearchResultsModal({ open, onClose, values, onSelectClub, theme }) {
 // the title "Search for anything" plus the four current facet values on a
 // single line. Used in tight mobile chrome where the full 4-segment bar is
 // too tall.
-function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubmit }) {
+function SearchBarCompact({ theme, viewport = "mobile", values, onChange, onExpand, onSubmit }) {
   // Compact owns its own state by default so the bottom sheet's selections
   // persist between opens. Callers can hoist by passing `values` + a
-  // matching change handler via `onExpand` (kept for backwards compat).
+  // matching `onChange` handler so the parent (e.g. DashboardDesktop)
+  // can auto-apply the SearchBar's filters across the page.
   const [internal, setInternal] = useStateSB({
-    where: "Oakland, CA", activity: "Any Sport",
+    where: "Oakland, CA", activity: "Any Sport", activities: [],
     when: "Any Day • Any Time", who: "1 Player",
   });
   const v = values || internal;
+  // When controlled (caller passes values+onChange), bubble every
+  // sheet update up to the parent. Falls back to internal state for
+  // uncontrolled callers (legacy).
   const update = (next) => {
-    if (values) {/* controlled — caller handles */ } else setInternal(next);
+    if (values && onChange) onChange(next);
+    else setInternal(next);
   };
 
   const [open, setOpen] = useStateSB(false);
