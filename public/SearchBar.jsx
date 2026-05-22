@@ -1341,6 +1341,12 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
     .filter((s) => s.kind !== "zip");
   const whereVisible = whereQuery ? whereMatches : whereMatches.slice(0, 3);
 
+  // Unmount when closed so the filter sheet doesn't sit underneath
+  // the results sheet (which would otherwise be visible through the
+  // results sheet's gradient footer or on tall mobile viewports).
+  // Trade-off: lose the slide-out animation; gain a clean stack.
+  if (!open) return null;
+
   // Portal target — the device frame's inner container has
   // `position: relative` and `overflow: hidden`, so anchoring the sheet
   // there gives us a clean modal overlay scoped to the mobile frame.
@@ -1827,7 +1833,7 @@ function MobileSearchSheet({ open, onClose, values, onChange, onSubmit, theme })
 // same backdrop + slide animation, same 24/800 title, same ghost X,
 // same row anatomy. Difference: no radios — each club row is a direct
 // navigation target with a trailing chevron.
-function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
+function SearchResultsSheet({ open, onClose, onEdit, values, onSelectClub, theme }) {
   useEffectSB(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -1904,19 +1910,38 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
             fontWeight: 800, fontSize: 24, lineHeight: 1.15, letterSpacing: -0.6,
             color: "var(--pp-fg-default)",
           }}>Available clubs</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            style={{
-              width: 44, height: 44, border: 0, padding: 0,
-              background: "transparent",
-              display: "inline-flex", alignItems: "center", justifyContent: "flex-end",
-              cursor: "pointer",
-            }}
-          >
-            {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="var(--pp-fg-default)" />}
-          </button>
+          {/* Trailing actions — Edit (re-open the filter sheet) and
+              Close. Both 44×44 hit areas, ghost backgrounds. Edit
+              sits to the left of close so the row reads left→right
+              as filter-then-dismiss. */}
+          <div style={{ display: "inline-flex", alignItems: "center" }}>
+            <button
+              type="button"
+              onClick={() => { onEdit && onEdit(); }}
+              aria-label="Edit filters"
+              style={{
+                width: 44, height: 44, border: 0, padding: 0,
+                background: "transparent",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              {window.Icon && <window.Icon name="SlidersHorizontal" size={20} strokeWidth={2} color="var(--pp-fg-default)" />}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              style={{
+                width: 44, height: 44, border: 0, padding: 0,
+                background: "transparent",
+                display: "inline-flex", alignItems: "center", justifyContent: "flex-end",
+                cursor: "pointer",
+              }}
+            >
+              {window.Icon && <window.Icon name="X" size={22} strokeWidth={2} color="var(--pp-fg-default)" />}
+            </button>
+          </div>
         </div>
 
         {/* Filter chip row — surfaces the committed filters at the top
@@ -2426,6 +2451,10 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onChange, onExpa
     <SearchResultsSheet
       open={resultsOpen}
       onClose={() => setResultsOpen(false)}
+      // Edit button re-opens the filter sheet so the user can refine
+      // the search without losing their current filter set. Closes
+      // the results sheet first, then opens the filter sheet.
+      onEdit={() => { setResultsOpen(false); setOpen(true); }}
       values={v}
       onSelectClub={(clubName, clubId) => {
         // Stash club + canonical id so the booking flow can route the
