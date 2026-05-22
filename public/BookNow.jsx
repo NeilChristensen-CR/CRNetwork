@@ -300,7 +300,14 @@ function BookNowSegment({ theme, viewport = "desktop", filters }) {
             alignItems: "stretch"
           }}>
             {ordered.map((v) => (
-              <div key={v.id} style={{ flex: "0 0 280px", scrollSnapAlign: "start", display: "flex" }}>
+              <div key={v.id} style={{
+                // Mobile: card spans container - 48px so the next card
+                // peeks ~32px from the right edge. Desktop stays at
+                // 280 for a multi-card row.
+                flex: isMobile ? "0 0 calc(100% - 48px)" : "0 0 280px",
+                scrollSnapAlign: "start",
+                display: "flex",
+              }}>
                 <BookNowCard v={v} theme={theme} viewport={viewport} onPickSlot={(timeLabel) => setPendingSlot({ venue: v, time: timeLabel })} />
               </div>
             ))}

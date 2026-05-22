@@ -2240,7 +2240,16 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop", filters
           // stays consistent across viewports. The shared <BookNowCard>
           // fills the slot via its own width:100% and handles the entire
           // card body, header (MiniMap), time pills, and footer.
-          <div key={c.id} style={{ flex: "0 0 280px", scrollSnapAlign: "start", display: "flex" }}>
+          <div key={c.id} style={{
+            // Mobile: focused card spans the section content width minus
+            // a 48px reserve (16px gap + 32px peek), so the next card
+            // shows 32px from the right edge — signaling "swipe for
+            // more" without dominating the viewport. Desktop stays at
+            // a fixed 280 so the row reads as a multi-card grid.
+            flex: isMobile ? "0 0 calc(100% - 48px)" : "0 0 280px",
+            scrollSnapAlign: "start",
+            display: "flex",
+          }}>
             {window.BookNowCard && (
               <window.BookNowCard
                 v={c}
@@ -2419,7 +2428,11 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             key={ev.id}
             data-card-hover
             style={{
-              flex: "0 0 320px", scrollSnapAlign: "start",
+              // Mobile: card width = container - 48px so the next card
+              // peeks ~32px from the right edge. Desktop holds 320px so
+              // the row reads as multi-card.
+              flex: isMobile ? "0 0 calc(100% - 48px)" : "0 0 320px",
+              scrollSnapAlign: "start",
               background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)", borderRadius: 8,
               overflow: "hidden",
               display: "flex", flexDirection: "column",
