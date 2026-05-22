@@ -2223,16 +2223,17 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop", filters
           </button>
         </div>
       </div>
-      {/* Carousel wrapper — `position: relative` so the right-edge gradient
-          fade can sit absolutely on top, and y-padding gives card hover
-          shadows room to render without getting clipped by the scroll
-          container's overflow box. overflowY: visible is required because
-          overflowX: auto otherwise implicitly clips the vertical axis,
-          which cuts off the card's lift shadow. */}
-      <div style={{ position: "relative", margin: isMobile ? "-24px -16px -32px 0" : "-24px -4px -32px" }}>
+      {/* Carousel wrapper — y-padding gives the card's focused-state
+          shadow (0 12px 32px) room to render. The shadow extends
+          ~20px above and ~44px below the card edge (after the -4px
+          lift), so the track needs at least 24/44px vertical padding
+          to avoid clipping. Outer negative margins reclaim the
+          padding so the visual rhythm into adjacent sections is
+          preserved. */}
+      <div style={{ position: "relative", margin: isMobile ? "-28px -16px -44px 0" : "-28px -4px -44px" }}>
       <div ref={trackRef} style={{
         display: "flex", gap: 16, overflowX: "auto", overflowY: "visible", scrollSnapType: "x mandatory",
-        paddingTop: isMobile ? 24 : 28, paddingBottom: isMobile ? 32 : 32, scrollbarWidth: "none",
+        paddingTop: isMobile ? 28 : 28, paddingBottom: isMobile ? 44 : 44, scrollbarWidth: "none",
         paddingLeft: 4, paddingRight: 4
       }}>
         {clubs.map((c) => (
@@ -2350,8 +2351,8 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
       (entries) => {
         entries.forEach((e) => {
           if (e.intersectionRatio >= 0.7) {
-            e.target.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)";
-            e.target.style.transform = "translateY(-2px)";
+            e.target.style.boxShadow = "0 12px 32px rgba(15,18,20,0.18)";
+            e.target.style.transform = "translateY(-4px)";
           } else if (e.intersectionRatio < 0.4) {
             e.target.style.boxShadow = "none";
             e.target.style.transform = "translateY(0)";
@@ -2410,11 +2411,12 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
       </div>
       {/* Carousel wrapper — relative for the right-edge fade overlay,
           y-padding + overflowY: visible so card hover/focus shadows
-          render fully without being clipped by the horizontal scroller. */}
-      <div style={{ position: "relative", margin: isMobile ? "-24px -16px -32px 0" : "-24px -4px -32px" }}>
+          render fully without being clipped. Shadow is 0 12px 32px
+          with -4px lift → needs ~28/44px of vertical breathing room. */}
+      <div style={{ position: "relative", margin: isMobile ? "-28px -16px -44px 0" : "-28px -4px -44px" }}>
       <div ref={trackRef} style={{
         display: "flex", gap: 16, overflowX: "auto", overflowY: "visible", scrollSnapType: "x mandatory",
-        paddingTop: isMobile ? 24 : 28, paddingBottom: isMobile ? 32 : 32, scrollbarWidth: "none",
+        paddingTop: isMobile ? 28 : 28, paddingBottom: isMobile ? 44 : 44, scrollbarWidth: "none",
         paddingLeft: 4, paddingRight: 4,
         alignItems: "stretch"
       }}>
@@ -2443,7 +2445,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
             // (applies to whichever card is most visible in the
             // carousel viewport) so touch users don't lose the
             // "in focus" cue.
-            onMouseEnter={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseEnter={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "0 12px 32px rgba(15,18,20,0.18)"; e.currentTarget.style.transform = "translateY(-4px)"; }}
             onMouseLeave={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
             {/* Header — bordered "content" block, 12px padding, gap 12.

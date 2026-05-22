@@ -287,10 +287,10 @@ function BookNowSegment({ theme, viewport = "desktop", filters }) {
         // "My clubs / Clubs around me" subgrouping (signed-out users have
         // no club affiliation to split by).
         return (
-          <div style={{ position: "relative", margin: isMobile ? "-24px -16px -32px 0" : "-24px -4px -32px" }}>
+          <div style={{ position: "relative", margin: isMobile ? "-28px -16px -44px 0" : "-28px -4px -44px" }}>
           <div ref={trackRef} style={{
             display: "flex", gap: 16, overflowX: "auto", overflowY: "visible", scrollSnapType: "x mandatory",
-            paddingTop: isMobile ? 24 : 28, paddingBottom: isMobile ? 32 : 32, scrollbarWidth: "none",
+            paddingTop: isMobile ? 28 : 28, paddingBottom: isMobile ? 44 : 44, scrollbarWidth: "none",
             // Mobile: paddingLeft 4 so the leftmost card aligns with the
             // 16px page gutter (carousel's marginLeft is 0 → outer aligns,
             // 4px inner padding gives the card a slight breath from the
@@ -474,12 +474,12 @@ function BookNowCard({ v, theme, viewport = "desktop", onPickSlot, onOpenClub })
         display: "flex", flexDirection: "column",
         overflow: "hidden",
         transition: "box-shadow 160ms, transform 160ms",
-        boxShadow: elevated ? "0 8px 24px rgba(15,18,20,0.10)" : "none",
-        transform: elevated ? "translateY(-2px)" : "translateY(0)",
+        boxShadow: elevated ? "0 12px 32px rgba(15,18,20,0.18)" : "none",
+        transform: elevated ? "translateY(-4px)" : "translateY(0)",
       }}
       // Desktop only — onMouse handlers don't fire on touch but we
       // skip wiring them on mobile to make the intent explicit.
-      onMouseEnter={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "0 8px 24px rgba(15,18,20,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+      onMouseEnter={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "0 12px 32px rgba(15,18,20,0.18)"; e.currentTarget.style.transform = "translateY(-4px)"; }}
       onMouseLeave={isMobile ? undefined : (e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
     >
       
