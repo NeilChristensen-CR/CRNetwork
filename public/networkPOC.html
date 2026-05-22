@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CourtReserve · Events Discovery</title>
-<link rel="stylesheet" href="colors_and_type.css?v=20260521az">
+<link rel="stylesheet" href="colors_and_type.css?v=20260521ba">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -99,27 +99,27 @@
 <!-- Cache-buster — bump ?v= when iterating on a .jsx file so the browser
      refetches it instead of serving the previously-compiled version.
      Babel-standalone has no module hashing of its own. -->
-<script type="text/babel" src="Components.jsx?v=20260521az"></script>
-<script type="text/babel" src="SearchBar.jsx?v=20260521az"></script>
-<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521az"></script>
-<script type="text/babel" src="data.jsx?v=20260521az"></script>
-<script type="text/babel" src="EventCard.jsx?v=20260521az"></script>
-<script type="text/babel" src="BrowseDesktop.jsx?v=20260521az"></script>
-<script type="text/babel" src="FilterDesktop.jsx?v=20260521az"></script>
-<script type="text/babel" src="Mobile.jsx?v=20260521az"></script>
-<script type="text/babel" src="FilterBarD.jsx?v=20260521az"></script>
-<script type="text/babel" src="RecurringCarousel.jsx?v=20260521az"></script>
-<script type="text/babel" src="EventDetails.jsx?v=20260521az"></script>
-<script type="text/babel" src="EventRegistration.jsx?v=20260521az"></script>
-<script type="text/babel" src="BookNow.jsx?v=20260521az"></script>
-<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521az"></script>
-<script type="text/babel" src="BookCourtWidget.jsx?v=20260521az"></script>
-<script type="text/babel" src="Apps.jsx?v=20260521az"></script>
-<script type="text/babel" src="ClubDetail.jsx?v=20260521az"></script>
-<script type="text/babel" src="FindClubs.jsx?v=20260521az"></script>
-<script type="text/babel" src="Profile.jsx?v=20260521az"></script>
-<script type="text/babel" src="ReserveCourt.jsx?v=20260521az"></script>
-<script type="text/babel" src="design-canvas.jsx?v=20260521az"></script>
+<script type="text/babel" src="Components.jsx?v=20260521ba"></script>
+<script type="text/babel" src="SearchBar.jsx?v=20260521ba"></script>
+<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521ba"></script>
+<script type="text/babel" src="data.jsx?v=20260521ba"></script>
+<script type="text/babel" src="EventCard.jsx?v=20260521ba"></script>
+<script type="text/babel" src="BrowseDesktop.jsx?v=20260521ba"></script>
+<script type="text/babel" src="FilterDesktop.jsx?v=20260521ba"></script>
+<script type="text/babel" src="Mobile.jsx?v=20260521ba"></script>
+<script type="text/babel" src="FilterBarD.jsx?v=20260521ba"></script>
+<script type="text/babel" src="RecurringCarousel.jsx?v=20260521ba"></script>
+<script type="text/babel" src="EventDetails.jsx?v=20260521ba"></script>
+<script type="text/babel" src="EventRegistration.jsx?v=20260521ba"></script>
+<script type="text/babel" src="BookNow.jsx?v=20260521ba"></script>
+<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521ba"></script>
+<script type="text/babel" src="BookCourtWidget.jsx?v=20260521ba"></script>
+<script type="text/babel" src="Apps.jsx?v=20260521ba"></script>
+<script type="text/babel" src="ClubDetail.jsx?v=20260521ba"></script>
+<script type="text/babel" src="FindClubs.jsx?v=20260521ba"></script>
+<script type="text/babel" src="Profile.jsx?v=20260521ba"></script>
+<script type="text/babel" src="ReserveCourt.jsx?v=20260521ba"></script>
+<script type="text/babel" src="design-canvas.jsx?v=20260521ba"></script>
 <script type="text/babel">
   const { useState } = React;
 
@@ -160,7 +160,12 @@
     // 1200 already, so tablet (768-1024), desktop web (1024-1440), and
     // large web (≥1440) all read as the same desktop layout
     // proportionally centered — page padding bumps with viewport.
-    const getInitialDevice = () => {
+    // The prototype is fully responsive to the actual browser
+    // viewport — `device` tracks window.innerWidth in real time
+    // (no manual override) so dragging the window edge reflows the
+    // page through mobile → tablet → desktop → wide without
+    // anyone clicking a toggle.
+    const getDevice = () => {
       if (typeof window === "undefined") return "desktop";
       const w = window.innerWidth || 1024;
       if (w < 768) return "mobile";
@@ -168,29 +173,13 @@
       if (w < 1440) return "desktop";
       return "wide";
     };
-    const [device, setDevice] = useState(getInitialDevice());
-    const [userOverrode, setUserOverrode] = useState(false);
+    const [device, setDevice] = useState(getDevice());
     React.useEffect(() => {
       if (typeof window === "undefined") return;
-      const onResize = () => {
-        // Only auto-flip when the user hasn't manually picked a device
-        // via the ControlPanel. Manual override sticks until the page
-        // reloads — keeps QA mode from getting disrupted by a stray
-        // resize while toggling.
-        if (userOverrode) return;
-        const w = window.innerWidth || 1024;
-        setDevice(
-          w < 768 ? "mobile"
-            : w < 1024 ? "tablet"
-            : w < 1440 ? "desktop"
-            : "wide"
-        );
-      };
+      const onResize = () => setDevice(getDevice());
       window.addEventListener("resize", onResize);
       return () => window.removeEventListener("resize", onResize);
-    }, [userOverrode]);
-    // Wrap setDevice so any ControlPanel toggle marks the override flag.
-    const setDeviceManual = (next) => { setUserOverrode(true); setDevice(next); };
+    }, []);
     // Derived viewport prop — drives all the component-level
     // `isMobile` checks. Mobile + Tablet share the mobile-style
     // layout (single column, compact pill, accordion sheet) since
@@ -458,15 +447,25 @@
                 <Icon name="X" size={14} strokeWidth={2.2} color="#858F8F" />
               </button>
             </div>
-            <Group label="Device">
-              {/* Tablet + Wide desktop are visual labels for now — the
-                  prototype renders all desktop-class widths through the
-                  same viewport={viewport} code path. Mobile uniquely
-                  triggers viewport={viewport} + 410-cap layout. */}
-              <RadioRow on={device === "mobile"}  onClick={() => setDeviceManual("mobile")}   icon="Smartphone" label="Mobile" />
-              <RadioRow on={device === "tablet"}  onClick={() => setDeviceManual("tablet")}   icon="Tablet"     label="Tablet" />
-              <RadioRow on={device === "desktop"} onClick={() => setDeviceManual("desktop")}  icon="Monitor"    label="Desktop" />
-              <RadioRow on={device === "wide"}    onClick={() => setDeviceManual("wide")}     icon="Tv"         label="Wide desktop" />
+            {/* Device readout — display-only. The prototype is fully
+                responsive to the browser viewport, so this section
+                shows the currently detected breakpoint and reflects
+                live as you resize the window. No manual override —
+                the viewport itself controls the layout. */}
+            <Group label={"Device · " + (device === "mobile" ? "Mobile" : device === "tablet" ? "Tablet" : device === "desktop" ? "Desktop" : "Wide desktop")}>
+              <div style={{
+                padding: "10px 12px",
+                background: "#F4F5F6", borderRadius: 8,
+                fontSize: 11.5, color: "#4B5052",
+                lineHeight: 1.45,
+                fontFamily: "Inter, system-ui, sans-serif",
+              }}>
+                Resize the browser to see the layout reflow.
+                <br />
+                <span style={{ fontSize: 10.5, color: "#858F8F" }}>
+                  Mobile &lt;768 · Tablet &lt;1024 · Desktop &lt;1440 · Wide ≥1440
+                </span>
+              </div>
             </Group>
             <Group label="Mode">
               {/* Brand/club theming is handled by the Club section
@@ -566,26 +565,24 @@
       // components branches on isMobile only; tablet renders the
       // desktop layout in a narrower container, which is exactly
       // how it should behave on a real tablet.
-      <div style={{ background: "#F4F5F6", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
+      <div style={{ background: "var(--pp-bg-default)", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
         <div style={{ display: "flex", justifyContent: "center" }}>
           {viewport !== "mobile" ? (
             <div id="device-frame-inner" ref={deviceFrameRef} style={{
-              // Width caps simulate each desktop-class breakpoint;
-              // height: 100vh keeps the nested flex:1 overflowY:auto
-              // scroll container bounded. Sticky headers + the
-              // floating action bar anchor to that inner scroller.
+              // Fills the browser viewport edge-to-edge. The prototype
+              // is fully responsive — resizing the window reflows the
+              // page through tablet / desktop / wide breakpoints via
+              // the viewport prop derivation above + clamp() values
+              // baked into the page layout. No fixed-width frame
+              // because the user wanted the browser viewport itself
+              // to control the layout.
               width: "100%",
-              maxWidth: device === "desktop" ? 1280 : undefined,
               height: "100vh",
               background: "var(--pp-bg-default)",
               color: "var(--pp-fg-default)",
               overflowX: "hidden",
               position: "relative",
               display: "flex", flexDirection: "column",
-              // Soft horizontal shadow so the constrained frame reads
-              // as a "viewport" against the page bg behind it. Hidden
-              // on wide desktop since that mode fills edge-to-edge.
-              boxShadow: device === "wide" ? "none" : "0 0 0 1px rgba(15,18,20,.06), 0 12px 32px rgba(15,18,20,.06)",
             }}>
               <div style={{ flex: 1, overflowY: "auto" }}>
                 {forceType
@@ -666,23 +663,17 @@
               </div>
             </div>
           ) : (
-            // Mobile-style structure — used for both Mobile (410 cap)
-            // and Tablet (820 cap). Same flex-column + sticky-bottom-nav
-            // anchoring; just a wider frame at tablet so the touch
-            // layout has more breathing room. The `device-frame-inner`
+            // Mobile-style structure (used for both Mobile and Tablet
+            // viewport sizes). Same flex-column + sticky-bottom-nav
+            // anchoring as before, but the frame now fills the actual
+            // browser viewport edge-to-edge — the page reflows as
+            // the user resizes their window. The `device-frame-inner`
             // ID stays on the inner wrapper so the MobileSearchSheet
-            // portal target still resolves. `height: 100vh` on the
-            // inner keeps the existing `flex: 1 overflow: hidden`
-            // body container bounded so sticky shelves + action bars
-            // anchor correctly.
+            // portal target still resolves.
             <div ref={deviceFrameRef} style={{
               width: "100%",
-              maxWidth: device === "tablet" ? 820 : 410,
               height: "100vh",
               display: "flex", justifyContent: "center",
-              // Frame shadow on mobile/tablet so the constrained width
-              // reads as a "viewport" against the gray page bg behind.
-              boxShadow: "0 0 0 1px rgba(15,18,20,.06), 0 12px 32px rgba(15,18,20,.06)",
             }}>
               <div id="device-frame-inner" style={{
                 width: "100%", height: "100%",
