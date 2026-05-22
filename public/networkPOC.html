@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CourtReserve · Events Discovery</title>
-<link rel="stylesheet" href="colors_and_type.css?v=20260521bb">
+<link rel="stylesheet" href="colors_and_type.css?v=20260521bc">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -99,27 +99,27 @@
 <!-- Cache-buster — bump ?v= when iterating on a .jsx file so the browser
      refetches it instead of serving the previously-compiled version.
      Babel-standalone has no module hashing of its own. -->
-<script type="text/babel" src="Components.jsx?v=20260521bb"></script>
-<script type="text/babel" src="SearchBar.jsx?v=20260521bb"></script>
-<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521bb"></script>
-<script type="text/babel" src="data.jsx?v=20260521bb"></script>
-<script type="text/babel" src="EventCard.jsx?v=20260521bb"></script>
-<script type="text/babel" src="BrowseDesktop.jsx?v=20260521bb"></script>
-<script type="text/babel" src="FilterDesktop.jsx?v=20260521bb"></script>
-<script type="text/babel" src="Mobile.jsx?v=20260521bb"></script>
-<script type="text/babel" src="FilterBarD.jsx?v=20260521bb"></script>
-<script type="text/babel" src="RecurringCarousel.jsx?v=20260521bb"></script>
-<script type="text/babel" src="EventDetails.jsx?v=20260521bb"></script>
-<script type="text/babel" src="EventRegistration.jsx?v=20260521bb"></script>
-<script type="text/babel" src="BookNow.jsx?v=20260521bb"></script>
-<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521bb"></script>
-<script type="text/babel" src="BookCourtWidget.jsx?v=20260521bb"></script>
-<script type="text/babel" src="Apps.jsx?v=20260521bb"></script>
-<script type="text/babel" src="ClubDetail.jsx?v=20260521bb"></script>
-<script type="text/babel" src="FindClubs.jsx?v=20260521bb"></script>
-<script type="text/babel" src="Profile.jsx?v=20260521bb"></script>
-<script type="text/babel" src="ReserveCourt.jsx?v=20260521bb"></script>
-<script type="text/babel" src="design-canvas.jsx?v=20260521bb"></script>
+<script type="text/babel" src="Components.jsx?v=20260521bc"></script>
+<script type="text/babel" src="SearchBar.jsx?v=20260521bc"></script>
+<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521bc"></script>
+<script type="text/babel" src="data.jsx?v=20260521bc"></script>
+<script type="text/babel" src="EventCard.jsx?v=20260521bc"></script>
+<script type="text/babel" src="BrowseDesktop.jsx?v=20260521bc"></script>
+<script type="text/babel" src="FilterDesktop.jsx?v=20260521bc"></script>
+<script type="text/babel" src="Mobile.jsx?v=20260521bc"></script>
+<script type="text/babel" src="FilterBarD.jsx?v=20260521bc"></script>
+<script type="text/babel" src="RecurringCarousel.jsx?v=20260521bc"></script>
+<script type="text/babel" src="EventDetails.jsx?v=20260521bc"></script>
+<script type="text/babel" src="EventRegistration.jsx?v=20260521bc"></script>
+<script type="text/babel" src="BookNow.jsx?v=20260521bc"></script>
+<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521bc"></script>
+<script type="text/babel" src="BookCourtWidget.jsx?v=20260521bc"></script>
+<script type="text/babel" src="Apps.jsx?v=20260521bc"></script>
+<script type="text/babel" src="ClubDetail.jsx?v=20260521bc"></script>
+<script type="text/babel" src="FindClubs.jsx?v=20260521bc"></script>
+<script type="text/babel" src="Profile.jsx?v=20260521bc"></script>
+<script type="text/babel" src="ReserveCourt.jsx?v=20260521bc"></script>
+<script type="text/babel" src="design-canvas.jsx?v=20260521bc"></script>
 <script type="text/babel">
   const { useState } = React;
 
@@ -567,28 +567,24 @@
       // components branches on isMobile only; tablet renders the
       // desktop layout in a narrower container, which is exactly
       // how it should behave on a real tablet.
-      <div style={{ background: forcedDevice ? "#F4F5F6" : "var(--pp-bg-default)", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
+      <div style={{ background: "var(--pp-bg-default)", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
         <div style={{ display: "flex", justifyContent: "center" }}>
           {viewport !== "mobile" ? (
             <div id="device-frame-inner" ref={deviceFrameRef} style={{
-              // Fills the browser viewport edge-to-edge by default.
-              // When the panel forces a device size, the frame caps
-              // to a simulated viewport width (1280 desktop / 100%
-              // wide) so the page actually renders AT that width
-              // and components reflow accordingly. Outer container
-              // gets a gray bg to read as a "viewport" against the
-              // simulated frame.
+              // Always fills the browser viewport edge-to-edge — the
+              // prototype is full-screen at every breakpoint. The
+              // panel's Device toggle only influences which layout
+              // style renders (mobile-style vs desktop-style via the
+              // `viewport` prop derived above); it does NOT cap the
+              // frame width. Page reflows naturally as the browser
+              // resizes.
               width: "100%",
-              maxWidth: forcedDevice === "desktop" ? 1280 : undefined,
               height: "100vh",
               background: "var(--pp-bg-default)",
               color: "var(--pp-fg-default)",
               overflowX: "hidden",
               position: "relative",
               display: "flex", flexDirection: "column",
-              boxShadow: forcedDevice && forcedDevice !== "wide"
-                ? "0 0 0 1px rgba(15,18,20,.06), 0 12px 32px rgba(15,18,20,.06)"
-                : "none",
             }}>
               <div style={{ flex: 1, overflowY: "auto" }}>
                 {forceType
@@ -670,19 +666,15 @@
             </div>
           ) : (
             // Mobile-style structure (used for both Mobile and Tablet
-            // viewport sizes). Same flex-column + sticky-bottom-nav
-            // anchoring. Fills the actual browser viewport by default;
-            // when the panel forces Mobile or Tablet, the frame caps
-            // to 410 / 820 so the page renders AT that simulated
-            // width and reflows accordingly.
+            // viewport sizes). Always fills the browser viewport
+            // edge-to-edge — the prototype is full-screen at every
+            // breakpoint. The Device toggle only changes which
+            // layout style renders (via the viewport prop); no
+            // frame cap applied.
             <div ref={deviceFrameRef} style={{
               width: "100%",
-              maxWidth: forcedDevice === "mobile" ? 410 : forcedDevice === "tablet" ? 820 : undefined,
               height: "100vh",
               display: "flex", justifyContent: "center",
-              boxShadow: forcedDevice
-                ? "0 0 0 1px rgba(15,18,20,.06), 0 12px 32px rgba(15,18,20,.06)"
-                : "none",
             }}>
               <div id="device-frame-inner" style={{
                 width: "100%", height: "100%",
