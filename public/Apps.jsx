@@ -2178,7 +2178,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop", filters
     return (
       <div style={{ marginTop: 8 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-          <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
+          <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : "clamp(20px, 2.4vw, 28px)", lineHeight: isMobile ? "28px" : 1.2, letterSpacing: 0, color: theme.t.text, margin: 0 }}>
             Clubs near me
           </h2>
         </div>
@@ -2191,7 +2191,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop", filters
   return (
     <div style={{ marginTop: 8 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : "clamp(20px, 2.4vw, 28px)", lineHeight: isMobile ? "28px" : 1.2, letterSpacing: 0, color: theme.t.text, margin: 0 }}>
           Clubs near me
         </h2>
         {/* Section nav — ghost icon-only buttons per Figma spec
@@ -2247,7 +2247,7 @@ function VerifiedPopularClubs({ theme, onOpenClub, viewport = "desktop", filters
             // shows 32px from the right edge — signaling "swipe for
             // more" without dominating the viewport. Desktop stays at
             // a fixed 280 so the row reads as a multi-card grid.
-            flex: isMobile ? "0 0 calc(100% - 48px)" : "0 0 280px",
+            flex: isMobile ? "0 0 clamp(280px, calc(50% - 8px), 360px)" : "0 0 280px",
             scrollSnapAlign: "start",
             display: "flex",
           }}>
@@ -2367,7 +2367,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
   return (
     <div style={{ marginTop: isMobile ? 48 : 56 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : "clamp(20px, 2.4vw, 28px)", lineHeight: isMobile ? "28px" : 1.2, letterSpacing: 0, color: theme.t.text, margin: 0 }}>
           {title}
         </h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
@@ -2433,7 +2433,7 @@ function PopularEventsNearYou({ theme, onOpenEvent, title = "Popular events near
               // Mobile: card width = container - 48px so the next card
               // peeks ~32px from the right edge. Desktop holds 320px so
               // the row reads as multi-card.
-              flex: isMobile ? "0 0 calc(100% - 48px)" : "0 0 320px",
+              flex: isMobile ? "0 0 clamp(280px, calc(50% - 8px), 360px)" : "0 0 320px",
               scrollSnapAlign: "start",
               background: "var(--pp-bg-default)", border: "1px solid var(--pp-border-subtle)", borderRadius: 8,
               overflow: "hidden",
@@ -2665,7 +2665,7 @@ function MoreEventsNearYou({ theme, onOpenEvent, viewport = "desktop", filters }
           date-grouped content rows below; the 3-segment filter chrome
           stays pulled. */}
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : 24, lineHeight: isMobile ? "28px" : "32px", letterSpacing: 0, color: theme.t.text, margin: 0 }}>
+        <h2 style={{ fontFamily: theme.display, fontWeight: 700, fontSize: isMobile ? 20 : "clamp(20px, 2.4vw, 28px)", lineHeight: isMobile ? "28px" : 1.2, letterSpacing: 0, color: theme.t.text, margin: 0 }}>
           {isMobile ? "Advanced players" : "Events for advanced players"}
         </h2>
       </div>
@@ -3047,7 +3047,19 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
       "--text-inverted": theme.t.textInverted, "--line": theme.t.line, "--rule": theme.t.rule, "--chip": theme.t.chip
     }}>
       <ChromeBar theme={theme} viewport={viewport} app={app} setApp={setApp} onOpenQR={() => setQrOpen(true)} onFindClubs={onFindClubs} onOpenProfile={() => {if (window.__navigateProfile) window.__navigateProfile();}} active="Home" onNav={(l) => {if (window.__navigate) window.__navigate(l);}} />
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 16px 80px" : "48px 32px 64px" }}>
+      <div style={{
+        // Fluid page container. Width caps at 1200 on the largest
+        // viewports but the padding scales with viewport width via
+        // clamp() so the rhythm stays consistent across mobile →
+        // wide-desktop without binary jumps. Mobile preserves the
+        // 80px bottom cushion (action bar clearance); larger sizes
+        // grow into 64px.
+        maxWidth: 1200,
+        margin: "0 auto",
+        padding: isMobile
+          ? "16px 16px 80px"
+          : "clamp(24px, 4vw, 48px) clamp(16px, 3vw, 32px) clamp(48px, 6vw, 64px)",
+      }}>
         {racquetAlertOpen && window.ProShopAlert &&
         <div style={{ marginBottom: 24 }}>
             <window.ProShopAlert theme={theme} desktop={!isMobile} onDismiss={() => setRacquetAlertOpen(false)} />
@@ -3076,14 +3088,15 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           <h1 style={{
             margin: 0,
             fontFamily: theme.display, fontWeight: 800,
-            // Stepped down from display/d1 (64/88) → display/d3 (40/48)
-            // on desktop / d4-adjacent 28/36 on mobile. The previous
-            // 64px head consumed ~176px above-fold and outranked the
-            // SearchBar; this size keeps the head as a confident
-            // greeting without stealing the hero's job.
-            fontSize: isMobile ? 28 : 40,
-            lineHeight: isMobile ? "36px" : "48px",
-            letterSpacing: isMobile ? -0.4 : -0.4,
+            // Fluid title — clamp() scales from 28px (narrow mobile)
+            // to 48px (large desktop), interpolating against viewport
+            // width. Mobile keeps the fixed 28/36 hero so the
+            // wrapping behavior (br before "Let's Play.") still
+            // anchors at the same scale; desktop+ uses clamp so the
+            // title grows naturally as the frame widens.
+            fontSize: isMobile ? 28 : "clamp(32px, 4vw, 48px)",
+            lineHeight: isMobile ? "36px" : 1.15,
+            letterSpacing: -0.4,
             color: theme.t.text,
           }}>
             This is CourtReserve.

@@ -304,7 +304,7 @@ function BookNowSegment({ theme, viewport = "desktop", filters }) {
                 // Mobile: card spans container - 48px so the next card
                 // peeks ~32px from the right edge. Desktop stays at
                 // 280 for a multi-card row.
-                flex: isMobile ? "0 0 calc(100% - 48px)" : "0 0 280px",
+                flex: isMobile ? "0 0 clamp(280px, calc(50% - 8px), 360px)" : "0 0 280px",
                 scrollSnapAlign: "start",
                 display: "flex",
               }}>
