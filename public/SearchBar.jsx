@@ -1835,6 +1835,13 @@ function SearchResultsSheet({ open, onClose, values, onSelectClub, theme }) {
     return () => { document.body.style.overflow = prev; };
   }, [open]);
 
+  // Bail before mounting the portal when closed so the sheet's
+  // markup isn't present in the DOM at all. (Previously the sheet
+  // stayed mounted with translateY(100%) for the slide animation —
+  // but the spec is now "results don't exist until you've hit
+  // Search", so we trade the slide-out for a clean conditional.)
+  if (!open) return null;
+
   const portalTarget = typeof document !== "undefined"
     ? document.getElementById("device-frame-inner")
     : null;
