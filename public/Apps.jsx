@@ -3044,7 +3044,16 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             "Welcome back to {club}!" with the "More info about {club}"
             outline button to the right. */}
         {isCR ?
-        <div style={{ marginBottom: isMobile ? 24 : 32, textAlign: "center" }}>
+        <div style={{
+          // Mobile: 32px clear space above the title (between the
+          // ChromeBar bottom and the headline) for a calmer first
+          // impression. The tighter mobile title→searchbar gap
+          // (12px instead of 24) compensates so the hero still
+          // reads as one block.
+          marginTop: isMobile ? 32 : 0,
+          marginBottom: isMobile ? 12 : 32,
+          textAlign: "center",
+        }}>
           <h1 style={{
             margin: 0,
             fontFamily: theme.display, fontWeight: 800,
@@ -3058,7 +3067,11 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
             letterSpacing: isMobile ? -0.4 : -0.4,
             color: theme.t.text,
           }}>
-            This is CourtReserve.{" "}
+            This is CourtReserve.
+            {/* Mobile drops "Let's Play." onto its own line so the
+                tagline reads as a second beat; desktop keeps them
+                inline so the headline fills the 1040px column. */}
+            {isMobile ? <br /> : " "}
             {/* "Let's Play." picks up the brand green (#2E7D32) so the
                 tagline reads as the CourtReserve voice instead of a
                 second beat in the headline. Same hex as the brandmark
@@ -3135,14 +3148,18 @@ function DashboardDesktop({ theme, viewport = "desktop", onOpenEventList, onOpen
           flexDirection: "row",
           flexWrap: "wrap",
           alignItems: "center",
-          justifyContent: isMobile ? "flex-start" : "center",
+          // Center on both viewports — mobile previously hugged the
+          // left edge, which read as an unrelated caption rather
+          // than a confirmation of the search bar's WHERE state.
+          justifyContent: "center",
           columnGap: 6,
           rowGap: 4,
           fontSize: 13,
           color: "var(--pp-fg-muted)",
-          // Mobile: 24px blurb-marginBottom + 8px section-marginTop = 32px
-          // gap into Popular Clubs (per spec).
-          marginBottom: isMobile ? 24 : 24,
+          // Mobile gets 40px below the blurb (vs 24 desktop) so the
+          // tap-target for "Get Current Location" doesn't bump into
+          // the first card of "Clubs near me".
+          marginBottom: isMobile ? 40 : 24,
           padding: isMobile ? "0 4px" : 0,
           fontFamily: "Inter, system-ui, sans-serif",
         }}>

@@ -2199,14 +2199,15 @@ function SearchBarCompact({ theme, viewport = "mobile", values, onExpand, onSubm
       }}
       style={{
         width: "100%",
-        // Auto height with 12px vertical padding gives the pill a more
-        // generous shape — content (label + value) is two stacked lines
-        // ≈ 36px tall, so total pill ≈ 60px tall.
+        // Auto height with 14px vertical padding lands the pill at
+        // ~64px tall (content is two stacked lines ≈ 36px). Bumped
+        // from 12 so the bar reads with the same visual weight as
+        // the desktop 4-segment SearchBar (68 tall).
         borderRadius: 999,
         background: "var(--pp-bg-default)",
         border: 0,
         boxShadow: "0 1px 2px rgba(15,18,20,.06), 0 4px 14px rgba(15,18,20,.08), inset 0 0 0 1px rgba(15,18,20,.06)",
-        padding: "12px 8px 12px 18px",
+        padding: "14px 8px 14px 18px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
