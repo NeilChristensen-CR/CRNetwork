@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CourtReserve · Events Discovery</title>
-<link rel="stylesheet" href="colors_and_type.css?v=20260521aw">
+<link rel="stylesheet" href="colors_and_type.css?v=20260521ax">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -99,27 +99,27 @@
 <!-- Cache-buster — bump ?v= when iterating on a .jsx file so the browser
      refetches it instead of serving the previously-compiled version.
      Babel-standalone has no module hashing of its own. -->
-<script type="text/babel" src="Components.jsx?v=20260521aw"></script>
-<script type="text/babel" src="SearchBar.jsx?v=20260521aw"></script>
-<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521aw"></script>
-<script type="text/babel" src="data.jsx?v=20260521aw"></script>
-<script type="text/babel" src="EventCard.jsx?v=20260521aw"></script>
-<script type="text/babel" src="BrowseDesktop.jsx?v=20260521aw"></script>
-<script type="text/babel" src="FilterDesktop.jsx?v=20260521aw"></script>
-<script type="text/babel" src="Mobile.jsx?v=20260521aw"></script>
-<script type="text/babel" src="FilterBarD.jsx?v=20260521aw"></script>
-<script type="text/babel" src="RecurringCarousel.jsx?v=20260521aw"></script>
-<script type="text/babel" src="EventDetails.jsx?v=20260521aw"></script>
-<script type="text/babel" src="EventRegistration.jsx?v=20260521aw"></script>
-<script type="text/babel" src="BookNow.jsx?v=20260521aw"></script>
-<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521aw"></script>
-<script type="text/babel" src="BookCourtWidget.jsx?v=20260521aw"></script>
-<script type="text/babel" src="Apps.jsx?v=20260521aw"></script>
-<script type="text/babel" src="ClubDetail.jsx?v=20260521aw"></script>
-<script type="text/babel" src="FindClubs.jsx?v=20260521aw"></script>
-<script type="text/babel" src="Profile.jsx?v=20260521aw"></script>
-<script type="text/babel" src="ReserveCourt.jsx?v=20260521aw"></script>
-<script type="text/babel" src="design-canvas.jsx?v=20260521aw"></script>
+<script type="text/babel" src="Components.jsx?v=20260521ax"></script>
+<script type="text/babel" src="SearchBar.jsx?v=20260521ax"></script>
+<script type="text/babel" src="ChromeBarLoggedOut.jsx?v=20260521ax"></script>
+<script type="text/babel" src="data.jsx?v=20260521ax"></script>
+<script type="text/babel" src="EventCard.jsx?v=20260521ax"></script>
+<script type="text/babel" src="BrowseDesktop.jsx?v=20260521ax"></script>
+<script type="text/babel" src="FilterDesktop.jsx?v=20260521ax"></script>
+<script type="text/babel" src="Mobile.jsx?v=20260521ax"></script>
+<script type="text/babel" src="FilterBarD.jsx?v=20260521ax"></script>
+<script type="text/babel" src="RecurringCarousel.jsx?v=20260521ax"></script>
+<script type="text/babel" src="EventDetails.jsx?v=20260521ax"></script>
+<script type="text/babel" src="EventRegistration.jsx?v=20260521ax"></script>
+<script type="text/babel" src="BookNow.jsx?v=20260521ax"></script>
+<script type="text/babel" src="MyClubBookingPanel.jsx?v=20260521ax"></script>
+<script type="text/babel" src="BookCourtWidget.jsx?v=20260521ax"></script>
+<script type="text/babel" src="Apps.jsx?v=20260521ax"></script>
+<script type="text/babel" src="ClubDetail.jsx?v=20260521ax"></script>
+<script type="text/babel" src="FindClubs.jsx?v=20260521ax"></script>
+<script type="text/babel" src="Profile.jsx?v=20260521ax"></script>
+<script type="text/babel" src="ReserveCourt.jsx?v=20260521ax"></script>
+<script type="text/babel" src="design-canvas.jsx?v=20260521ax"></script>
 <script type="text/babel">
   const { useState } = React;
 
@@ -537,28 +537,44 @@
     );
 
     return (
-      // Live prototype — the app renders flush to the viewport without
-      // a device-card wrapper. Outer is a 100vh column with the
-      // ControlPanel floating on top; the inner element gets the
-      // `device-frame-inner` ID so the MobileSearchSheet's portal
-      // target still resolves on mobile. Desktop also carries the ID
-      // for consistency (portal lookups return whichever node mounts).
+      // Live prototype — the app renders inside a width-constrained
+      // device frame so the Device toggle (Mobile / Tablet / Desktop
+      // / Wide desktop) can visually simulate each breakpoint. The
+      // outer page bg shows on the sides when the frame is narrower
+      // than the viewport, so each device option produces a visibly
+      // different layout. The inner element keeps the
+      // `device-frame-inner` ID so MobileSearchSheet's portal target
+      // still resolves regardless of device.
+      // Frame widths (px):
+      //   mobile        → 410
+      //   tablet        → 820
+      //   desktop       → 1280
+      //   wide desktop  → 100% (uncapped)
+      // The viewport prop passed to components stays binary
+      // (mobile vs desktop) since the responsive logic inside
+      // components branches on isMobile only; tablet renders the
+      // desktop layout in a narrower container, which is exactly
+      // how it should behave on a real tablet.
       <div style={{ background: "#F4F5F6", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
         <div style={{ display: "flex", justifyContent: "center" }}>
           {device !== "mobile" ? (
             <div id="device-frame-inner" ref={deviceFrameRef} style={{
-              // Fills the viewport edge-to-edge — `height: 100vh` (not
-              // just minHeight) so the nested `flex: 1 overflowY: auto`
-              // scroll container below still has a bounded parent to
-              // size against. Sticky headers + the floating action bar
-              // anchor to that inner scroller exactly like before, just
-              // at viewport height instead of the legacy 1024px card.
-              width: "100%", height: "100vh",
+              // Width caps simulate each desktop-class breakpoint;
+              // height: 100vh keeps the nested flex:1 overflowY:auto
+              // scroll container bounded. Sticky headers + the
+              // floating action bar anchor to that inner scroller.
+              width: "100%",
+              maxWidth: device === "tablet" ? 820 : device === "desktop" ? 1280 : undefined,
+              height: "100vh",
               background: "var(--pp-bg-default)",
               color: "var(--pp-fg-default)",
               overflowX: "hidden",
               position: "relative",
               display: "flex", flexDirection: "column",
+              // Soft horizontal shadow so the constrained frame reads
+              // as a "viewport" against the page bg behind it. Hidden
+              // on wide desktop since that mode fills edge-to-edge.
+              boxShadow: device === "wide" ? "none" : "0 0 0 1px rgba(15,18,20,.06), 0 12px 32px rgba(15,18,20,.06)",
             }}>
               <div style={{ flex: 1, overflowY: "auto" }}>
                 {forceType
